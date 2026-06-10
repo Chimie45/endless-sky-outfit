@@ -1,0 +1,652 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drydock — Endless Sky Outfit Builder</title>
+<style>
+:root{
+  --bg:#080b12; --bg2:#0b1019; --panel:#0e1420; --panel2:#121a28;
+  --line:#1d2738; --line2:#2a3950;
+  --dim:#6c7d97; --txt:#cdd8ea; --bright:#eef4ff;
+  --energy:#39b6f6; --heat:#ffb13c; --ok:#3ddc97; --bad:#ff6b6b; --warn:#ffcf5c;
+  --accent:#39b6f6; --accent2:#7c5cff;
+  --gun:#39b6f6; --turret:#7c5cff; --engine:#ffb13c; --bay:#3ddc97;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:
+    radial-gradient(1200px 600px at 78% -10%, #14233b 0%, transparent 55%),
+    radial-gradient(900px 500px at 8% 110%, #1a1430 0%, transparent 50%),
+    var(--bg);
+  color:var(--txt);
+  font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace}
+.eyebrow{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--dim)}
+h1,h2,h3{margin:0;font-weight:650}
+button{font:inherit;color:inherit;cursor:pointer}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---- top bar ---- */
+header{
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:14px 20px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(18,26,40,.9),rgba(8,11,18,.7));
+  position:sticky;top:0;z-index:30;backdrop-filter:blur(6px)
+}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:150px}
+.brand .name{font-size:19px;letter-spacing:.22em;text-transform:uppercase;color:var(--bright);font-weight:700}
+.brand .name b{color:var(--accent);font-weight:700}
+.ctrl{display:flex;flex-direction:column;gap:4px}
+.ctrl label{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
+select,input[type=search]{
+  background:var(--panel2);border:1px solid var(--line2);color:var(--bright);
+  border-radius:7px;padding:7px 10px;font:inherit;min-width:150px;outline:none
+}
+select:focus,input:focus{border-color:var(--accent)}
+.spoiler{display:flex;align-items:center;gap:8px}
+.tierbtns{display:flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden}
+.tierbtns button{background:var(--panel2);border:0;padding:7px 11px;color:var(--dim);border-right:1px solid var(--line);font-size:12px}
+.tierbtns button:last-child{border-right:0}
+.tierbtns button[aria-pressed=true]{background:var(--accent);color:#04121f;font-weight:700}
+.spacer{flex:1}
+.costchip{text-align:right}
+.costchip .v{font-size:20px;color:var(--bright);font-weight:700}
+.linkbtn{background:transparent;border:1px solid var(--line2);border-radius:7px;padding:8px 12px;color:var(--dim)}
+.linkbtn:hover{border-color:var(--bad);color:var(--bad)}
+
+/* ---- 3-column layout ---- */
+main{display:grid;grid-template-columns:340px minmax(0,1fr) 360px;gap:0;height:calc(100vh - 65px)}
+.col{overflow-y:auto;padding:18px}
+.col.left{border-right:1px solid var(--line)}
+.col.right{border-left:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),var(--bg))}
+.sect{margin-bottom:22px}
+.sect>.eyebrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+
+/* capacity meters */
+.meter{margin:9px 0}
+.meter .top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.meter .top .lab{color:var(--dim);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px}
+.meter .top .val{color:var(--txt)}
+.bar{height:6px;border-radius:6px;background:var(--panel2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:6px;transition:width .18s}
+.meter.over .bar i{background:var(--bad)}
+.meter.over .val{color:var(--bad);font-weight:700}
+
+/* stat rows */
+.rows{display:grid;grid-template-columns:1fr auto;gap:3px 12px;font-size:13px}
+.rows .k{color:var(--dim)}
+.rows .v{text-align:right;color:var(--bright)}
+
+/* energy/heat table */
+table.eh{width:100%;border-collapse:collapse;font-size:13px}
+table.eh th,table.eh td{padding:5px 4px;text-align:right}
+table.eh th{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line)}
+table.eh td:first-child,table.eh th:first-child{text-align:left;color:var(--dim);text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+table.eh .en{color:var(--energy)} table.eh .ht{color:var(--heat)}
+table.eh tr.net td{border-top:1px solid var(--line)}
+table.eh tr.max td{color:var(--bright)}
+.flags{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.flag{display:flex;gap:8px;align-items:center;font-size:12px;padding:7px 10px;border-radius:7px;border:1px solid var(--line)}
+.flag .dot{width:8px;height:8px;border-radius:50%;flex:none}
+.flag.good{border-color:rgba(61,220,151,.35);background:rgba(61,220,151,.07)} .flag.good .dot{background:var(--ok)}
+.flag.bad{border-color:rgba(255,107,107,.4);background:rgba(255,107,107,.08)} .flag.bad .dot{background:var(--bad)}
+
+/* ---- center: schematic ---- */
+.hullwrap{position:relative;border:1px solid var(--line);border-radius:14px;background:
+  radial-gradient(420px 320px at 50% 38%, rgba(57,182,246,.08), transparent 70%),var(--panel);
+  padding:14px;margin-bottom:18px}
+.hullhead{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px}
+.hullhead .nm{font-size:22px;color:var(--bright);font-weight:700}
+.hullhead .cat{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+svg.schem{width:100%;height:340px;display:block}
+.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:4px;font-size:11px;color:var(--dim)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.dropmsg{position:absolute;inset:14px;border:2px dashed var(--accent);border-radius:12px;
+  display:none;align-items:center;justify-content:center;color:var(--accent);font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;background:rgba(57,182,246,.08);pointer-events:none}
+.hullwrap.dragover .dropmsg{display:flex}
+
+/* installed loadout */
+.loadgroup{margin-bottom:14px}
+.loadgroup h3{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:7px;display:flex;justify-content:space-between}
+.litem{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;background:var(--panel)}
+.litem .tile{width:30px;height:30px;border-radius:7px;flex:none;display:grid;place-items:center;font-weight:700;font-size:12px;color:#04121f}
+.litem .nm{flex:1;min-width:0}
+.litem .nm b{display:block;color:var(--bright);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.litem .nm small{color:var(--dim);font-size:11px}
+.stepper{display:flex;align-items:center;gap:4px}
+.stepper button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line2);background:var(--panel2);color:var(--bright);font-size:15px;line-height:1;display:grid;place-items:center}
+.stepper button:hover{border-color:var(--accent);color:var(--accent)}
+.stepper .cnt{min-width:26px;text-align:center;color:var(--bright);font-weight:700}
+.empty{color:var(--dim);font-size:13px;text-align:center;padding:24px;border:1px dashed var(--line);border-radius:10px}
+
+/* ---- right: outfitter catalog ---- */
+.searchrow{position:sticky;top:-18px;background:linear-gradient(180deg,var(--bg2) 70%,transparent);padding:18px 0 10px;margin:-18px 0 6px;z-index:5}
+.searchrow input{width:100%}
+.catbar{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.catbar button{font-size:10.5px;letter-spacing:.05em;padding:5px 9px;border-radius:20px;border:1px solid var(--line2);background:transparent;color:var(--dim)}
+.catbar button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+.ocard{display:flex;gap:10px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:7px;background:var(--panel);cursor:grab}
+.ocard:hover{border-color:var(--accent2)}
+.ocard:active{cursor:grabbing}
+.ocard .tile{width:34px;height:34px;border-radius:7px;flex:none;display:grid;place-items:center;font-weight:700;font-size:12px;color:#04121f}
+.ocard .body{flex:1;min-width:0}
+.ocard .body .t{display:flex;justify-content:space-between;gap:8px}
+.ocard .body b{color:var(--bright);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ocard .body .price{color:var(--dim);font-size:11px;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chip{font-size:10px;color:var(--dim);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.chip.fac{border-color:var(--line2);color:var(--accent2)}
+.addbtn{width:30px;height:30px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--ok);font-size:18px;flex:none}
+.addbtn:hover{background:var(--ok);color:#04121f;border-color:var(--ok)}
+.catcount{color:var(--dim);font-size:10px}
+
+/* detail drawer */
+.drawer{position:fixed;inset:0;background:rgba(4,7,12,.6);display:none;z-index:50;align-items:stretch;justify-content:flex-end}
+.drawer.open{display:flex}
+.drawer .panel{width:min(440px,92vw);background:var(--panel);border-left:1px solid var(--line2);padding:22px;overflow-y:auto}
+.drawer h2{color:var(--bright);font-size:20px;margin-bottom:2px}
+.drawer .desc{color:var(--txt);font-size:13px;margin:12px 0;line-height:1.6}
+.drawer .x{position:absolute;top:14px;right:18px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:3px 14px;font-size:12.5px;margin:10px 0}
+.kv .k{color:var(--dim)} .kv .v{text-align:right;color:var(--bright)}
+.soldlist{font-size:12.5px;color:var(--txt)}
+.soldlist .p{padding:6px 0;border-bottom:1px solid var(--line)}
+.soldlist .p small{color:var(--dim)}
+.note{font-size:11.5px;color:var(--dim);margin-top:8px}
+@media(max-width:1080px){
+  main{grid-template-columns:1fr;height:auto}
+  .col{height:auto}
+  .col.left,.col.right{border:0;border-top:1px solid var(--line)}
+}
+</style>
+
+<header>
+  <div class="brand">
+    <span class="eyebrow">Endless Sky · v<span id="ver"></span></span>
+    <span class="name">DRY<b>DOCK</b></span>
+  </div>
+  <div class="ctrl">
+    <label for="shipSel">Ship</label>
+    <select id="shipSel"></select>
+  </div>
+  <div class="ctrl">
+    <label for="presetSel">Preset</label>
+    <select id="presetSel">
+      <option value="empty">Empty hull</option>
+      <option value="stock">Stock loadout</option>
+    </select>
+  </div>
+  <div class="ctrl spoiler">
+    <div>
+      <label>Spoiler / tech access</label>
+      <div class="tierbtns" id="tierBtns">
+        <button data-tier="0">Human</button>
+        <button data-tier="1">+First contact</button>
+        <button data-tier="2">+Deep space</button>
+        <button data-tier="3">All</button>
+      </div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="costchip">
+    <div class="eyebrow">Total cost</div>
+    <div class="v mono" id="totalCost">0</div>
+  </div>
+  <button class="linkbtn" id="resetBtn">Reset</button>
+</header>
+
+<main>
+  <!-- LEFT: live ship status -->
+  <section class="col left">
+    <div class="sect">
+      <div class="eyebrow"><span>Capacity</span><span id="massReadout" class="mono"></span></div>
+      <div id="meters"></div>
+    </div>
+    <div class="sect">
+      <div class="eyebrow"><span>Movement &amp; defense</span></div>
+      <div class="rows" id="moveRows"></div>
+    </div>
+    <div class="sect">
+      <div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">per second</span></div>
+      <table class="eh"><thead><tr><th></th><th>Energy</th><th>Heat</th></tr></thead>
+        <tbody id="ehBody"></tbody></table>
+      <div class="flags" id="flags"></div>
+    </div>
+  </section>
+
+  <!-- CENTER: hull schematic + installed loadout -->
+  <section class="col center">
+    <div class="hullwrap" id="hullwrap">
+      <div class="hullhead">
+        <div><div class="cat" id="hullCat"></div><div class="nm" id="hullName"></div></div>
+        <div class="eyebrow" id="hullFaction"></div>
+      </div>
+      <svg class="schem" id="schem" viewBox="0 0 400 340" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="legend">
+        <span><i style="background:var(--gun)"></i>Gun</span>
+        <span><i style="background:var(--turret)"></i>Turret</span>
+        <span><i style="background:var(--engine)"></i>Engine</span>
+        <span><i style="background:var(--bay)"></i>Bay</span>
+      </div>
+      <div class="dropmsg">Drop to install</div>
+    </div>
+    <div class="sect">
+      <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
+      <div id="loadout"></div>
+    </div>
+  </section>
+
+  <!-- RIGHT: outfitter catalog -->
+  <section class="col right">
+    <div class="searchrow">
+      <div class="eyebrow" style="margin-bottom:6px">Outfitter</div>
+      <input type="search" id="search" placeholder="Search outfits…" autocomplete="off">
+      <div class="catbar" id="catbar"></div>
+    </div>
+    <div id="catalog"></div>
+  </section>
+</main>
+
+<div class="drawer" id="drawer">
+  <div class="panel">
+    <button class="linkbtn x" id="drawerX">Close</button>
+    <div id="drawerBody"></div>
+  </div>
+</div>
+
+<script>
+const DATA = /*__DATA__*/{};
+const FMT = n => {
+  if(!isFinite(n)) return "—";
+  const a=Math.abs(n);
+  let s;
+  if(a>=1000) s=Math.round(n).toLocaleString();
+  else if(a>=100) s=(Math.round(n*10)/10).toLocaleString();
+  else if(a>=10) s=(Math.round(n*100)/100).toString();
+  else s=(Math.round(n*1000)/1000).toString();
+  return s;
+};
+const MONEY = n => n>=1e6 ? (n/1e6).toFixed(n>=1e7?1:2).replace(/\.0$/,'')+"M"
+  : n>=1e3 ? Math.round(n).toLocaleString() : Math.round(n).toString();
+
+// faction -> spoiler tier
+const TIER = {
+  human:0,
+  hai:1, quarg:1, pug:1,
+  wanderer:2, korath:2, remnant:2, coalition:2,
+};   // everything else => 3
+const factionTier = f => (f in TIER) ? TIER[f] : 3;
+const CAT_COLOR = {
+  "Guns":"var(--gun)","Turrets":"var(--turret)","Secondary Weapons":"#5fd0ff",
+  "Ammunition":"#9aa6bd","Systems":"#3ddc97","Power":"#ffb13c","Engines":"#ff8f5c",
+  "Hand to Hand":"#c98bff","Minerals":"#8fa0bb","Special":"#8fa0bb",
+  "Unique":"#ffd76b","Licenses":"#8fa0bb"
+};
+
+let state = { ship:null, installed:{}, tier:3, cat:"All", q:"" };
+
+/* ---------- stat engine (formulas verbatim from ShipInfoDisplay.cpp / Ship.cpp) ---------- */
+function num(v){ return typeof v==="number" ? v : 0; }
+function eff(key){            // chassis attribute + sum of installed outfit contributions
+  let v = num(state.ship.attributes[key]);
+  for(const [nm,c] of Object.entries(state.installed)){
+    const o = DATA.outfits[nm]; if(!o) continue;
+    v += c * num(o.attributes[key]);
+  }
+  return v;
+}
+function capacity(key){       // returns {free,total,used} matching the game's display
+  let free = eff(key);
+  let total = num(state.ship.attributes[key]);
+  for(const [nm,c] of Object.entries(state.installed)){
+    const o = DATA.outfits[nm]; if(!o) continue;
+    total -= Math.min(0, c*num(o.attributes[key]));
+  }
+  return {free, total, used: total-free};
+}
+function coolingEfficiency(x){ return 2 + 2/(1+Math.exp(-x/2)) - 4/(1+Math.exp(-x/4)); }
+
+function computeStats(){
+  const A = key => eff(key);
+  const emptyMass = A("mass");
+  const cargo = A("cargo space");
+  const reduction = 1 + A("inertia reduction");
+  const eM = emptyMass/reduction, fM = (emptyMass+cargo)/reduction;
+  const thrust = A("thrust") || A("afterburner thrust");
+  const drag = A("drag") || 1;
+  const maxSpeed = 60*thrust/drag;
+  const baseAccel = 3600*thrust*(1+A("acceleration multiplier"));
+  const baseTurn = 60*A("turn")*(1+A("turn multiplier"));
+
+  const shieldRegen = (A("shield generation")+A("delayed shield generation"))*(1+A("shield generation multiplier"));
+  const hullRepair  = (A("hull repair rate")+A("delayed hull repair rate"))*(1+A("hull repair multiplier"));
+
+  const ce = coolingEfficiency(A("cooling inefficiency"));
+  const idleE = A("energy generation")+A("solar collection")+A("fuel energy")-A("energy consumption")-A("cooling energy");
+  const idleH = A("heat generation")+A("solar heat")+A("fuel heat") - ce*(A("cooling")+A("active cooling"));
+  const movE = Math.max(A("thrusting energy"),A("reverse thrusting energy"))+A("turning energy")+A("afterburner energy");
+  const movH = Math.max(A("thrusting heat"),A("reverse thrusting heat"))+A("turning heat")+A("afterburner heat");
+  let firE=0, firH=0;
+  for(const [nm,c] of Object.entries(state.installed)){
+    const w = DATA.outfits[nm]?.weapon; if(w && w.reload){ firE += c*num(w["firing energy"])/w.reload; firH += c*num(w["firing heat"])/w.reload; }
+  }
+  const hasSR = shieldRegen>0, hasHR = hullRepair>0;
+  const shE = hasSR ? (A("shield energy")+A("delayed shield energy"))*(1+A("shield energy multiplier")) : 0;
+  const huE = hasHR ? (A("hull energy")+A("delayed hull energy"))*(1+A("hull energy multiplier")) : 0;
+  const shH = hasSR ? (A("shield heat")+A("delayed shield heat"))*(1+A("shield heat multiplier")) : 0;
+  const huH = hasHR ? (A("hull heat")+A("delayed hull heat"))*(1+A("hull heat multiplier")) : 0;
+
+  const maxHeat = 60*(0.001*A("heat dissipation"))*(100*(emptyMass + A("heat capacity")));
+  const maxEnergy = A("energy capacity");
+
+  const eh = {
+    idle:[60*idleE, 60*idleH], moving:[-60*movE, 60*movH],
+    firing:[-60*firE, 60*firH], shieldhull:[-60*(shE+huE), 60*(shH+huH)],
+    net:[60*(idleE-movE-firE-shE-huE), 60*(idleH+movH+firH+shH+huH)],
+    max:[maxEnergy, maxHeat]
+  };
+  // sustainability
+  const energyOK = eh.net[0] >= -0.0001;
+  const heatGenTotal = eh.idle[1]>0?eh.idle[1]:0; // base + ...
+  const totalHeatIn = Math.max(0,eh.idle[1]) + eh.moving[1] + eh.firing[1] + eh.shieldhull[1];
+  const heatOK = totalHeatIn <= maxHeat + 0.0001;
+
+  return {emptyMass,cargo,maxSpeed,
+    accel:[baseAccel/fM, baseAccel/eM], turn:[baseTurn/fM, baseTurn/eM],
+    shields:A("shields"), shieldRegen:60*shieldRegen, hasSR,
+    hull:A("hull"), hullRepair:60*hullRepair, hasHR,
+    fuel:A("fuel capacity"), eh, energyOK, heatOK, totalHeatIn, maxHeat,
+    cost: shipCost()};
+}
+function shipCost(){
+  let c = num(state.ship.attributes.cost);
+  for(const [nm,n] of Object.entries(state.installed)) c += n*(DATA.outfits[nm]?.cost||0);
+  return c;
+}
+function requiredCrew(){
+  let c = eff("required crew"); return Math.max(1, Math.round(c));
+}
+
+/* ---------- weapon mount accounting ---------- */
+function installedOf(predicate){
+  let n=0; for(const [nm,c] of Object.entries(state.installed)) if(predicate(DATA.outfits[nm])) n+=c; return n;
+}
+
+/* ---------- rendering ---------- */
+const el = id => document.getElementById(id);
+function tile(text,color){ return `<div class="tile" style="background:${color}">${text}</div>`; }
+function mono2(nm){ const p=nm.replace(/[^A-Za-z0-9]/g,'').slice(0,2).toUpperCase(); return p||'··'; }
+
+function renderMeters(){
+  const s = computeStats();
+  const hp = state.ship.hardpoints;
+  const totalBays = Object.values(hp.bays||{}).reduce((a,b)=>a+b,0);
+  const crew = requiredCrew(), bunks = eff("bunks");
+  const guns = installedOf(o=>num(o.attributes["gun ports"])<0);
+  const turrets = installedOf(o=>num(o.attributes["turret mounts"])<0);
+
+  const meters = [];
+  const cap = (label,key,unit)=>{const c=capacity(key); meters.push(meter(label,c.used,c.total,unit));};
+  cap("Outfit space","outfit space"," t");
+  cap("Weapon capacity","weapon capacity"," t");
+  cap("Engine capacity","engine capacity"," t");
+  meters.push(meter("Gun ports", guns, hp.guns,""));
+  meters.push(meter("Turret mounts", turrets, hp.turrets,""));
+  if(totalBays) meters.push(meter("Fighter / drone bays", 0, totalBays,"", true));
+  meters.push(meter("Crew / bunks", crew, bunks,""));
+  meters.push(meter("Cargo", 0, s.cargo," t", true));
+  meters.push(meter("Fuel", 0, s.fuel,"", true));
+  el("meters").innerHTML = meters.join("");
+  el("massReadout").textContent = FMT(s.emptyMass)+" t";
+
+  el("moveRows").innerHTML = `
+    <div class="k">Max speed</div><div class="v mono">${FMT(s.maxSpeed)}</div>
+    <div class="k">Acceleration</div><div class="v mono">${FMT(s.accel[0])} – ${FMT(s.accel[1])}</div>
+    <div class="k">Turning</div><div class="v mono">${FMT(s.turn[0])} – ${FMT(s.turn[1])}</div>
+    <div class="k">Shields</div><div class="v mono">${FMT(s.shields)}${s.hasSR?` <span style="color:var(--dim)">(${FMT(s.shieldRegen)}/s)</span>`:''}</div>
+    <div class="k">Hull</div><div class="v mono">${FMT(s.hull)}${s.hasHR?` <span style="color:var(--dim)">(${FMT(s.hullRepair)}/s)</span>`:''}</div>`;
+
+  const row=(lab,e,h,cls="")=>`<tr class="${cls}"><td>${lab}</td><td class="mono en">${FMT(e)}</td><td class="mono ht">${FMT(h)}</td></tr>`;
+  el("ehBody").innerHTML =
+    row("idle",s.eh.idle[0],s.eh.idle[1])+
+    row("moving",s.eh.moving[0],s.eh.moving[1])+
+    row("firing",s.eh.firing[0],s.eh.firing[1])+
+    row("shields / hull",s.eh.shieldhull[0],s.eh.shieldhull[1])+
+    row("net change",s.eh.net[0],s.eh.net[1],"net")+
+    row("max",s.eh.max[0],s.eh.max[1],"max");
+
+  el("flags").innerHTML =
+    flag(s.energyOK,"Energy sustainable while firing","Energy drains under full load — net energy negative")+
+    flag(s.heatOK,
+      `Heat manageable — ${FMT(s.totalHeatIn)} / ${FMT(s.maxHeat)} per s`,
+      `Overheats under full load — ${FMT(s.totalHeatIn)} heat/s exceeds ${FMT(s.maxHeat)} dissipation`);
+  el("totalCost").textContent = MONEY(s.cost);
+
+  // re-color meters with capacity warnings handled in meter()
+}
+function meter(label, used, total, unit, infoOnly){
+  const over = used>total+1e-6;
+  const pct = total>0 ? Math.min(100, Math.max(0, used/total*100)) : (used>0?100:0);
+  const right = infoOnly ? `${FMT(total)}${unit}` : `${FMT(used)} / ${FMT(total)}${unit}`;
+  return `<div class="meter ${over?'over':''}">
+    <div class="top"><span class="lab">${label}</span><span class="val mono">${right}</span></div>
+    <div class="bar"><i style="width:${infoOnly?0:pct}%"></i></div></div>`;
+}
+function flag(ok, goodText, badText){
+  return `<div class="flag ${ok?'good':'bad'}"><span class="dot"></span><span>${ok?goodText:badText}</span></div>`;
+}
+
+function renderSchem(){
+  const ship = state.ship;
+  el("hullName").textContent = ship.name;
+  el("hullCat").textContent = ship.category;
+  el("hullFaction").textContent = ship.faction;
+  const pts = ship.points||[];
+  const svg = el("schem");
+  const W=400,H=340,cx=W/2,cy=H/2;
+  // scale point coords into the box
+  let maxR=80;
+  for(const p of pts) maxR=Math.max(maxR, Math.abs(p.x), Math.abs(p.y));
+  const sc = (H*0.42)/maxR;
+  // fill order: how many of each mount are filled by installed outfits
+  const installedGuns = installedOf(o=>num(o.attributes["gun ports"])<0);
+  const installedTurrets = installedOf(o=>num(o.attributes["turret mounts"])<0);
+  const filledEngines = (eff("thrust")||eff("turn")) ? 99 : 0; // engines aren't per-slot; mark all lit if any engine outfit
+  let gi=0,ti=0;
+  const COLORS={gun:'var(--gun)',turret:'var(--turret)',engine:'var(--engine)',reverse:'var(--engine)',bay:'var(--bay)'};
+  let body=`<defs><radialGradient id="hg" cx="50%" cy="42%" r="60%">
+      <stop offset="0%" stop-color="#1b2c46"/><stop offset="100%" stop-color="#0c1422"/></radialGradient></defs>`;
+  // hull silhouette: rough capsule from point spread
+  body+=`<ellipse cx="${cx}" cy="${cy}" rx="${Math.min(120,maxR*sc*0.85)}" ry="${Math.min(150,maxR*sc*1.05)}"
+      fill="url(#hg)" stroke="var(--line2)" stroke-width="1.2"/>`;
+  for(const p of pts){
+    const x=cx+p.x*sc, y=cy+p.y*sc;
+    let lit=false;
+    if(p.t==='gun'){ lit = gi++ < installedGuns; }
+    else if(p.t==='turret'){ lit = ti++ < installedTurrets; }
+    else if(p.t==='engine'||p.t==='reverse'){ lit = filledEngines>0; }
+    const col=COLORS[p.t];
+    const op = lit?1:0.28;
+    if(p.t==='gun')
+      body+=`<polygon points="${x},${y-6} ${x-5},${y+5} ${x+5},${y+5}" fill="${col}" opacity="${op}"/>`;
+    else if(p.t==='turret')
+      body+=`<rect x="${x-5}" y="${y-5}" width="10" height="10" transform="rotate(45 ${x} ${y})" fill="${col}" opacity="${op}"/>`;
+    else if(p.t==='bay')
+      body+=`<circle cx="${x}" cy="${y}" r="5.5" fill="none" stroke="${col}" stroke-width="2" opacity="${op}"/>`;
+    else
+      body+=`<rect x="${x-3}" y="${y-3}" width="6" height="9" rx="1.5" fill="${col}" opacity="${op}"/>`;
+  }
+  svg.innerHTML=body;
+}
+
+function renderLoadout(){
+  const groups={};
+  for(const [nm,c] of Object.entries(state.installed)){
+    const o=DATA.outfits[nm]; if(!o) continue;
+    (groups[o.category] ||= []).push([nm,c,o]);
+  }
+  const order = DATA.categoryOrder.filter(k=>groups[k]);
+  const box = el("loadout");
+  let count = Object.values(state.installed).reduce((a,b)=>a+b,0);
+  el("installCount").textContent = count?`${count} item${count>1?'s':''}`:"";
+  if(!order.length){ box.innerHTML=`<div class="empty">Empty hull. Drag outfits here, or use the + buttons in the outfitter →</div>`; return; }
+  box.innerHTML = order.map(cat=>{
+    const rows = groups[cat].sort((a,b)=>a[0].localeCompare(b[0])).map(([nm,c,o])=>`
+      <div class="litem">
+        ${tile(mono2(nm),CAT_COLOR[cat]||'var(--dim)')}
+        <div class="nm"><b title="${nm}">${nm}</b><small>${FMT(o.mass)} t · ${MONEY(o.cost)}</small></div>
+        <div class="stepper">
+          <button data-dec="${nm}">−</button><span class="cnt mono">${c}</span><button data-inc="${nm}">+</button>
+        </div>
+      </div>`).join("");
+    return `<div class="loadgroup"><h3>${cat}<span class="catcount">${groups[cat].reduce((a,x)=>a+x[1],0)}</span></h3>${rows}</div>`;
+  }).join("");
+}
+
+function visibleOutfits(){
+  const q=state.q.toLowerCase();
+  return Object.values(DATA.outfits).filter(o=>{
+    if(factionTier(o.faction)>state.tier) return false;
+    if(state.cat!=="All" && o.category!==state.cat) return false;
+    if(q && !o.name.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+function renderCatbar(){
+  const cats=["All",...DATA.categoryOrder];
+  el("catbar").innerHTML = cats.map(c=>`<button data-cat="${c}" aria-pressed="${state.cat===c}">${c}</button>`).join("");
+}
+function chipFor(o){
+  const a=o.attributes, w=o.weapon, chips=[];
+  const add=(label,v)=>{ if(v) chips.push(`<span class="chip">${label} ${FMT(v)}</span>`); };
+  if(w&&w.reload){ const dps=(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload;
+    chips.push(`<span class="chip">${FMT(dps)} dps</span>`); }
+  add("space", a["outfit space"]<0?Math.abs(a["outfit space"]):0);
+  add("⚡", a["energy generation"]||a["energy capacity"]);
+  add("cool", a["cooling"]);
+  add("thrust", a["thrust"]); add("turn", a["turn"]);
+  add("shield", a["shield generation"]); add("hull", a["hull repair rate"]);
+  return `<div class="chips"><span class="chip fac">${o.faction}</span>${chips.slice(0,4).join("")}</div>`;
+}
+function renderCatalog(){
+  const list=visibleOutfits().sort((a,b)=>{
+    const ai=DATA.categoryOrder.indexOf(a.category), bi=DATA.categoryOrder.indexOf(b.category);
+    return ai-bi || a.cost-b.cost || a.name.localeCompare(b.name);
+  });
+  el("catalog").innerHTML = list.length? list.slice(0,400).map(o=>`
+    <div class="ocard" draggable="true" data-name="${o.name.replace(/"/g,'&quot;')}">
+      ${tile(mono2(o.name),CAT_COLOR[o.category]||'var(--dim)')}
+      <div class="body">
+        <div class="t"><b data-detail="${o.name.replace(/"/g,'&quot;')}" title="${o.name}">${o.name}</b>
+          <span class="price mono">${MONEY(o.cost)}</span></div>
+        ${chipFor(o)}
+      </div>
+      <button class="addbtn" data-inc="${o.name.replace(/"/g,'&quot;')}">+</button>
+    </div>`).join("")
+    : `<div class="empty">No outfits match. Raise the tech access or clear the search.</div>`;
+}
+
+/* ---------- detail drawer ---------- */
+function openDetail(nm){
+  const o=DATA.outfits[nm]; if(!o) return;
+  const a=o.attributes;
+  const skip=new Set(["mass"]);
+  const kv=Object.entries(a).filter(([k,v])=>typeof v==="number"&&v!==0&&!skip.has(k))
+    .sort((x,y)=>x[0].localeCompare(y[0]))
+    .map(([k,v])=>`<div class="k">${k}</div><div class="v mono">${FMT(v)}</div>`).join("");
+  let wk="";
+  if(o.weapon){ const w=o.weapon;
+    const rows=[["shield damage",w["shield damage"]],["hull damage",w["hull damage"]],
+      ["reload (frames)",w.reload],["firing energy",w["firing energy"]],["firing heat",w["firing heat"]],
+      ["velocity",w.velocity],["range",w.velocity&&w.lifetime?w.velocity*w.lifetime:0]];
+    wk=`<div class="eyebrow" style="margin-top:14px">Weapon</div><div class="kv">`+
+      rows.filter(r=>r[1]).map(r=>`<div class="k">${r[0]}</div><div class="v mono">${FMT(r[1])}</div>`).join("")+`</div>`;
+  }
+  const sold=o.soldAt||[];
+  const soldHTML = sold.length
+    ? `<div class="soldlist">${sold.slice(0,40).map(s=>`<div class="p">${s.planet}${s.system?` <small>· ${s.system}</small>`:''}</div>`).join("")}${sold.length>40?`<div class="note">+${sold.length-40} more locations</div>`:''}</div>`
+    : `<div class="note">Not sold at any outfitter — this is loot / mission-only / starting equipment. (Loot sources aren't in the buy index yet — see roadmap Phase 4.)</div>`;
+  el("drawerBody").innerHTML=`
+    <div class="eyebrow">${o.category} · ${o.faction}</div>
+    <h2>${nm}</h2>
+    <div class="kv"><div class="k">cost</div><div class="v mono">${MONEY(o.cost)}</div>
+      <div class="k">mass</div><div class="v mono">${FMT(o.mass)} t</div></div>
+    ${o.description?`<div class="desc">${o.description}</div>`:""}
+    <div class="eyebrow">Attributes</div><div class="kv">${kv||'<div class="k">—</div><div class="v">—</div>'}</div>
+    ${wk}
+    <div class="eyebrow" style="margin-top:14px">Sold at (${sold.length})</div>
+    ${soldHTML}
+    <button class="addbtn" style="width:auto;padding:8px 16px;margin-top:16px;border-radius:8px" data-inc="${nm.replace(/"/g,'&quot;')}">+ Install</button>`;
+  el("drawer").classList.add("open");
+}
+
+/* ---------- mutations ---------- */
+function add(nm,d=1){ state.installed[nm]=(state.installed[nm]||0)+d; if(state.installed[nm]<=0) delete state.installed[nm]; renderAll(); }
+function setShip(name){
+  state.ship = DATA.ships[name]; state.installed={};
+  el("presetSel").value="empty"; renderAll();
+}
+function applyPreset(p){
+  if(p==="empty"){ state.installed={}; }
+  else if(p==="stock"){ state.installed = {...(state.ship.defaultOutfits||{})}; }
+  renderAll();
+}
+function renderAll(){ renderMeters(); renderSchem(); renderLoadout(); renderCatalog(); }
+
+/* ---------- wiring ---------- */
+function buildShipSelect(){
+  const byFac={};
+  for(const s of Object.values(DATA.ships)){ (byFac[s.faction]||=[]).push(s); }
+  const facOrder=Object.keys(byFac).sort((a,b)=>factionTier(a)-factionTier(b)||a.localeCompare(b));
+  const sel=el("shipSel"); sel.innerHTML="";
+  for(const f of facOrder){
+    const og=document.createElement("optgroup"); og.label=f;
+    byFac[f].sort((a,b)=>a.name.localeCompare(b.name)).forEach(s=>{
+      const op=document.createElement("option"); op.value=s.name; op.textContent=s.name; og.appendChild(op);
+    });
+    sel.appendChild(og);
+  }
+}
+function init(){
+  el("ver").textContent=DATA.version;
+  buildShipSelect(); renderCatbar();
+  // pick a sensible default human warship
+  const def = DATA.ships["Bactrian"]||DATA.ships["Falcon"]||DATA.ships["Leviathan"]||Object.values(DATA.ships)[0];
+  el("shipSel").value=def.name; setShip(def.name);
+  // tier default = All
+  document.querySelectorAll("#tierBtns button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tier==="3"));
+
+  el("shipSel").addEventListener("change",e=>setShip(e.target.value));
+  el("presetSel").addEventListener("change",e=>applyPreset(e.target.value));
+  el("resetBtn").addEventListener("click",()=>{state.installed={};el("presetSel").value="empty";renderAll();});
+  el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+    state.tier=+b.dataset.tier;
+    document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+    renderCatalog();});
+  el("search").addEventListener("input",e=>{state.q=e.target.value;renderCatalog();});
+  el("catbar").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+    state.cat=b.dataset.cat; renderCatbar(); renderCatalog();});
+  document.body.addEventListener("click",e=>{
+    const inc=e.target.closest("[data-inc]"), dec=e.target.closest("[data-dec]"), det=e.target.closest("[data-detail]");
+    if(inc){ add(inc.dataset.inc, +1); }
+    else if(dec){ add(dec.dataset.dec, -1); }
+    else if(det){ openDetail(det.dataset.detail); }
+  });
+  el("drawerX").addEventListener("click",()=>el("drawer").classList.remove("open"));
+  el("drawer").addEventListener("click",e=>{ if(e.target===el("drawer")) el("drawer").classList.remove("open"); });
+
+  // drag and drop
+  const hull=el("hullwrap");
+  document.body.addEventListener("dragstart",e=>{const c=e.target.closest(".ocard");if(c)e.dataTransfer.setData("text/plain",c.dataset.name);});
+  hull.addEventListener("dragover",e=>{e.preventDefault();hull.classList.add("dragover");});
+  hull.addEventListener("dragleave",()=>hull.classList.remove("dragover"));
+  hull.addEventListener("drop",e=>{e.preventDefault();hull.classList.remove("dragover");
+    const nm=e.dataTransfer.getData("text/plain"); if(DATA.outfits[nm]) add(nm,1);});
+}
+init();
+</script>
