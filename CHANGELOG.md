@@ -11,6 +11,15 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.66 — 2026-06-12
+- Unified Add Ship and Add Parts into the same side-drawer pattern: search at the top, a left
+  vertical sort rail, and the grid. "Add Ship" (renamed from "Ship") now opens as a right drawer
+  like Add Parts instead of a centred modal; the ship picker's factions and the outfitter's
+  categories both became left rails. Only one drawer is open at a time, and opening either shifts
+  the page left so you can still drag parts onto the ship.
+- (Also repaired app.css, whose tail — the phone media block and the toast styles — had been
+  truncated by an earlier edit.)
+
 ### v0.3.65 — 2026-06-12
 - Right-edge tab rail: added a "Ship" tab (opens the ship picker) above the parts tab. Renamed
   the blue "Outfitter" tab/button to "Add Parts" so it clearly means "add items to your build" —

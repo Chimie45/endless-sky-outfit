@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.65 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.66 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -21,7 +21,7 @@
     <div class="eyebrow">Total cost</div>
     <div class="v mono" id="totalCost">0</div>
   </div>
-  <button class="linkbtn" id="outfitterBtn" title="Show / hide the parts panel">Add Parts</button>
+  <button class="linkbtn" id="outfitterBtn" title="Show / hide the Add Parts panel">Add Parts</button>
   <button class="linkbtn" id="resetBtn">Reset</button>
   <button class="linkbtn gear" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
 </header>
@@ -139,18 +139,23 @@
 
   </section>
 
-  <!-- RIGHT: outfitter catalog (collapsible side panel) -->
-  <section class="col right" id="outfitter">
-    <div class="searchrow">
-      <div class="of-head"><span class="eyebrow">Outfitter</span><button class="modalx" id="outfitterClose" aria-label="Close outfitter">×</button></div>
-      <input type="search" id="search" placeholder="Search outfits…" autocomplete="off">
-      <div class="catbar" id="catbar"></div>
-    </div>
-    <div class="ogrid" id="catalog"></div>
-  </section>
 </main>
+
+<!-- Add Parts side panel -->
+<section class="sidepanel" id="outfitter" aria-label="Add parts">
+  <div class="sp-head">
+    <span class="sp-title">Add Parts</span>
+    <input type="search" id="search" placeholder="Search outfits…" autocomplete="off">
+    <button class="modalx" id="outfitterClose" aria-label="Close">×</button>
+  </div>
+  <div class="sp-body">
+    <div class="sp-rail" id="catbar"></div>
+    <div class="ogrid sp-grid" id="catalog"></div>
+  </div>
+</section>
+
 <div class="edge-tabs" id="edgeTabs">
-  <button class="edge-tab" id="shipTab" aria-label="Choose a ship">Ship</button>
+  <button class="edge-tab" id="shipTab" aria-label="Add ship">Add Ship</button>
   <button class="edge-tab accent" id="outfitterTab" aria-label="Add parts">Add Parts</button>
 </div>
 
@@ -189,19 +194,18 @@
   </div>
 </div>
 
-<div class="modal" id="shipPicker">
-  <div class="sheet picker">
+<!-- Add Ship side panel -->
+<section class="sidepanel" id="shipPicker" aria-label="Add ship">
+  <div class="sp-head">
+    <span class="sp-title">Add Ship</span>
+    <input type="search" id="pickerSearch" placeholder="Search ships…" autocomplete="off">
     <button class="modalx" id="pickerX" aria-label="Close">×</button>
-    <h2 style="color:var(--bright);margin:0 0 12px">Choose a ship</h2>
-    <div class="pickerbody">
-      <div class="pickertabs" id="pickerFac"></div>
-      <div class="pickermain">
-        <div class="shipgrid" id="pickerGrid"></div>
-        <input type="search" id="pickerSearch" placeholder="Search ships…" autocomplete="off">
-      </div>
-    </div>
   </div>
-</div>
+  <div class="sp-body">
+    <div class="sp-rail" id="pickerFac"></div>
+    <div class="shipgrid sp-grid" id="pickerGrid"></div>
+  </div>
+</section>
 
 <div id="fleetHover" class="fleet-hover"></div>
 <div id="toast" class="toast"></div>

@@ -728,8 +728,7 @@ function updateShipPickBtn(){
   el("spName").textContent = sh.displayName || sh.name;
   el("spMeta").textContent = FACLABEL(sh.faction)+" · "+sh.category;
 }
-function openShipPicker(){ renderPickerFac(); renderPickerGrid(); el("shipPicker").classList.add("open"); const ps=el("pickerSearch"); if(ps){ps.value=state.pickerQ||"";setTimeout(()=>ps.focus(),30);} }
-function closeShipPicker(){ el("shipPicker").classList.remove("open"); }
+/* ship-picker open/close handled by the panel system (openPanel/closePanels) */
 function renderPickerFac(){
   const byFac=shipsByFaction();
   const facOrder=Object.keys(byFac).sort((a,b)=>factionTier(a)-factionTier(b)||a.localeCompare(b));
@@ -758,12 +757,15 @@ function setTheme(t){
   try{ localStorage.setItem("drydock-theme",t); }catch(e){}
   document.querySelectorAll("#themeBtns button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.theme===t));
 }
-function setOutfitter(open){
-  document.body.classList.toggle("ofit-open", open);
-  var ob=el("outfitterBtn"); if(ob) ob.setAttribute("aria-pressed", open);
-  try{ localStorage.setItem("drydock-outfitter", open?"1":"0"); }catch(e){}
+function openPanel(name){
+  document.body.dataset.panel = name;
+  if(name==="ship"){ renderPickerFac(); renderPickerGrid(); const ps=el("pickerSearch"); if(ps){ ps.value=state.pickerQ||""; setTimeout(()=>ps.focus(),30); } }
+  try{ localStorage.setItem("drydock-panel", name); }catch(e){}
 }
-function toggleOutfitter(){ setOutfitter(!document.body.classList.contains("ofit-open")); }
+function closePanels(){ document.body.dataset.panel=""; try{ localStorage.setItem("drydock-panel",""); }catch(e){} }
+function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
+function openShipPicker(){ togglePanel("ship"); }
+function closeShipPicker(){ closePanels(); }
 function init(){
   el("ver").textContent=DATA.version;
   let su=null; try{ su=localStorage.getItem("drydock-unreleased"); }catch(e){}
@@ -777,13 +779,12 @@ function init(){
   let savedTheme=null; try{ savedTheme=localStorage.getItem("drydock-theme"); }catch(e){}
   setTheme(savedTheme||"blue");
 
-  el("shipPickBtn").addEventListener("click",openShipPicker);
-  el("pickerX").addEventListener("click",closeShipPicker);
-  el("shipPicker").addEventListener("click",e=>{ if(e.target===el("shipPicker")) closeShipPicker(); });
+  el("shipPickBtn").addEventListener("click",()=>togglePanel("ship"));
+  el("pickerX").addEventListener("click",closePanels);
   el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; renderPickerGrid(); });
   el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;renderPickerFac();renderPickerGrid();});
-  el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);closeShipPicker();});
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeShipPicker(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); } });
+  el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);});
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); } });
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("fleetAddBtn").addEventListener("click",addToFleet);
@@ -808,14 +809,14 @@ function init(){
     state.showUnreleased=!state.showUnreleased;
     try{ localStorage.setItem("drydock-unreleased", state.showUnreleased?"1":"0"); }catch(e){}
     el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
-    if(el("shipPicker").classList.contains("open")){ renderPickerFac(); renderPickerGrid(); } renderCatalog();
+    if(document.body.dataset.panel==="ship"){ renderPickerFac(); renderPickerGrid(); } renderCatalog();
   });
   el("resetBtn").addEventListener("click",()=>loadLoadout("empty"));
-  el("outfitterBtn").addEventListener("click",toggleOutfitter);
-  el("outfitterTab").addEventListener("click",toggleOutfitter);
-  el("outfitterClose").addEventListener("click",()=>setOutfitter(false));
-  el("shipTab").addEventListener("click",openShipPicker);
-  { let oo=null; try{ oo=localStorage.getItem("drydock-outfitter"); }catch(e){} setOutfitter(oo!=="0"); }
+  el("outfitterBtn").addEventListener("click",()=>togglePanel("parts"));
+  el("outfitterTab").addEventListener("click",()=>togglePanel("parts"));
+  el("outfitterClose").addEventListener("click",closePanels);
+  el("shipTab").addEventListener("click",()=>togglePanel("ship"));
+  { let sp=null; try{ sp=localStorage.getItem("drydock-panel"); }catch(e){} if(sp==="ship") openPanel("ship"); else if(sp==="parts"||sp==null) openPanel("parts"); }
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
     state.tier=+b.dataset.tier;
     document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",x===b));
