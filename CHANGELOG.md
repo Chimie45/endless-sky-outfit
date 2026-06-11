@@ -11,6 +11,15 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.54 — 2026-06-12
+- Reorganised the fleet right column: action buttons relabeled/reordered (Import Fleet | Share
+  Fleet / Clear Fleet | Delete Ship / Copy Ship | Set Flagship), with a new "Issues" box of six
+  checks underneath in two columns: Jump | Power / Thrust | Steer / Bays | Heat. Each shows a
+  green check when the whole fleet is clear, or a red/yellow count of ships with that problem.
+  "Moving" was split into separate Thrust and Steer checks. With the warnings moved here, the
+  left Fleet Stats is back to a single column (Cargo, Crew, Daily, Firepower, Fighters), freeing
+  width for the ship icons in the center.
+
 ### v0.3.53 — 2026-06-12
 - Fixed the fleet stats not splitting into two columns (the element also had the .statpills
   flex class, which disables CSS multi-column; bumped selector specificity to force a 2-column
