@@ -11,6 +11,15 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.41 — 2026-06-11
+- Added the Fleet tracker below the ship card. Left side shows live totals (Total cargo,
+  Total crew, Total daily cost = 100 cr/day per crew, pilot unpaid); the middle lists fleet
+  ships as 40x40 icons with names (up to 10 across, scrolls beyond that); the right has
+  Import, Share, Clear, Remove and Copy Ship. Click a ship to select it and load it into the
+  builder; Remove/Copy act on the selection. The fleet persists in your browser. Share copies
+  a link with the whole fleet encoded in the URL (#f=) and Import reads a pasted link or code;
+  opening a fleet link restores it automatically. (Replaces the small roster from v0.3.39.)
+
 ### v0.3.40 — 2026-06-11
 - Corrected the v0.3.39 layout: the status alerts (Thrust / Steering / Energy / Heat) move
   back beside the ship name. The six action buttons now live under Energy & heat in a 2x3

@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.40 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.41 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -94,6 +94,24 @@
           </div>
           <div class="dropmsg">Drop to install</div>
         </div>
+        <div class="fleetpanel" id="fleetPanel">
+          <div class="fleet-head"><span class="fleet-title">Fleet</span><span class="fleet-count" id="fleetCount"></span></div>
+          <div class="fleet-body">
+            <div class="fleet-totals">
+              <div><span class="ft-lbl">Total cargo</span><span class="ft-val mono" id="ftCargo">0</span></div>
+              <div><span class="ft-lbl">Total crew</span><span class="ft-val mono" id="ftCrew">0</span></div>
+              <div><span class="ft-lbl">Daily cost</span><span class="ft-val mono" id="ftCost" title="Crew salaries at 100 cr/day each (the pilot is unpaid)">0</span></div>
+            </div>
+            <div class="fleet-list" id="fleetList"></div>
+            <div class="fleet-actions">
+              <button class="fbtn" id="fleetImport">Import</button>
+              <button class="fbtn" id="fleetShare">Share</button>
+              <button class="fbtn" id="fleetClearBtn">Clear</button>
+              <button class="fbtn" id="fleetRemove">Remove</button>
+              <button class="fbtn" id="fleetCopy">Copy Ship</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="loadpanel">
@@ -101,7 +119,6 @@
           <div class="eyebrow">Variants</div>
           <div class="variants" id="variants"></div>
         </div>
-        <div class="fleetroster" id="fleetRoster" hidden></div>
         <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
         <div id="loadout"></div>
       </div>

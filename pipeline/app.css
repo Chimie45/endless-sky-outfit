@@ -202,16 +202,28 @@ svg.schem{width:100%;height:340px;display:block}
 .pbtn.act{color:var(--accent2)}
 .pbtn.act:hover{color:var(--bright)}
 .novar{font-size:10.5px;color:var(--dim)}
-.fleetroster{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:8px;margin-bottom:10px}
-.fleetroster .fr-head{display:flex;justify-content:space-between;align-items:baseline;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-.fleetroster .fr-clear{background:none;border:none;color:var(--accent2);font-size:10px;cursor:pointer;padding:0}
-.fleetroster .fr-clear:hover{color:var(--bright)}
-.fleetroster .fr-list{display:flex;flex-wrap:wrap;gap:5px}
-.fleetroster .fr-ship{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;padding:4px 7px;border:1px solid var(--line2);border-radius:6px;background:var(--panel);color:var(--txt);cursor:pointer}
-.fleetroster .fr-ship:hover{border-color:var(--accent)}
-.fleetroster .fr-ship .x{color:#ff7a7a;font-weight:700;padding-left:2px;font-size:12px;line-height:1}
-.fleetroster .fr-tot{font-size:9.5px;color:var(--dim);display:flex;gap:12px;flex-wrap:wrap}
-.fleetroster .fr-tot b{color:var(--txt);font-weight:600}
+.fleetpanel{flex:none;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px 12px;min-height:0}
+.fleet-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:8px}
+.fleet-title{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:700}
+.fleet-count{font-size:9.5px;color:var(--dim)}
+.fleet-body{display:flex;align-items:flex-start;gap:14px}
+.fleet-totals{flex:none;display:flex;flex-direction:column;gap:6px;width:104px}
+.fleet-totals>div{display:flex;flex-direction:column;line-height:1.1}
+.ft-lbl{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.ft-val{font-size:14px;font-weight:700;color:var(--bright)}
+.fleet-list{flex:1;min-width:0;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px;max-height:150px;overflow-y:auto;align-content:start}
+.fleet-empty{grid-column:1/-1;font-size:11px;color:var(--dim);padding:10px 2px}
+.fleet-ship{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 3px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2);color:var(--txt);cursor:pointer}
+.fleet-ship:hover{border-color:var(--accent)}
+.fleet-ship.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--panel)}
+.fleet-ship .fs-art{width:40px;height:40px;display:block}
+.fleet-ship .fs-art .tile{width:40px;height:40px;border-radius:6px}
+.fleet-ship .fs-nm{font-size:8.5px;line-height:1.1;text-align:center;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.fleet-actions{flex:none;display:grid;grid-template-columns:1fr;gap:5px;width:92px}
+.fbtn{font-size:10.5px;font-weight:600;padding:5px 8px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);cursor:pointer;text-align:center}
+.fbtn:hover{border-color:var(--accent)}
+.fbtn:disabled{opacity:.4;cursor:default}
+.fbtn:disabled:hover{border-color:var(--line2)}
 
 /* capacity meters */
 .meter{margin:5px 0}

@@ -27,7 +27,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:0, cat:"All", q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[] };
+let state = { ship:null, installed:{}, tier:0, cat:"All", q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1 };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -556,25 +556,47 @@ function loadLoadout(token){
 }
 function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); renderFleet(); setPresetPressed(); }
 
-/* ---------- fleet (saved builds, persisted in localStorage) ---------- */
+/* ---------- fleet tracker (persisted in localStorage) ---------- */
 const FLEET_KEY="drydock-fleet";
-function loadFleet(){ try{ state.fleet=JSON.parse(localStorage.getItem(FLEET_KEY))||[]; }catch(e){ state.fleet=[]; } if(!Array.isArray(state.fleet)) state.fleet=[]; }
+const CREW_SALARY=100;   // credits/day per crew member; the pilot (1) is unpaid
+function loadFleet(){ try{ state.fleet=JSON.parse(localStorage.getItem(FLEET_KEY))||[]; }catch(e){ state.fleet=[]; } if(!Array.isArray(state.fleet)) state.fleet=[]; state.fleetSel=-1; }
 function saveFleet(){ try{ localStorage.setItem(FLEET_KEY, JSON.stringify(state.fleet)); }catch(e){} }
-function addToFleet(){ if(!state.ship) return; state.fleet.push({ship:state.ship.name, outfits:{...state.installed}}); saveFleet(); renderFleet(); showToast("Added to fleet ("+state.fleet.length+")"); }
-function removeFromFleet(i){ state.fleet.splice(i,1); saveFleet(); renderFleet(); }
-function clearFleet(){ state.fleet=[]; saveFleet(); renderFleet(); }
-function loadFleetEntry(i){ const e=state.fleet[i]; if(!e||!DATA.ships[e.ship]) return; state.ship=DATA.ships[e.ship]; state.installed={...(e.outfits||{})}; state.loadoutName="fleet:"+i; renderAll(); updateShipPickBtn(); }
-function fleetTotals(){ let cost=0,crew=0,cargo=0; const sShip=state.ship, sInst=state.installed;
-  for(const e of state.fleet){ const sh=DATA.ships[e.ship]; if(!sh) continue; state.ship=sh; state.installed={...(e.outfits||{})}; cost+=shipCost(); crew+=requiredCrew(); cargo+=eff("cargo space"); }
-  state.ship=sShip; state.installed=sInst; return {cost,crew,cargo,n:state.fleet.length}; }
-function renderFleet(){ const box=el("fleetRoster"); if(!box) return;
-  if(!state.fleet || !state.fleet.length){ box.hidden=true; box.innerHTML=""; return; }
-  box.hidden=false; const t=fleetTotals();
-  const ships=state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const nm=sh?(sh.displayName||sh.name):e.ship;
-    return `<span class="fr-ship" data-fleet="${i}" title="Load this build">${nm}<span class="x" data-fleetdel="${i}">\u00d7</span></span>`; }).join("");
-  box.innerHTML=`<div class="fr-head"><span>Fleet (${t.n})</span><button class="fr-clear" id="fleetClear">Clear</button></div>`+
-    `<div class="fr-list">${ships}</div>`+
-    `<div class="fr-tot"><span>Cost <b>${MONEY(t.cost)}</b></span><span>Crew <b>${FMT(t.crew)}</b></span><span>Cargo <b>${FMT(t.cargo)} t</b></span></div>`; }
+function addToFleet(){ if(!state.ship) return; state.fleet.push({ship:state.ship.name, outfits:{...state.installed}}); state.fleetSel=state.fleet.length-1; saveFleet(); renderFleet(); showToast("Added to fleet ("+state.fleet.length+")"); }
+function removeSelected(){ if(state.fleetSel<0||state.fleetSel>=state.fleet.length) return; state.fleet.splice(state.fleetSel,1); state.fleetSel=Math.min(state.fleetSel,state.fleet.length-1); saveFleet(); renderFleet(); }
+function copySelected(){ if(state.fleetSel<0||state.fleetSel>=state.fleet.length) return; const e=state.fleet[state.fleetSel]; state.fleet.splice(state.fleetSel+1,0,{ship:e.ship,outfits:{...e.outfits}}); state.fleetSel++; saveFleet(); renderFleet(); }
+function clearFleet(){ state.fleet=[]; state.fleetSel=-1; saveFleet(); renderFleet(); }
+function selectFleet(i){ const e=state.fleet[i]; if(!e) return; state.fleetSel=i;
+  if(DATA.ships[e.ship]){ state.ship=DATA.ships[e.ship]; state.installed={...(e.outfits||{})}; state.loadoutName="fleet:"+i; renderAll(); updateShipPickBtn(); }
+  else renderFleet(); }
+function _withBuild(e,fn){ const sShip=state.ship,sInst=state.installed; state.ship=DATA.ships[e.ship]; state.installed={...(e.outfits||{})}; let r; try{ r=fn(); } finally{ state.ship=sShip; state.installed=sInst; } return r; }
+function fleetTotals(){ let cost=0,crew=0,cargo=0;
+  for(const e of state.fleet){ if(!DATA.ships[e.ship]) continue; _withBuild(e,()=>{ cost+=shipCost(); crew+=requiredCrew(); cargo+=eff("cargo space"); }); }
+  return {cost,crew,cargo,daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length}; }
+function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
+  const t=fleetTotals();
+  el("fleetCount").textContent = t.n ? `${t.n} ship${t.n>1?"s":""} · ${MONEY(t.cost)} to buy` : "";
+  el("ftCargo").textContent = FMT(t.cargo)+" t";
+  el("ftCrew").textContent = FMT(t.crew);
+  el("ftCost").textContent = MONEY(t.daily)+"/day";
+  const list=el("fleetList");
+  if(!state.fleet.length){ list.innerHTML=`<div class="fleet-empty">No ships yet \u2014 build one and press \u201c+ Add to Fleet\u201d.</div>`; }
+  else{ list.innerHTML = state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const nm=sh?(sh.displayName||sh.name):e.ship;
+      return `<button class="fleet-ship${i===state.fleetSel?' sel':''}" data-fleet="${i}" title="${nm}">`+
+        `<span class="fs-art">${artTile(sh?(sh.thumbnail||sh.sprite):null, mono2(nm), "var(--accent)")}</span>`+
+        `<span class="fs-nm">${nm}</span></button>`; }).join(""); }
+  const hasSel = state.fleetSel>=0 && state.fleetSel<state.fleet.length;
+  el("fleetRemove").disabled=!hasSel; el("fleetCopy").disabled=!hasSel;
+  el("fleetClearBtn").disabled=!state.fleet.length; el("fleetShare").disabled=!state.fleet.length; }
+function fleetToHash(){ try{ return "#f="+btoa(unescape(encodeURIComponent(JSON.stringify(state.fleet.map(e=>({s:e.ship,o:e.outfits})))))); }catch(e){ return ""; } }
+function shareFleet(){ if(!state.fleet.length){ showToast("Fleet is empty"); return; } const h=fleetToHash(); if(!h) return; const url=location.origin+location.pathname+h;
+  try{ history.replaceState(null,"",h); }catch(e){}
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(()=>showToast("Fleet link copied"),()=>prompt("Copy this fleet link:",url)); }
+  else prompt("Copy this fleet link:",url); }
+function parseFleetCode(str){ if(!str) return null; const m=String(str).match(/f=([^&\s]+)/); const code=m?m[1]:String(str).trim();
+  try{ const arr=JSON.parse(decodeURIComponent(escape(atob(code)))); if(Array.isArray(arr)) return arr.filter(e=>e&&DATA.ships[e.s]).map(e=>({ship:e.s,outfits:e.o||{}})); }catch(e){} return null; }
+function importFleet(){ const str=prompt("Paste a fleet link or code:"); if(str==null) return; const f=parseFleetCode(str);
+  if(!f||!f.length){ showToast("Couldn\u2019t read that fleet code"); return; }
+  state.fleet=f; state.fleetSel=-1; saveFleet(); renderFleet(); showToast("Imported "+f.length+" ship"+(f.length>1?"s":"")); }
 
 /* ---------- share (current build encoded in the URL hash) ---------- */
 function buildToHash(){ try{ const payload={s:state.ship.name,o:state.installed,t:state.tier}; return "#b="+btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); }catch(e){ return ""; } }
@@ -582,14 +604,17 @@ function shareBuild(){ const h=buildToHash(); if(!h) return; const url=location.
   try{ history.replaceState(null,"",h); }catch(e){}
   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(()=>showToast("Build link copied"),()=>prompt("Copy this build link:",url)); }
   else prompt("Copy this build link:",url); }
-function loadFromHash(){ const m=(location.hash||"").match(/b=([^&]+)/); if(!m) return false;
+function loadFromHash(){ const hash=location.hash||"";
+  const fm=hash.match(/f=([^&]+)/);
+  if(fm){ const f=parseFleetCode("f="+fm[1]); if(f&&f.length){ state.fleet=f; state.fleetSel=-1; saveFleet(); renderFleet(); } }
+  const m=hash.match(/b=([^&]+)/); if(!m){ return !!fm; }
   try{ const p=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
     if(p&&p.s&&DATA.ships[p.s]){
       if(typeof p.t==="number"){ state.tier=p.t; document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",+x.dataset.tier===p.t)); }
       state.ship=DATA.ships[p.s]; state.installed={};
       for(const k in (p.o||{})){ if(DATA.outfits[k]) state.installed[k]=p.o[k]; }
       state.loadoutName="shared"; renderAll(); updateShipPickBtn(); return true; }
-  }catch(e){} return false; }
+  }catch(e){} return !!fm; }
 
 /* ---------- ship pickers (race -> model) ---------- */
 const MODEL_RE=/^Model \d+/i;
@@ -663,11 +688,12 @@ function init(){
   el("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("fleetAddBtn").addEventListener("click",addToFleet);
   el("shareBtn").addEventListener("click",shareBuild);
-  el("fleetRoster").addEventListener("click",e=>{
-    const del=e.target.closest("[data-fleetdel]"); if(del){ e.stopPropagation(); removeFromFleet(+del.dataset.fleetdel); return; }
-    if(e.target.closest("#fleetClear")){ clearFleet(); return; }
-    const ld=e.target.closest("[data-fleet]"); if(ld){ loadFleetEntry(+ld.dataset.fleet); }
-  });
+  el("fleetList").addEventListener("click",e=>{const b=e.target.closest("[data-fleet]");if(b)selectFleet(+b.dataset.fleet);});
+  el("fleetRemove").addEventListener("click",removeSelected);
+  el("fleetCopy").addEventListener("click",copySelected);
+  el("fleetClearBtn").addEventListener("click",clearFleet);
+  el("fleetShare").addEventListener("click",shareFleet);
+  el("fleetImport").addEventListener("click",importFleet);
   el("themeBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;setTheme(b.dataset.theme);});
   el("unrelBtn").addEventListener("click",()=>{
     state.showUnreleased=!state.showUnreleased;
