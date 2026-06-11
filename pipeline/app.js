@@ -228,25 +228,85 @@ function renderVariants(){
 
 function renderSchem(){
   const ship = state.ship;
-  const pts = ship.points||[];
-  const W=520,H=300,cx=W/2,cy=H/2;
-  let maxR=70;
-  for(const p of pts) maxR=Math.max(maxR, Math.abs(p.x), Math.abs(p.y));
-  const sc = (H*0.40)/maxR;
-  // assign installed weapons to gun/turret hardpoints, in order
+  const url = imgURL(ship.sprite);
+  const stage = el("stage");
+  if(url){
+    stage.innerHTML = `<img id="shipSprite" class="shipsprite" src="${url}" alt=""
+      onload="drawHardpoints()" onerror="spriteFail()"><svg id="hpOverlay" class="hpoverlay"></svg>`;
+    const img = el("shipSprite");
+    if(img.complete && img.naturalWidth) requestAnimationFrame(drawHardpoints);
+  } else {
+    drawEllipse();
+  }
+}
+function spriteFail(){ drawEllipse(); }
+function weaponSlots(){
   const guns=[], turrets=[];
   for(const [nm,c] of Object.entries(state.installed)){
     const o=DATA.outfits[nm]; if(!o) continue;
     if(num(o.attributes["gun ports"])<0) for(let i=0;i<c;i++) guns.push(nm);
     if(num(o.attributes["turret mounts"])<0) for(let i=0;i<c;i++) turrets.push(nm);
   }
+  return {guns,turrets};
+}
+function drawHardpoints(){
+  const ship=state.ship, img=el("shipSprite"), stage=el("stage"), svg=el("hpOverlay");
+  if(!img||!svg||!stage||!img.naturalWidth) return;
+  const SW=stage.clientWidth, SH=stage.clientHeight;
+  const dispW=img.clientWidth||img.offsetWidth, dispH=img.clientHeight||img.offsetHeight;
+  if(!dispW||!dispH){ requestAnimationFrame(drawHardpoints); return; }
+  const scale=dispW/img.naturalWidth;            // coords map 1:1 to native sprite px
+  const cx=(SW)/2, cy=(SH)/2;                     // sprite is centered in the stage
+  svg.setAttribute("viewBox",`0 0 ${SW} ${SH}`);
+  const pts=ship.points||[];
+  const {guns,turrets}=weaponSlots();
+  let gi=0,ti=0;
+  const COLORS={gun:'var(--gun)',turret:'var(--turret)',engine:'var(--engine)',reverse:'var(--engine)',bay:'var(--bay)'};
+  const trunc=t=>t.length>18?t.slice(0,17)+'…':t;
+  let body="", labels=[];
+  for(const p of pts){
+    const x=cx+p.x*scale, y=cy+p.y*scale, col=COLORS[p.t];
+    let label=null, lit=true;
+    if(p.t==='gun'){ const w=guns[gi++]; label=w||'[empty]'; lit=!!w; }
+    else if(p.t==='turret'){ const w=turrets[ti++]; label=w||'[empty]'; lit=!!w; }
+    else if(p.t==='engine'||p.t==='reverse'){ lit=(eff("thrust")||eff("turn"))>0; }
+    const op=lit?1:0.45;
+    if(p.t==='gun')
+      body+=`<polygon points="${x},${y-5} ${x-4},${y+4} ${x+4},${y+4}" fill="${col}" opacity="${op}" stroke="#05080d" stroke-width="0.6"/>`;
+    else if(p.t==='turret')
+      body+=`<rect x="${x-4.5}" y="${y-4.5}" width="9" height="9" transform="rotate(45 ${x} ${y})" fill="${col}" opacity="${op}" stroke="#05080d" stroke-width="0.6"/>`;
+    else if(p.t==='bay')
+      body+=`<circle cx="${x}" cy="${y}" r="5" fill="none" stroke="${col}" stroke-width="2" opacity="${op}"/>`;
+    else
+      body+=`<rect x="${x-2.5}" y="${y-3}" width="5" height="8" rx="1.5" fill="${col}" opacity="${op}"/>`;
+    if(label!==null){ const left=p.x<0; labels.push({x,y,left,label,lit,lx:left?6:SW-6,anchor:left?'start':'end'}); }
+  }
+  for(const side of [true,false]){
+    const arr=labels.filter(l=>l.left===side).sort((a,b)=>a.y-b.y);
+    let prev=-1e9; for(const l of arr){ l.ly=Math.max(l.y, prev+13); prev=l.ly; }
+  }
+  let lab="";
+  for(const l of labels){
+    lab+=`<line x1="${l.x}" y1="${l.y}" x2="${l.lx}" y2="${l.ly}" stroke="var(--line2)" stroke-width="1" opacity="0.65"/>`;
+    lab+=`<text x="${l.lx}" y="${l.ly+3}" text-anchor="${l.anchor}" font-size="9" fill="${l.lit?'var(--txt)':'var(--dim)'}">${trunc(l.label)}</text>`;
+  }
+  svg.innerHTML=body+lab;
+}
+function drawEllipse(){
+  const ship = state.ship;
+  const pts = ship.points||[];
+  const W=520,H=340,cx=W/2,cy=H/2;
+  let maxR=70;
+  for(const p of pts) maxR=Math.max(maxR, Math.abs(p.x), Math.abs(p.y));
+  const sc = (H*0.40)/maxR;
+  const {guns,turrets}=weaponSlots();
   const filledEngines = (eff("thrust")||eff("turn")) ? 1 : 0;
   let gi=0,ti=0;
   const COLORS={gun:'var(--gun)',turret:'var(--turret)',engine:'var(--engine)',reverse:'var(--engine)',bay:'var(--bay)'};
   const trunc = t => t.length>18 ? t.slice(0,17)+'…' : t;
   let body=`<defs><radialGradient id="hg" cx="50%" cy="42%" r="62%">
       <stop offset="0%" stop-color="var(--tile1)"/><stop offset="100%" stop-color="var(--tile2)"/></radialGradient></defs>`;
-  body+=`<ellipse cx="${cx}" cy="${cy}" rx="${Math.min(92,maxR*sc*0.8)}" ry="${Math.min(140,maxR*sc*1.05)}"
+  body+=`<ellipse cx="${cx}" cy="${cy}" rx="${Math.min(92,maxR*sc*0.8)}" ry="${Math.min(150,maxR*sc*1.05)}"
       fill="url(#hg)" stroke="var(--line2)" stroke-width="1.2"/>`;
   const labels=[];
   for(const p of pts){
@@ -257,18 +317,12 @@ function renderSchem(){
     else if(p.t==='turret'){ const w=turrets[ti++]; label=w||'[empty]'; lit=!!w; }
     else if(p.t==='engine'||p.t==='reverse'){ lit=filledEngines>0; }
     const op=lit?1:0.3;
-    if(p.t==='gun')
-      body+=`<polygon points="${x},${y-6} ${x-5},${y+5} ${x+5},${y+5}" fill="${col}" opacity="${op}"/>`;
-    else if(p.t==='turret')
-      body+=`<rect x="${x-5}" y="${y-5}" width="10" height="10" transform="rotate(45 ${x} ${y})" fill="${col}" opacity="${op}"/>`;
-    else if(p.t==='bay')
-      body+=`<circle cx="${x}" cy="${y}" r="5.5" fill="none" stroke="${col}" stroke-width="2" opacity="${op}"/>`;
-    else
-      body+=`<rect x="${x-3}" y="${y-3}" width="6" height="9" rx="1.5" fill="${col}" opacity="${op}"/>`;
-    if(label!==null){ const left=p.x<0; labels.push({x,y,left,label,lit,
-      lx:left?12:W-12, anchor:left?'start':'end'}); }
+    if(p.t==='gun') body+=`<polygon points="${x},${y-6} ${x-5},${y+5} ${x+5},${y+5}" fill="${col}" opacity="${op}"/>`;
+    else if(p.t==='turret') body+=`<rect x="${x-5}" y="${y-5}" width="10" height="10" transform="rotate(45 ${x} ${y})" fill="${col}" opacity="${op}"/>`;
+    else if(p.t==='bay') body+=`<circle cx="${x}" cy="${y}" r="5.5" fill="none" stroke="${col}" stroke-width="2" opacity="${op}"/>`;
+    else body+=`<rect x="${x-3}" y="${y-3}" width="6" height="9" rx="1.5" fill="${col}" opacity="${op}"/>`;
+    if(label!==null){ const left=p.x<0; labels.push({x,y,left,label,lit,lx:left?12:W-12, anchor:left?'start':'end'}); }
   }
-  // stack labels per side so they don't overlap vertically
   for(const side of [true,false]){
     const arr=labels.filter(l=>l.left===side).sort((a,b)=>a.y-b.y);
     let prev=-1e9; for(const l of arr){ l.ly=Math.max(l.y, prev+13); prev=l.ly; }
@@ -543,4 +597,6 @@ function init(){
   card.addEventListener("drop",e=>{e.preventDefault();card.classList.remove("dragover");
     const nm=e.dataTransfer.getData("text/plain"); if(DATA.outfits[nm]) add(nm,1);});
 }
+let _rz=null;
+window.addEventListener("resize",()=>{ clearTimeout(_rz); _rz=setTimeout(()=>{ if(state.ship) renderShipCard(); },150); });
 init();

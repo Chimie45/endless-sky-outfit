@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.5 — 2026-06-11
+- The ship display now shows the **real top-down sprite** with gun/turret/engine/bay
+  hardpoints drawn directly on the hull (weapon name or `[empty]` per mount), like the
+  in-game outfitter. Coordinates map 1:1 to the bundled sprite. Ships whose sprite is
+  animated/unavailable fall back to the schematic ellipse. Bundles 313 top-down ship
+  sprites (~19 MB).
+
 ### v0.3.4 — 2026-06-11
 - Installed loadout moved back to a column on the right of the ship card (beside the
   faction), full card height with its own scroll.
