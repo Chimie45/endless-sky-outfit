@@ -413,7 +413,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.59 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.60 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -807,8 +807,12 @@ function renderQuickStats(s){
 }
 function renderAlerts(s){
   const hasThrust=eff("thrust")>0, hasTurn=eff("turn")>0;
-  const p=(lab,ok)=>`<span class="pill ${ok?'good':'bad'}">${lab} ${ok?'✓':'✗'}</span>`;
-  el("alerts").innerHTML = p("Thrust",hasThrust)+p("Steering",hasTurn)+p("Energy",s.energyOK)+p("Heat",s.heatOK);
+  const p=(lab,ok,tip)=>`<span class="pill ${ok?'good':'bad'}" title="${tip}">${lab} ${ok?'✓':'✗'}</span>`;
+  el("alerts").innerHTML =
+    p("Thrust",hasThrust,hasThrust?"Has a thruster \u2014 can accelerate":"No thruster \u2014 can\u2019t accelerate")+
+    p("Steering",hasTurn,hasTurn?"Has steering \u2014 can turn":"No steering \u2014 can\u2019t turn")+
+    p("Energy",s.energyOK,s.energyOK?"Generates enough power to run":"Will run out of power")+
+    p("Heat",s.heatOK,s.heatOK?"Stays cool enough":"Will overheat");
 }
 function renderShipCard(){
   const ship = state.ship;
@@ -1214,9 +1218,9 @@ function buildDrive(e){ if(!DATA.ships[e.ship]) return null; return _withBuild(e
 function buildDPS(e){ if(!DATA.ships[e.ship]) return 0; return _withBuild(e,()=>{ let d=0; for(const [nm,c] of Object.entries(state.installed)){ const w=DATA.outfits[nm]?.weapon; if(w&&w.reload) d+=c*(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload; } return d; }); }
 function buildIssue(e){ if(!DATA.ships[e.ship]) return null; return _withBuild(e,()=>{ const noThr=eff("thrust")<=0, noTurn=eff("turn")<=0;
   if(noThr||noTurn) return {lvl:"red", msg:[noThr?"No thrust":null,noTurn?"No steering":null].filter(Boolean).join(" & ")};
-  const s=computeStats(); if(!s.energyOK||!s.heatOK){ const m=[]; if(!s.energyOK)m.push("power"); if(!s.heatOK)m.push("heat"); return {lvl:"yellow", msg:"At risk of running out of "+m.join(" / ")}; }
+  const s=computeStats(); if(!s.energyOK||!s.heatOK){ const m=[]; if(!s.energyOK)m.push("run out of power"); if(!s.heatOK)m.push("overheat"); return {lvl:"yellow", msg:"Will "+m.join(" & ")}; }
   return null; }); }
-function fleetTotals(){ let cost=0,crew=0,cargo=0,bunks=0,fuel=0,shields=0,hull=0,figBays=0,droBays=0,figCraft=0,droCraft=0,stranded=0,dps=0,allJump=true,cantThrust=0,cantSteer=0,cantPower=0,overheat=0,jumpsMin=Infinity,underCrew=0,noFuel=0;
+function fleetTotals(){ let cost=0,crew=0,cargo=0,bunks=0,fuel=0,shields=0,hull=0,figBays=0,droBays=0,figCraft=0,droCraft=0,stranded=0,dps=0,allJump=true,cantThrust=0,cantSteer=0,cantPower=0,overheat=0,jumpsMin=Infinity,missingWeapons=0,noShields=0;
   for(const e of state.fleet){ const sh=DATA.ships[e.ship]; if(!sh) continue;
     const b=sh.hardpoints.bays||{}; figBays+=(b.Fighter||0); droBays+=(b.Drone||0);
     if(sh.category==="Fighter") figCraft++; else if(sh.category==="Drone") droCraft++;
@@ -1224,16 +1228,16 @@ function fleetTotals(){ let cost=0,crew=0,cargo=0,bunks=0,fuel=0,shields=0,hull=
       cost+=shipCost(); crew+=requiredCrew(); cargo+=eff("cargo space");
       bunks+=eff("bunks"); fuel+=eff("fuel capacity"); shields+=eff("shields"); hull+=eff("hull");
       if(eff("thrust")<=0) cantThrust++; if(eff("turn")<=0) cantSteer++;
+      if(eff("shields")<=0) noShields++;
+      if((sh.hardpoints.guns+sh.hardpoints.turrets)>0 && installedOf(o=>o&&(num(o.attributes["gun ports"])<0||num(o.attributes["turret mounts"])<0))===0) missingWeapons++;
       const st=computeStats(); if(!st.energyOK) cantPower++; if(!st.heatOK) overheat++;
       let dr=null; if(eff("jump drive")>0)dr="J"; else if(eff("scram drive")>0)dr="S"; else if(eff("hyperdrive")>0)dr="H";
       if(!dr) stranded++; if(dr!=="J") allJump=false;
       const jf=eff("jump fuel"); if(jf>0) jumpsMin=Math.min(jumpsMin, Math.floor(eff("fuel capacity")/jf));
-      if(dr && jf>0 && eff("fuel capacity")<jf) noFuel++;
-      if(requiredCrew() > eff("bunks")+1e-9) underCrew++;
       for(const [nm,c] of Object.entries(state.installed)){ const wp=DATA.outfits[nm]?.weapon; if(wp&&wp.reload) dps+=c*(num(wp["shield damage"])+num(wp["hull damage"]))*60/wp.reload; }
     }); }
   const bays=figBays+droBays, smallCraft=figCraft+droCraft, lackBay=Math.max(0,figCraft-figBays)+Math.max(0,droCraft-droBays);
-  return {cost,crew,cargo,bunks,fuel,shields,hull,jumps:(isFinite(jumpsMin)?jumpsMin:0),daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft,figBays,droBays,figCraft,droCraft,stranded,dps,cantThrust,cantSteer,cantPower,overheat,underCrew,noFuel,lackBay,
+  return {cost,crew,cargo,bunks,fuel,shields,hull,jumps:(isFinite(jumpsMin)?jumpsMin:0),daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft,figBays,droBays,figCraft,droCraft,stranded,dps,cantThrust,cantSteer,cantPower,overheat,missingWeapons,noShields,lackBay,
     jumpMode: stranded?"strand":(allJump?"jump":"hyper")}; }
 function renderFleetSelect(){ const sel=el("fleetSelect"); if(!sel) return; sel.innerHTML=Object.keys(state.fleets).map(n=>`<option value="${n.replace(/"/g,'&quot;')}"${n===state.fleetName?" selected":""}>${n}</option>`).join(""); }
 function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
@@ -1250,12 +1254,16 @@ function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
     fstat("Jumps", FMT(t.jumps)) +
     fstat("Cost", dailyTxt) +
     fstat("Craft", `${t.smallCraft} / ${t.bays}`);
-  const issue=(label,count,lvl)=>`<div class="issue ${count>0?(lvl||"bad"):"ok"}"><span>${label}</span><b>${count>0?count:"\u2713"}</b></div>`;
+  const issue=(label,count,lvl,desc)=>`<div class="issue ${count>0?(lvl||"bad"):"ok"}" title="${desc}"><span>${label}</span><b>${count>0?count:"\u2713"}</b></div>`;
   el("fleetIssues").innerHTML =
-    issue("Jump", t.stranded, "bad") + issue("Power", t.cantPower, "warn") +
-    issue("Thrust", t.cantThrust, "bad") + issue("Steer", t.cantSteer, "bad") +
-    issue("Bays", t.lackBay, "bad") + issue("Heat", t.overheat, "warn") +
-    issue("Crew", t.underCrew, "bad") + issue("Fuel", t.noFuel, "warn");
+    issue("Jump", t.stranded, "bad", "Ships with no working drive \u2014 can\u2019t leave the system") +
+    issue("Power", t.cantPower, "warn", "Ships that run out of energy at idle (negative power)") +
+    issue("Thrust", t.cantThrust, "bad", "Ships with no thruster \u2014 can\u2019t accelerate") +
+    issue("Steer", t.cantSteer, "bad", "Ships with no steering \u2014 can\u2019t turn") +
+    issue("Bays", t.lackBay, "bad", "Fighters/drones with no bay to dock in") +
+    issue("Heat", t.overheat, "warn", "Ships that overheat while cruising") +
+    issue("Weapons", t.missingWeapons, "warn", "Hulls that have weapon hardpoints but no weapons installed") +
+    issue("Shields", t.noShields, "warn", "Ships with no shields");
   const list=el("fleetList");
   if(!state.fleet.length){ list.innerHTML=`<div class="fleet-empty">No ships yet. Build one and press “+ Add to Fleet”.</div>`; }
   else{ list.innerHTML = state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const base=sh?(sh.displayName||sh.name):e.ship; const nm=e.label||base;

@@ -11,6 +11,14 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.60 — 2026-06-12
+- Replaced the Crew/Fuel warning ideas (which can't actually occur — bunks always cover crew,
+  hulls include fuel) with Weapons (a hull that has weapon hardpoints but no weapons installed)
+  and Shields (a ship with no shields). Issues grid is 8: Jump, Power, Thrust, Steer, Bays, Heat,
+  Weapons, Shields.
+- Added hover text to every Issues cell, improved the ship-tile warning tooltip wording, and
+  added hover text to the ship-card alert pills (Thrust / Steering / Energy / Heat).
+
 ### v0.3.59 — 2026-06-12
 - Two more fleet warnings: Crew (a ship's required crew exceeds its bunks) and Fuel (a ship has
   a drive but not enough fuel for even one jump). Issues grid is now 8 (4x2).
