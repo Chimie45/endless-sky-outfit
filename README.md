@@ -52,7 +52,7 @@ python3 -m http.server   # then open http://localhost:8000
 
 Game data and most sprites are from Endless Sky, which is GPLv3 (code) with art assets
 mostly under **CC-BY-SA-4.0**. If you rehost the sprites, credit the authors and keep the
-same license. This tool ships no sprite art yet — outfits/ships render as schematic tiles.
+same license. Sprite thumbnails from Endless Sky v0.11.0 are bundled under `images/` and credited in `images/CREDITS.md`; they stay under CC-BY-SA-4.0. Hulls without a static thumbnail fall back to lettered tiles, and the ship card has a Hardpoints view for the schematic.
 
 ## Do I need a database?
 

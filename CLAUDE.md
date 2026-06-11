@@ -49,15 +49,30 @@ Outfits are gated by `faction` (the data subfolder they came from). Tier map in 
 0 = human · 1 = hai/quarg/pug · 2 = wanderer/korath/remnant/coalition · 3 = everything else.
 
 ## What's done
-Stat engine (validated), hardpoint schematic from real coordinates, drag-and-drop outfitter
-catalog with search + category filter, spoiler/tech gate, presets (empty / stock), "where to buy"
-per outfit, and shareable build URLs (ship + outfits + tier encoded in the URL hash).
+Stat engine (validated), real bundled sprite art (ships + outfits, `images/`), race -> model
+ship picker (uses each ship's `display name`), hardpoint schematic (toggle on the ship card),
+ship variants exposed as clickable loadout presets, two-column UI (ship + stats + installed
+loadout on the left, outfitter art-grid on the right), drag-and-drop, search + category filter,
+spoiler/tech gate, empty/stock presets, and "where to buy" per outfit.
 
 ## Roadmap / next ideas
-- Real sprite art (data has the image paths; assets are CC-BY-SA-4.0 — credit + same license).
 - "Where to loot" (needs NPC fleet definitions, not in the buy index yet).
-- Ship variants (currently base hulls only).
+- Shareable build URLs (encode ship + outfits + tier in the URL hash) — not yet implemented.
 - DPS / combat detail; A/B build comparison; mobile polish.
+- Variant attribute/sprite overrides (today a variant only swaps its outfit loadout; the rare
+  variants that change hull attributes or sprite are approximated by the base hull).
+
+## Bundled images (CC-BY-SA-4.0)
+`images/` holds ship/outfit thumbnails pulled from Endless Sky v0.11.0 (same relative paths as
+the game's `images/` tree). They are NOT injected into index.html — the app references them at
+`images/<path>.png`. The parser keeps the `thumbnail`/`sprite` path strings; `pipeline/` does not
+download images. To refresh art for a new release, re-pull the thumbnails referenced by the data.
+Art stays under CC-BY-SA-4.0 — keep `images/CREDITS.md` and attribution.
+
+## Versioning / changelog
+Keep `CHANGELOG.md` current. Scheme: v1.0.0 = first release; vX.1.0 = major update; vX.X.1 =
+minor update worth noting. The app version is shown in the header; bump it there (in
+`pipeline/template.html`) and add a CHANGELOG entry with the date when you ship a change.
 
 ## Git workflow
 This is a public GitHub repo. After a change, from the repo root:
