@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.10 — 2026-06-11
+- Alerts collapse to a single row; removed the redundant "Loadout" label line.
+- Tightened stat spacing (meters, Energy & Heat, movement rows) so Energy & Heat no
+  longer clips; Capacity fills its column so the last meter bottoms out with the stat
+  stack and the loadout panel.
+
 ### v0.3.9 — 2026-06-11
 - Fixed the page overflowing the viewport: the body is now a fixed-height flex column,
   so the layout fills exactly one screen (right catalog and loadout scroll internally).

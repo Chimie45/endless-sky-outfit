@@ -219,8 +219,7 @@ function renderArtbox(){
 function renderVariants(){
   const ship = state.ship;
   const vnames = Object.keys(ship.variants||{});
-  let html = `<span class="vlabel">Loadout</span>`;
-  html += `<button class="vchip" data-load="empty" aria-pressed="${state.loadoutName==='empty'}">Empty hull</button>`;
+  let html = `<button class="vchip" data-load="empty" aria-pressed="${state.loadoutName==='empty'}">Empty hull</button>`;
   if(ship.defaultOutfits && Object.keys(ship.defaultOutfits).length)
     html += `<button class="vchip" data-load="stock" aria-pressed="${state.loadoutName==='stock'}">Stock</button>`;
   for(const v of vnames)
