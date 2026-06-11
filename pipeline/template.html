@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.7 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.8 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -39,8 +39,6 @@
 <main>
   <!-- LEFT: ship art + schematic + variants + live status + installed loadout -->
   <section class="col left">
-    <div class="alerts" id="alerts"></div>
-
     <div class="leftbody">
       <div class="maincol">
         <div class="shipcard" id="shipcard">
@@ -49,7 +47,10 @@
               <div class="cat" id="hullCat"></div>
               <div class="nm" id="hullName"></div>
             </div>
-            <div class="fac" id="hullFaction"></div>
+            <div class="headright">
+              <div class="fac" id="hullFaction"></div>
+              <div class="alerts" id="alerts"></div>
+            </div>
           </div>
           <div class="cardbody">
             <div class="infocol">
@@ -58,13 +59,13 @@
             </div>
             <div class="displaycol">
               <div class="stage" id="stage"></div>
-              <div class="legend" id="legend">
-                <span><i style="background:var(--gun)"></i>Gun</span>
-                <span><i style="background:var(--turret)"></i>Turret</span>
-                <span><i style="background:var(--engine)"></i>Engine</span>
-                <span><i style="background:var(--bay)"></i>Bay</span>
-              </div>
             </div>
+          </div>
+          <div class="legend" id="legend">
+            <span><i style="background:var(--gun)"></i>Gun</span>
+            <span><i style="background:var(--turret)"></i>Turret</span>
+            <span><i style="background:var(--engine)"></i>Engine</span>
+            <span><i style="background:var(--bay)"></i>Bay</span>
           </div>
           <div class="variants" id="variants"></div>
           <div class="dropmsg">Drop to install</div>

@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.8 — 2026-06-11
+- Status alerts moved under the faction label inside the ship card (frees the row at
+  the top, lifts everything up).
+- Ship display height now matches the info column (top of the art down to the Bays row).
+- Capacity and Movement/Energy columns forced to equal height, and the stat block now
+  bottom-aligns with the installed-loadout panel.
+
 ### v0.3.7 — 2026-06-11
 - Installed loadout is now its own full-height panel occupying the right 1/3 of the
   left column (top of the ship card down to the bottom of Energy & Heat), separate
