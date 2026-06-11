@@ -814,6 +814,7 @@ function init(){
   el("outfitterBtn").addEventListener("click",toggleOutfitter);
   el("outfitterTab").addEventListener("click",toggleOutfitter);
   el("outfitterClose").addEventListener("click",()=>setOutfitter(false));
+  el("shipTab").addEventListener("click",openShipPicker);
   { let oo=null; try{ oo=localStorage.getItem("drydock-outfitter"); }catch(e){} setOutfitter(oo!=="0"); }
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
     state.tier=+b.dataset.tier;

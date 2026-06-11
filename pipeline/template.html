@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.64 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.65 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -21,7 +21,7 @@
     <div class="eyebrow">Total cost</div>
     <div class="v mono" id="totalCost">0</div>
   </div>
-  <button class="linkbtn" id="outfitterBtn" title="Show / hide the outfitter">Outfitter</button>
+  <button class="linkbtn" id="outfitterBtn" title="Show / hide the parts panel">Add Parts</button>
   <button class="linkbtn" id="resetBtn">Reset</button>
   <button class="linkbtn gear" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
 </header>
@@ -149,7 +149,10 @@
     <div class="ogrid" id="catalog"></div>
   </section>
 </main>
-<button id="outfitterTab" class="outfitter-tab" aria-label="Open outfitter">Outfitter</button>
+<div class="edge-tabs" id="edgeTabs">
+  <button class="edge-tab" id="shipTab" aria-label="Choose a ship">Ship</button>
+  <button class="edge-tab accent" id="outfitterTab" aria-label="Add parts">Add Parts</button>
+</div>
 
 <div class="drawer" id="drawer">
   <div class="panel">

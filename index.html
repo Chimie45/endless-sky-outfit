@@ -142,9 +142,12 @@ body.ofit-open main{margin-right:min(560px,90vw)}
 .col.right{position:fixed;top:64px;right:0;bottom:0;width:min(560px,90vw);transform:translateX(100%);transition:transform .22s ease;z-index:40;border-left:1px solid var(--line2);background:linear-gradient(180deg,var(--bg2),var(--bg));box-shadow:-14px 0 36px rgba(0,0,0,.5)}
 body.ofit-open .col.right{transform:none}
 .of-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.outfitter-tab{position:fixed;right:0;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;text-orientation:mixed;background:var(--accent);color:#04121f;font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;padding:16px 7px;border:0;border-radius:8px 0 0 8px;cursor:pointer;z-index:39;box-shadow:-4px 0 14px rgba(0,0,0,.4)}
-.outfitter-tab:hover{background:var(--accent2)}
-body.ofit-open .outfitter-tab{display:none}
+.edge-tabs{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:39;display:flex;flex-direction:column;gap:8px}
+.edge-tab{writing-mode:vertical-rl;text-orientation:mixed;font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;padding:15px 7px;border:1px solid var(--line2);border-right:0;border-radius:8px 0 0 8px;cursor:pointer;background:var(--panel2);color:var(--txt);box-shadow:-4px 0 14px rgba(0,0,0,.35)}
+.edge-tab.accent{background:var(--accent);color:#04121f;border-color:var(--accent)}
+.edge-tab:hover{border-color:var(--accent2)}
+.edge-tab.accent:hover{background:var(--accent2)}
+body.ofit-open .edge-tabs{display:none}
 .sect{margin-bottom:20px}
 .sect>.eyebrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
 .leftgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
@@ -433,7 +436,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.64 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.65 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -449,7 +452,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
     <div class="eyebrow">Total cost</div>
     <div class="v mono" id="totalCost">0</div>
   </div>
-  <button class="linkbtn" id="outfitterBtn" title="Show / hide the outfitter">Outfitter</button>
+  <button class="linkbtn" id="outfitterBtn" title="Show / hide the parts panel">Add Parts</button>
   <button class="linkbtn" id="resetBtn">Reset</button>
   <button class="linkbtn gear" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
 </header>
@@ -577,7 +580,10 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
     <div class="ogrid" id="catalog"></div>
   </section>
 </main>
-<button id="outfitterTab" class="outfitter-tab" aria-label="Open outfitter">Outfitter</button>
+<div class="edge-tabs" id="edgeTabs">
+  <button class="edge-tab" id="shipTab" aria-label="Choose a ship">Ship</button>
+  <button class="edge-tab accent" id="outfitterTab" aria-label="Add parts">Add Parts</button>
+</div>
 
 <div class="drawer" id="drawer">
   <div class="panel">
@@ -1447,6 +1453,7 @@ function init(){
   el("outfitterBtn").addEventListener("click",toggleOutfitter);
   el("outfitterTab").addEventListener("click",toggleOutfitter);
   el("outfitterClose").addEventListener("click",()=>setOutfitter(false));
+  el("shipTab").addEventListener("click",openShipPicker);
   { let oo=null; try{ oo=localStorage.getItem("drydock-outfitter"); }catch(e){} setOutfitter(oo!=="0"); }
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
     state.tier=+b.dataset.tier;

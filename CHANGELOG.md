@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.65 — 2026-06-12
+- Right-edge tab rail: added a "Ship" tab (opens the ship picker) above the parts tab. Renamed
+  the blue "Outfitter" tab/button to "Add Parts" so it clearly means "add items to your build" —
+  freeing the names "Outfitter(s)" and "Shipyards" for future shop/station browsing tabs.
+
 ### v0.3.64 — 2026-06-12
 - The Outfitter is now a collapsible right-docked panel instead of a permanent column. Toggle it
   with the header "Outfitter" button or the vertical "Outfitter" tab on the right edge (state is
