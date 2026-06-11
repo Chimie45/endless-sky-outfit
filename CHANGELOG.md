@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.70 — 2026-06-12
+- Slimmer Add Parts / Add Ship rail tabs (shorter, tighter spacing). Removed the header
+  "Add Parts" button (the edge tab handles it). The side panel now overlays the right edge
+  instead of pushing the page narrower, so the ship card (and the schematic's hardpoint labels)
+  no longer shrink when a panel is open — you can still drag parts onto the ship.
+
 ### v0.3.69 — 2026-06-12
 - Flagship highlight is now an inset ring so the flagged ship tile stays the same size as the
   others (was an outer ring that made it look bigger).

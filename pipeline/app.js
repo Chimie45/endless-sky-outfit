@@ -830,7 +830,6 @@ function init(){
     if(document.body.dataset.panel==="ship"){ renderPickerFac(); renderPickerGrid(); } renderPartsFac(); renderCatalog();
   });
   el("resetBtn").addEventListener("click",()=>loadLoadout("empty"));
-  el("outfitterBtn").addEventListener("click",()=>togglePanel("parts"));
   el("outfitterTab").addEventListener("click",()=>togglePanel("parts"));
   el("outfitterClose").addEventListener("click",closePanels);
   el("shipTab").addEventListener("click",()=>togglePanel("ship"));
