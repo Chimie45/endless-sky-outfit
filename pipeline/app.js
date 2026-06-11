@@ -501,6 +501,7 @@ function setShip(name){
   const stock = state.ship.defaultOutfits || {};
   if(Object.keys(stock).length){ state.installed = {...stock}; state.loadoutName = "stock"; }
   else { state.installed = {}; state.loadoutName = "empty"; }
+  state.fleetSel = -1;            // building a fresh hull: no longer editing a fleet member
   renderAll(); updateShipPickBtn();
 }
 function _idleEnergy(){ return eff("energy generation")+eff("solar collection")+eff("fuel energy")-eff("energy consumption")-eff("cooling energy"); }
@@ -555,7 +556,15 @@ function loadLoadout(token){
   else if(token.startsWith("auto:")){ computeAutoFill(token.slice(5)); }
   state.loadoutName=token; renderAll();
 }
-function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); renderFleet(); setPresetPressed(); }
+function syncSelectedFleet(){
+  // while a fleet ship is selected and you edit the same hull, write the edit
+  // back to that fleet entry so its icon badges/totals reflect what you see.
+  if(state.fleetSel<0 || state.fleetSel>=state.fleet.length) return;
+  const e=state.fleet[state.fleetSel];
+  if(!e || !state.ship || e.ship!==state.ship.name) return;
+  e.outfits={...state.installed}; saveFleet();
+}
+function renderAll(){ syncSelectedFleet(); renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); renderFleet(); setPresetPressed(); }
 
 /* ---------- fleet tracker (named fleets, persisted in localStorage) ---------- */
 const FLEETS_KEY="drydock-fleets";

@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.48 — 2026-06-11
+- Fixed: editing a ship that's selected in the fleet now writes through to that fleet entry, so
+  its icon badges and the fleet totals reflect what you see. (Before, emptying or re-outfitting a
+  selected fleet ship left the saved entry — and thus its drive/warning badge — stale.) Picking a
+  different hull from the ship picker detaches, so you don't overwrite the selected entry. The
+  warning logic itself was already correct (an empty hull audits as red — no thrust/steering).
+
 ### v0.3.47 — 2026-06-11
 - Warning badge is now just the ⚠ symbol (no circle/background), forced to monochrome so the
   colour shows: red for serious issues, yellow for risks, with a dark outline for legibility.
