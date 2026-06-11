@@ -224,14 +224,12 @@ function shortVariant(v){
 function renderVariants(){
   const ship = state.ship;
   const vnames = Object.keys(ship.variants||{});
-  let html = `<button class="vchip" data-load="empty" aria-pressed="${state.loadoutName==='empty'}">Empty hull</button>`;
-  if(ship.defaultOutfits && Object.keys(ship.defaultOutfits).length)
-    html += `<button class="vchip" data-load="stock" aria-pressed="${state.loadoutName==='stock'}">Stock</button>`;
-  for(const [tok,lab] of [["auto:cargo","Max cargo"],["auto:crew","Max crew"]])
-    html += `<button class="vchip auto" data-load="${tok}" aria-pressed="${state.loadoutName===tok}">${lab}</button>`;
-  for(const v of vnames)
-    html += `<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${shortVariant(v)}</button>`;
-  el("variants").innerHTML = html;
+  if(!vnames.length){ el("variants").innerHTML = `<span class="novar">No factory variants</span>`; return; }
+  el("variants").innerHTML = vnames.map(v=>
+    `<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${shortVariant(v)}</button>`).join("");
+}
+function setPresetPressed(){
+  document.querySelectorAll('#presetGrid [data-load]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.load===state.loadoutName));
 }
 
 function renderSchem(){
@@ -556,7 +554,7 @@ function loadLoadout(token){
   else if(token.startsWith("auto:")){ computeAutoFill(token.slice(5)); }
   state.loadoutName=token; renderAll();
 }
-function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); renderFleet(); }
+function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); renderFleet(); setPresetPressed(); }
 
 /* ---------- fleet (saved builds, persisted in localStorage) ---------- */
 const FLEET_KEY="drydock-fleet";
@@ -662,6 +660,7 @@ function init(){
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);closeShipPicker();});
   document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeShipPicker(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); } });
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
+  el("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("fleetAddBtn").addEventListener("click",addToFleet);
   el("shareBtn").addEventListener("click",shareBuild);
   el("fleetRoster").addEventListener("click",e=>{

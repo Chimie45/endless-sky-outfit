@@ -136,8 +136,6 @@ main{display:grid;grid-template-columns:minmax(0,1fr) clamp(430px,40vw,700px);ga
 .col.left .sect{margin-bottom:0}
 .alerts{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;align-content:flex-start}
 .alerts .pill{width:86px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;padding:5px 4px;font-weight:600}
-.rightstats .alerts{justify-content:flex-start;margin-top:2px}
-.rightstats .alerts .pill{width:calc(50% - 3px);flex:none}
 .headright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .col.right{border-left:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),var(--bg))}
 .sect{margin-bottom:20px}
@@ -200,9 +198,13 @@ svg.schem{width:100%;height:340px;display:block}
 .variants .vchip:hover{border-color:var(--accent)}
 .variants .vchip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
 .variants .vlabel{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);width:100%;margin-bottom:1px}
-.loadactions{display:flex;gap:6px;margin-top:8px}
-.actbtn{flex:1;font-size:11px;font-weight:600;padding:7px 8px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);cursor:pointer}
-.actbtn:hover{border-color:var(--accent);color:var(--bright)}
+.presetgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.pbtn{font-size:11px;font-weight:600;padding:6px 8px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);cursor:pointer;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbtn:hover{border-color:var(--accent)}
+.pbtn[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+.pbtn.act{color:var(--accent2)}
+.pbtn.act:hover{color:var(--bright)}
+.novar{font-size:10.5px;color:var(--dim)}
 .fleetroster{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:8px;margin-bottom:10px}
 .fleetroster .fr-head{display:flex;justify-content:space-between;align-items:baseline;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 .fleetroster .fr-clear{background:none;border:none;color:var(--accent2);font-size:10px;cursor:pointer;padding:0}
@@ -363,7 +365,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.39 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.40 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -418,6 +420,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
               <span class="cat" id="hullCat"></span><span class="sep">/</span>
               <span class="nm" id="hullName"></span>
             </div>
+            <div class="alerts" id="alerts"></div>
           </div>
           <div class="cardbody">
             <div class="infocol">
@@ -439,7 +442,14 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
             <div class="rightstats">
               <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
               <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">E · H /s</span></div><div class="statpills" id="ehPills"></div></div>
-              <div class="alerts" id="alerts"></div>
+              <div class="presetgrid" id="presetGrid">
+                <button class="pbtn" data-load="empty">Empty hull</button>
+                <button class="pbtn" data-load="stock">Stock</button>
+                <button class="pbtn" data-load="auto:cargo">Max cargo</button>
+                <button class="pbtn" data-load="auto:crew">Max crew</button>
+                <button class="pbtn act" id="fleetAddBtn">+ Add to Fleet</button>
+                <button class="pbtn act" id="shareBtn">Share</button>
+              </div>
             </div>
           </div>
           <div class="dropmsg">Drop to install</div>
@@ -450,10 +460,6 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
         <div class="presetbar">
           <div class="eyebrow">Variants</div>
           <div class="variants" id="variants"></div>
-          <div class="loadactions">
-            <button class="actbtn fleet" id="fleetAddBtn">+ Add to Fleet</button>
-            <button class="actbtn share" id="shareBtn">Share</button>
-          </div>
         </div>
         <div class="fleetroster" id="fleetRoster" hidden></div>
         <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
@@ -751,14 +757,12 @@ function shortVariant(v){
 function renderVariants(){
   const ship = state.ship;
   const vnames = Object.keys(ship.variants||{});
-  let html = `<button class="vchip" data-load="empty" aria-pressed="${state.loadoutName==='empty'}">Empty hull</button>`;
-  if(ship.defaultOutfits && Object.keys(ship.defaultOutfits).length)
-    html += `<button class="vchip" data-load="stock" aria-pressed="${state.loadoutName==='stock'}">Stock</button>`;
-  for(const [tok,lab] of [["auto:cargo","Max cargo"],["auto:crew","Max crew"]])
-    html += `<button class="vchip auto" data-load="${tok}" aria-pressed="${state.loadoutName===tok}">${lab}</button>`;
-  for(const v of vnames)
-    html += `<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${shortVariant(v)}</button>`;
-  el("variants").innerHTML = html;
+  if(!vnames.length){ el("variants").innerHTML = `<span class="novar">No factory variants</span>`; return; }
+  el("variants").innerHTML = vnames.map(v=>
+    `<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${shortVariant(v)}</button>`).join("");
+}
+function setPresetPressed(){
+  document.querySelectorAll('#presetGrid [data-load]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.load===state.loadoutName));
 }
 
 function renderSchem(){
@@ -1083,7 +1087,7 @@ function loadLoadout(token){
   else if(token.startsWith("auto:")){ computeAutoFill(token.slice(5)); }
   state.loadoutName=token; renderAll();
 }
-function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); renderFleet(); }
+function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); renderFleet(); setPresetPressed(); }
 
 /* ---------- fleet (saved builds, persisted in localStorage) ---------- */
 const FLEET_KEY="drydock-fleet";
@@ -1189,6 +1193,7 @@ function init(){
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);closeShipPicker();});
   document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeShipPicker(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); } });
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
+  el("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("fleetAddBtn").addEventListener("click",addToFleet);
   el("shareBtn").addEventListener("click",shareBuild);
   el("fleetRoster").addEventListener("click",e=>{

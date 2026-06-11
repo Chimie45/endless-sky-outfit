@@ -11,6 +11,14 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.40 — 2026-06-11
+- Corrected the v0.3.39 layout: the status alerts (Thrust / Steering / Energy / Heat) move
+  back beside the ship name. The six action buttons now live under Energy & heat in a 2x3
+  grid: Empty hull, Stock, Max cargo, Max crew, + Add to Fleet, Share.
+- The "Variants" section in the loadout panel now lists only the ship's actual factory
+  variants (e.g. Cosmic Devil, Hai Engines); it shows "No factory variants" when a hull
+  has none. Presets are no longer mixed in there.
+
 ### v0.3.39 — 2026-06-11
 - Loadout panel header renamed "Variants"; the quick status tags (Thrust / Steering /
   Energy / Heat) moved out of the ship-name row to sit under the Energy & heat stats.

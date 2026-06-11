@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.39 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.40 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -60,6 +60,7 @@
               <span class="cat" id="hullCat"></span><span class="sep">/</span>
               <span class="nm" id="hullName"></span>
             </div>
+            <div class="alerts" id="alerts"></div>
           </div>
           <div class="cardbody">
             <div class="infocol">
@@ -81,7 +82,14 @@
             <div class="rightstats">
               <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
               <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">E · H /s</span></div><div class="statpills" id="ehPills"></div></div>
-              <div class="alerts" id="alerts"></div>
+              <div class="presetgrid" id="presetGrid">
+                <button class="pbtn" data-load="empty">Empty hull</button>
+                <button class="pbtn" data-load="stock">Stock</button>
+                <button class="pbtn" data-load="auto:cargo">Max cargo</button>
+                <button class="pbtn" data-load="auto:crew">Max crew</button>
+                <button class="pbtn act" id="fleetAddBtn">+ Add to Fleet</button>
+                <button class="pbtn act" id="shareBtn">Share</button>
+              </div>
             </div>
           </div>
           <div class="dropmsg">Drop to install</div>
@@ -92,10 +100,6 @@
         <div class="presetbar">
           <div class="eyebrow">Variants</div>
           <div class="variants" id="variants"></div>
-          <div class="loadactions">
-            <button class="actbtn fleet" id="fleetAddBtn">+ Add to Fleet</button>
-            <button class="actbtn share" id="shareBtn">Share</button>
-          </div>
         </div>
         <div class="fleetroster" id="fleetRoster" hidden></div>
         <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
