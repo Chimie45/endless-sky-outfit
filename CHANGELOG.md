@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.55 — 2026-06-12
+- Moved the fleet name + New/Rename/Delete into the left "Fleet Stats" column. Fleet stats now
+  use the same boxed 2-column grid as the Issues panel. Dropped Firepower/DPS and added the
+  stats that matter for a fleet: Bunks (crew/passenger capacity), Fuel, Shields and Hull. Stats
+  shown: Cargo, Crew, Bunks, Fuel, Shields, Hull, Daily, Fighters.
+
 ### v0.3.54 — 2026-06-12
 - Reorganised the fleet right column: action buttons relabeled/reordered (Import Fleet | Share
   Fleet / Clear Fleet | Delete Ship / Copy Ship | Set Flagship), with a new "Issues" box of six

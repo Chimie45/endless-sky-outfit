@@ -605,12 +605,13 @@ function buildIssue(e){ if(!DATA.ships[e.ship]) return null; return _withBuild(e
   if(noThr||noTurn) return {lvl:"red", msg:[noThr?"No thrust":null,noTurn?"No steering":null].filter(Boolean).join(" & ")};
   const s=computeStats(); if(!s.energyOK||!s.heatOK){ const m=[]; if(!s.energyOK)m.push("power"); if(!s.heatOK)m.push("heat"); return {lvl:"yellow", msg:"At risk of running out of "+m.join(" / ")}; }
   return null; }); }
-function fleetTotals(){ let cost=0,crew=0,cargo=0,figBays=0,droBays=0,figCraft=0,droCraft=0,stranded=0,dps=0,allJump=true,cantThrust=0,cantSteer=0,cantPower=0,overheat=0;
+function fleetTotals(){ let cost=0,crew=0,cargo=0,bunks=0,fuel=0,shields=0,hull=0,figBays=0,droBays=0,figCraft=0,droCraft=0,stranded=0,dps=0,allJump=true,cantThrust=0,cantSteer=0,cantPower=0,overheat=0;
   for(const e of state.fleet){ const sh=DATA.ships[e.ship]; if(!sh) continue;
     const b=sh.hardpoints.bays||{}; figBays+=(b.Fighter||0); droBays+=(b.Drone||0);
     if(sh.category==="Fighter") figCraft++; else if(sh.category==="Drone") droCraft++;
     _withBuild(e,()=>{
       cost+=shipCost(); crew+=requiredCrew(); cargo+=eff("cargo space");
+      bunks+=eff("bunks"); fuel+=eff("fuel capacity"); shields+=eff("shields"); hull+=eff("hull");
       if(eff("thrust")<=0) cantThrust++; if(eff("turn")<=0) cantSteer++;
       const st=computeStats(); if(!st.energyOK) cantPower++; if(!st.heatOK) overheat++;
       let dr=null; if(eff("jump drive")>0)dr="J"; else if(eff("scram drive")>0)dr="S"; else if(eff("hyperdrive")>0)dr="H";
@@ -618,20 +619,23 @@ function fleetTotals(){ let cost=0,crew=0,cargo=0,figBays=0,droBays=0,figCraft=0
       for(const [nm,c] of Object.entries(state.installed)){ const wp=DATA.outfits[nm]?.weapon; if(wp&&wp.reload) dps+=c*(num(wp["shield damage"])+num(wp["hull damage"]))*60/wp.reload; }
     }); }
   const bays=figBays+droBays, smallCraft=figCraft+droCraft, lackBay=Math.max(0,figCraft-figBays)+Math.max(0,droCraft-droBays);
-  return {cost,crew,cargo,daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft,figBays,droBays,figCraft,droCraft,stranded,dps,cantThrust,cantSteer,cantPower,overheat,lackBay,
+  return {cost,crew,cargo,bunks,fuel,shields,hull,daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft,figBays,droBays,figCraft,droCraft,stranded,dps,cantThrust,cantSteer,cantPower,overheat,lackBay,
     jumpMode: stranded?"strand":(allJump?"jump":"hyper")}; }
 function renderFleetSelect(){ const sel=el("fleetSelect"); if(!sel) return; sel.innerHTML=Object.keys(state.fleets).map(n=>`<option value="${n.replace(/"/g,'&quot;')}"${n===state.fleetName?" selected":""}>${n}</option>`).join(""); }
 function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   renderFleetSelect();
   const t=fleetTotals();
   el("fleetCount").innerHTML = t.n ? `<span class="fc-ships">${t.n} ship${t.n>1?"s":""}</span> · <span class="fc-cost">${MONEY(t.cost)} to buy</span>` : "";
-  const trow=(l,val,cls)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals"><b class="val mono${cls?' '+cls:''}">${val}</b></span></div>`;
+  const fstat=(l,v)=>`<div class="fstat"><span>${l}</span><b>${v}</b></div>`;
   el("fleetTotals").innerHTML =
-    trow("Cargo", FMT(t.cargo)+" t") +
-    trow("Crew", FMT(t.crew)) +
-    trow("Daily", MONEY(t.daily)+"/day") +
-    trow("Firepower", FMT(t.dps)+" dps") +
-    trow("Fighters", `${t.smallCraft} / ${t.bays}`);
+    fstat("Cargo", FMT(t.cargo)+" t") +
+    fstat("Crew", FMT(t.crew)) +
+    fstat("Bunks", FMT(t.bunks)) +
+    fstat("Fuel", FMT(t.fuel)) +
+    fstat("Shields", FMT(t.shields)) +
+    fstat("Hull", FMT(t.hull)) +
+    fstat("Daily", MONEY(t.daily)+"/day") +
+    fstat("Fighters", `${t.smallCraft} / ${t.bays}`);
   const issue=(label,count,lvl)=>`<div class="issue ${count>0?(lvl||"bad"):"ok"}"><span>${label}</span><b>${count>0?count:"\u2713"}</b></div>`;
   el("fleetIssues").innerHTML =
     issue("Jump", t.stranded, "bad") + issue("Power", t.cantPower, "warn") +
