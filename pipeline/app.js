@@ -27,7 +27,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:0, cat:"All", q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"" };
+let state = { ship:null, installed:{}, tier:0, cat:"All", q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[] };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -227,7 +227,7 @@ function renderVariants(){
   let html = `<button class="vchip" data-load="empty" aria-pressed="${state.loadoutName==='empty'}">Empty hull</button>`;
   if(ship.defaultOutfits && Object.keys(ship.defaultOutfits).length)
     html += `<button class="vchip" data-load="stock" aria-pressed="${state.loadoutName==='stock'}">Stock</button>`;
-  for(const [tok,lab] of [["auto:dps","Max DPS"],["auto:cargo","Max cargo"],["auto:crew","Max crew"]])
+  for(const [tok,lab] of [["auto:cargo","Max cargo"],["auto:crew","Max crew"]])
     html += `<button class="vchip auto" data-load="${tok}" aria-pressed="${state.loadoutName===tok}">${lab}</button>`;
   for(const v of vnames)
     html += `<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${shortVariant(v)}</button>`;
@@ -511,22 +511,43 @@ function _perSpace(o,k){ const sp=Math.abs(num(o.attributes["outfit space"]))||1
 function _addBest(scoreFn){ let best=null,bs=0; for(const o of _eligibleOutfits()){ const sc=scoreFn(o); if(sc>0 && sc>bs && !limitBlocked(o,1)){ bs=sc; best=o; } } if(best){ state.installed[best.name]=(state.installed[best.name]||0)+1; return true; } return false; }
 function _ensure(cond, scoreFn, cap){ let g=cap||80; while(g-->0 && !cond()){ if(!_addBest(scoreFn)) break; } }
 function autoScore(o,kind){
-  const a=o.attributes;
   if(kind==="cargo") return _perSpace(o,"cargo space");
   if(kind==="crew")  return _perSpace(o,"bunks");
-  if(kind==="dps"){ const w=o.weapon; if(w&&w.reload&&(num(a["gun ports"])<0||num(a["turret mounts"])<0)) return (num(w["shield damage"])+num(w["hull damage"]))*60/w.reload; return -1; }
   return -1;
+}
+function _fillStep(kind){      // install one best-scoring outfit that still fits; false if none left
+  let best=null,bs=0;
+  for(const o of _eligibleOutfits()){ const sc=autoScore(o,kind); if(sc>0 && sc>bs && !limitBlocked(o,1)){ bs=sc; best=o; } }
+  if(best){ state.installed[best.name]=(state.installed[best.name]||0)+1; return true; }
+  return false;
+}
+function _expansionOutfit(){   // an outfit that trades cargo space for outfit space ("Outfits Expansion")
+  let best=null,bs=0;
+  for(const o of _eligibleOutfits()){ const os=num(o.attributes["outfit space"]), cs=num(o.attributes["cargo space"]);
+    if(os>0 && cs<0){ const r=os/(-cs); if(r>bs){ bs=r; best=o; } } }
+  return best;
 }
 function computeAutoFill(kind){
   state.installed={};
+  // Engines only: just enough thrust + steering. We deliberately add NO reactor
+  // and NO cooling - these presets maximise a single stat, so the hull is left
+  // power-starved (it has engines but can't actually take off).
   _addBest(o=>_perSpace(o,"thrust"));
   _addBest(o=>_perSpace(o,"turn"));
-  _ensure(()=>_idleEnergy()>=0, o=>_perSpace(o,"energy generation"));
-  _ensure(()=>_idleHeat()<=0,  o=>_perSpace(o,"cooling"));
-  const pool=_eligibleOutfits().filter(o=>autoScore(o,kind)>0).sort((a,b)=>autoScore(b,kind)-autoScore(a,kind));
-  let guard=4000;
-  while(guard-->0){ let added=false; for(const o of pool){ if(!limitBlocked(o,1)){ state.installed[o.name]=(state.installed[o.name]||0)+1; added=true; break; } } if(!added) break; }
-  if(kind==="dps"){ _ensure(()=>_idleEnergy()>=0, o=>_perSpace(o,"energy generation")); _ensure(()=>_idleHeat()<=0, o=>_perSpace(o,"cooling")); }
+  let guard=8000;
+  while(guard-->0){
+    if(_fillStep(kind)) continue;
+    if(kind==="crew"){
+      // outfit space is full; convert spare cargo into more outfit space via an
+      // expansion (e.g. "Outfits Expansion": -20 cargo, +15 outfit space) so we
+      // can keep stacking bunk rooms. Stop once there is no cargo left to trade.
+      const exp=_expansionOutfit();
+      if(exp && eff("cargo space")>=(-num(exp.attributes["cargo space"])) && !limitBlocked(exp,1)){
+        state.installed[exp.name]=(state.installed[exp.name]||0)+1; continue;
+      }
+    }
+    break;
+  }
 }
 function loadLoadout(token){
   if(token==="empty"){ state.installed={}; }
@@ -535,7 +556,42 @@ function loadLoadout(token){
   else if(token.startsWith("auto:")){ computeAutoFill(token.slice(5)); }
   state.loadoutName=token; renderAll();
 }
-function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); }
+function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); renderFleet(); }
+
+/* ---------- fleet (saved builds, persisted in localStorage) ---------- */
+const FLEET_KEY="drydock-fleet";
+function loadFleet(){ try{ state.fleet=JSON.parse(localStorage.getItem(FLEET_KEY))||[]; }catch(e){ state.fleet=[]; } if(!Array.isArray(state.fleet)) state.fleet=[]; }
+function saveFleet(){ try{ localStorage.setItem(FLEET_KEY, JSON.stringify(state.fleet)); }catch(e){} }
+function addToFleet(){ if(!state.ship) return; state.fleet.push({ship:state.ship.name, outfits:{...state.installed}}); saveFleet(); renderFleet(); showToast("Added to fleet ("+state.fleet.length+")"); }
+function removeFromFleet(i){ state.fleet.splice(i,1); saveFleet(); renderFleet(); }
+function clearFleet(){ state.fleet=[]; saveFleet(); renderFleet(); }
+function loadFleetEntry(i){ const e=state.fleet[i]; if(!e||!DATA.ships[e.ship]) return; state.ship=DATA.ships[e.ship]; state.installed={...(e.outfits||{})}; state.loadoutName="fleet:"+i; renderAll(); updateShipPickBtn(); }
+function fleetTotals(){ let cost=0,crew=0,cargo=0; const sShip=state.ship, sInst=state.installed;
+  for(const e of state.fleet){ const sh=DATA.ships[e.ship]; if(!sh) continue; state.ship=sh; state.installed={...(e.outfits||{})}; cost+=shipCost(); crew+=requiredCrew(); cargo+=eff("cargo space"); }
+  state.ship=sShip; state.installed=sInst; return {cost,crew,cargo,n:state.fleet.length}; }
+function renderFleet(){ const box=el("fleetRoster"); if(!box) return;
+  if(!state.fleet || !state.fleet.length){ box.hidden=true; box.innerHTML=""; return; }
+  box.hidden=false; const t=fleetTotals();
+  const ships=state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const nm=sh?(sh.displayName||sh.name):e.ship;
+    return `<span class="fr-ship" data-fleet="${i}" title="Load this build">${nm}<span class="x" data-fleetdel="${i}">\u00d7</span></span>`; }).join("");
+  box.innerHTML=`<div class="fr-head"><span>Fleet (${t.n})</span><button class="fr-clear" id="fleetClear">Clear</button></div>`+
+    `<div class="fr-list">${ships}</div>`+
+    `<div class="fr-tot"><span>Cost <b>${MONEY(t.cost)}</b></span><span>Crew <b>${FMT(t.crew)}</b></span><span>Cargo <b>${FMT(t.cargo)} t</b></span></div>`; }
+
+/* ---------- share (current build encoded in the URL hash) ---------- */
+function buildToHash(){ try{ const payload={s:state.ship.name,o:state.installed,t:state.tier}; return "#b="+btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); }catch(e){ return ""; } }
+function shareBuild(){ const h=buildToHash(); if(!h) return; const url=location.origin+location.pathname+h;
+  try{ history.replaceState(null,"",h); }catch(e){}
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(()=>showToast("Build link copied"),()=>prompt("Copy this build link:",url)); }
+  else prompt("Copy this build link:",url); }
+function loadFromHash(){ const m=(location.hash||"").match(/b=([^&]+)/); if(!m) return false;
+  try{ const p=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+    if(p&&p.s&&DATA.ships[p.s]){
+      if(typeof p.t==="number"){ state.tier=p.t; document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",+x.dataset.tier===p.t)); }
+      state.ship=DATA.ships[p.s]; state.installed={};
+      for(const k in (p.o||{})){ if(DATA.outfits[k]) state.installed[k]=p.o[k]; }
+      state.loadoutName="shared"; renderAll(); updateShipPickBtn(); return true; }
+  }catch(e){} return false; }
 
 /* ---------- ship pickers (race -> model) ---------- */
 const MODEL_RE=/^Model \d+/i;
@@ -591,6 +647,7 @@ function init(){
   state.showUnreleased = su==="1";
   el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
   renderCatbar();
+  loadFleet();
   const def = DATA.ships["Bactrian"]||DATA.ships["Falcon"]||DATA.ships["Leviathan"]||Object.values(DATA.ships)[0];
   setShip(def.name);
   document.querySelectorAll("#tierBtns button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tier==="0"));
@@ -605,6 +662,13 @@ function init(){
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);closeShipPicker();});
   document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeShipPicker(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); } });
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
+  el("fleetAddBtn").addEventListener("click",addToFleet);
+  el("shareBtn").addEventListener("click",shareBuild);
+  el("fleetRoster").addEventListener("click",e=>{
+    const del=e.target.closest("[data-fleetdel]"); if(del){ e.stopPropagation(); removeFromFleet(+del.dataset.fleetdel); return; }
+    if(e.target.closest("#fleetClear")){ clearFleet(); return; }
+    const ld=e.target.closest("[data-fleet]"); if(ld){ loadFleetEntry(+ld.dataset.fleet); }
+  });
   el("themeBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;setTheme(b.dataset.theme);});
   el("unrelBtn").addEventListener("click",()=>{
     state.showUnreleased=!state.showUnreleased;
@@ -642,6 +706,7 @@ function init(){
   }
   dropTarget(el("shipcard"));
   dropTarget(document.querySelector(".loadpanel"));
+  loadFromHash();
 }
 let _rz=null;
 window.addEventListener("resize",()=>{ clearTimeout(_rz); _rz=setTimeout(()=>{ if(state.ship) renderShipCard(); },150); });

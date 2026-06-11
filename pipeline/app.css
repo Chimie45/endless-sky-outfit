@@ -133,6 +133,8 @@ main{display:grid;grid-template-columns:minmax(0,1fr) clamp(430px,40vw,700px);ga
 .col.left .sect{margin-bottom:0}
 .alerts{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;align-content:flex-start}
 .alerts .pill{width:86px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;padding:5px 4px;font-weight:600}
+.rightstats .alerts{justify-content:flex-start;margin-top:2px}
+.rightstats .alerts .pill{width:calc(50% - 3px);flex:none}
 .headright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .col.right{border-left:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),var(--bg))}
 .sect{margin-bottom:20px}
@@ -195,6 +197,19 @@ svg.schem{width:100%;height:340px;display:block}
 .variants .vchip:hover{border-color:var(--accent)}
 .variants .vchip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
 .variants .vlabel{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);width:100%;margin-bottom:1px}
+.loadactions{display:flex;gap:6px;margin-top:8px}
+.actbtn{flex:1;font-size:11px;font-weight:600;padding:7px 8px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);cursor:pointer}
+.actbtn:hover{border-color:var(--accent);color:var(--bright)}
+.fleetroster{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:8px;margin-bottom:10px}
+.fleetroster .fr-head{display:flex;justify-content:space-between;align-items:baseline;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.fleetroster .fr-clear{background:none;border:none;color:var(--accent2);font-size:10px;cursor:pointer;padding:0}
+.fleetroster .fr-clear:hover{color:var(--bright)}
+.fleetroster .fr-list{display:flex;flex-wrap:wrap;gap:5px}
+.fleetroster .fr-ship{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;padding:4px 7px;border:1px solid var(--line2);border-radius:6px;background:var(--panel);color:var(--txt);cursor:pointer}
+.fleetroster .fr-ship:hover{border-color:var(--accent)}
+.fleetroster .fr-ship .x{color:#ff7a7a;font-weight:700;padding-left:2px;font-size:12px;line-height:1}
+.fleetroster .fr-tot{font-size:9.5px;color:var(--dim);display:flex;gap:12px;flex-wrap:wrap}
+.fleetroster .fr-tot b{color:var(--txt);font-weight:600}
 
 /* capacity meters */
 .meter{margin:5px 0}

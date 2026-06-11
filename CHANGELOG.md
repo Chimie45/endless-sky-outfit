@@ -11,6 +11,19 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.39 — 2026-06-11
+- Loadout panel header renamed "Variants"; the quick status tags (Thrust / Steering /
+  Energy / Heat) moved out of the ship-name row to sit under the Energy & heat stats.
+- Presets trimmed and clarified: removed "Max DPS" (not meaningfully knowable); presets
+  are now Empty hull, Stock, Max cargo, Max crew. Max cargo / Max crew now fit engines but
+  no reactor or cooling on purpose (they maximise one stat, so the hull is power-starved
+  and won't actually fly). Max crew also converts spare cargo into outfit space via
+  "Outfits Expansion" so it can stack more bunk rooms (e.g. Star Barge 3 -> 27 bunks).
+- Added "+ Add to Fleet" and "Share" buttons under the presets. Add to Fleet saves the
+  current ship + loadout to a fleet list kept in your browser, shown as a roster with
+  combined cost / crew / cargo totals; click a saved build to reload it, x to remove.
+  Share copies a link with the whole build encoded in the URL; opening that link rebuilds it.
+
 ### v0.3.38 — 2026-06-11
 - Fixed the Energy alert reading "OK" on an empty hull. The check now requires an
   actual generation source (reactor / solar / fuel cell) in addition to a non-negative
