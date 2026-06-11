@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.32 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.33 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -26,16 +26,23 @@
 </header>
 
 <svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
-  <filter id="esShip" color-interpolation-filters="sRGB" x="-12%" y="-12%" width="124%" height="124%">
+  <filter id="esShip" color-interpolation-filters="sRGB" x="-15%" y="-15%" width="130%" height="130%">
     <feColorMatrix type="saturate" values="0" result="g"/>
+    <!-- darker grayscale fill -->
     <feComponentTransfer in="g" result="fill">
-      <feFuncR type="linear" slope="0.42"/><feFuncG type="linear" slope="0.42"/><feFuncB type="linear" slope="0.42"/>
+      <feFuncR type="linear" slope="0.28"/><feFuncG type="linear" slope="0.28"/><feFuncB type="linear" slope="0.28"/>
     </feComponentTransfer>
+    <!-- faint interior structure (low intensity, no lift = less noise) -->
     <feConvolveMatrix in="g" order="3" preserveAlpha="true" kernelMatrix="0 -1 0 -1 4 -1 0 -1 0" result="edge"/>
     <feComponentTransfer in="edge" result="edgeB">
-      <feFuncR type="linear" slope="2.4" intercept="0.04"/><feFuncG type="linear" slope="2.4" intercept="0.05"/><feFuncB type="linear" slope="2.6" intercept="0.07"/>
+      <feFuncR type="linear" slope="1.15"/><feFuncG type="linear" slope="1.15"/><feFuncB type="linear" slope="1.2"/>
     </feComponentTransfer>
-    <feMerge><feMergeNode in="fill"/><feMergeNode in="edgeB"/></feMerge>
+    <!-- crisp light-grey silhouette outline stroke -->
+    <feMorphology in="SourceAlpha" operator="dilate" radius="1.6" result="dil"/>
+    <feComposite in="dil" in2="SourceAlpha" operator="out" result="ring"/>
+    <feFlood flood-color="#b6c0d0" result="oc"/>
+    <feComposite in="oc" in2="ring" operator="in" result="outline"/>
+    <feMerge><feMergeNode in="fill"/><feMergeNode in="edgeB"/><feMergeNode in="outline"/></feMerge>
   </filter>
 </defs></svg>
 
