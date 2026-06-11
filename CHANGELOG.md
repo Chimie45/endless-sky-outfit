@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.14 — 2026-06-11
+- Added computed preset loadouts beside Empty/Stock/variants: **Max DPS** (fills gun &
+  turret mounts with the highest-DPS weapons that fit), **Max cargo**, and **Max crew**
+  (greedy fills that respect all install limits). These are naive "max-metric" builds
+  (no power/engine balancing) for quick comparison.
+
 ### v0.3.13 — 2026-06-11
 - Moved Capacity, Movement & Defense, and Energy & Heat into the left info column
   (alongside cost/speed/etc.), narrowed the ship display, and freed the area below the
