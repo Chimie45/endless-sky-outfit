@@ -27,7 +27,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:0, cat:"All", q:"", view:"schem", loadoutName:"empty", showUnreleased:false };
+let state = { ship:null, installed:{}, tier:0, cat:"All", q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"" };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -494,7 +494,7 @@ function setShip(name){
   const stock = state.ship.defaultOutfits || {};
   if(Object.keys(stock).length){ state.installed = {...stock}; state.loadoutName = "stock"; }
   else { state.installed = {}; state.loadoutName = "empty"; }
-  renderAll();
+  renderAll(); updateShipPickBtn();
 }
 function loadLoadout(token){
   if(token==="empty"){ state.installed={}; }
@@ -513,35 +513,35 @@ function shipsByFaction(){
   }
   return byFac;
 }
-function refreshPickers(){
-  const curFac = state.ship ? state.ship.faction : null;
-  const curShip = state.ship ? state.ship.name : null;
-  buildFactionSelect();
-  const facOpts=[...el("facSel").options].map(o=>o.value);
-  const fac = facOpts.includes(curFac)?curFac:facOpts[0];
-  el("facSel").value=fac; buildModelSelect(fac);
-  const shipOpts=[...el("shipSel").options].map(o=>o.value);
-  if(curShip && shipOpts.includes(curShip)) el("shipSel").value=curShip;
-  else if(shipOpts.length){ el("shipSel").value=shipOpts[0]; setShip(shipOpts[0]); }
+function updateShipPickBtn(){
+  const sh=state.ship; if(!sh) return;
+  el("spArt").innerHTML = artTile(sh.thumbnail||sh.sprite, mono2(sh.displayName||sh.name), "var(--accent)");
+  el("spName").textContent = sh.displayName || sh.name;
+  el("spMeta").textContent = FACLABEL(sh.faction)+" · "+sh.category;
 }
-function buildFactionSelect(){
+function openShipPicker(){ renderPickerFac(); renderPickerGrid(); el("shipPicker").classList.add("open"); const ps=el("pickerSearch"); if(ps){ps.value=state.pickerQ||"";setTimeout(()=>ps.focus(),30);} }
+function closeShipPicker(){ el("shipPicker").classList.remove("open"); }
+function renderPickerFac(){
   const byFac=shipsByFaction();
   const facOrder=Object.keys(byFac).sort((a,b)=>factionTier(a)-factionTier(b)||a.localeCompare(b));
-  el("facSel").innerHTML = facOrder.map(f=>`<option value="${f}">${FACLABEL(f)} (${byFac[f].length})</option>`).join("");
+  const total=Object.values(byFac).reduce((a,b)=>a+b.length,0);
+  let html=`<button class="fchip" data-fac="all" aria-pressed="${state.pickerFac==='all'}">All (${total})</button>`;
+  for(const fobj of facOrder) html+=`<button class="fchip" data-fac="${fobj}" aria-pressed="${state.pickerFac===fobj}">${FACLABEL(fobj)} (${byFac[fobj].length})</button>`;
+  el("pickerFac").innerHTML=html;
 }
-function buildModelSelect(faction){
+function renderPickerGrid(){
   const byFac=shipsByFaction();
-  const list=(byFac[faction]||[]).slice();
-  const sel=el("shipSel"); sel.innerHTML="";
-  const byCat={};
-  for(const s of list){ (byCat[s.category] ||= []).push(s); }
-  for(const cat of Object.keys(byCat).sort()){
-    const og=document.createElement("optgroup"); og.label=cat;
-    byCat[cat].sort((a,b)=>(a.displayName||a.name).localeCompare(b.displayName||b.name)).forEach(s=>{
-      const op=document.createElement("option"); op.value=s.name; op.textContent=s.displayName||s.name; og.appendChild(op);
-    });
-    sel.appendChild(og);
-  }
+  let list=[];
+  for(const f in byFac){ if(state.pickerFac==='all'||state.pickerFac===f) list.push(...byFac[f]); }
+  const q=(state.pickerQ||"").toLowerCase();
+  if(q) list=list.filter(s=>(s.displayName||s.name).toLowerCase().includes(q)||s.name.toLowerCase().includes(q));
+  list.sort((a,b)=> a.category.localeCompare(b.category) || (a.displayName||a.name).localeCompare(b.displayName||b.name));
+  el("pickerGrid").innerHTML = list.length ? list.map(s=>`
+    <button class="shipcell ${state.ship&&state.ship.name===s.name?'sel':''}" data-ship="${s.name.replace(/"/g,'&quot;')}" title="${s.displayName||s.name}">
+      <div class="sc-art">${artTile(s.thumbnail||s.sprite, mono2(s.displayName||s.name), "var(--accent)")}</div>
+      <div class="sc-nm">${s.displayName||s.name}</div>
+      <div class="sc-cat">${s.category}</div>
+    </button>`).join("") : `<div class="empty">No ships match.</div>`;
 }
 
 function setTheme(t){
@@ -554,27 +554,27 @@ function init(){
   let su=null; try{ su=localStorage.getItem("drydock-unreleased"); }catch(e){}
   state.showUnreleased = su==="1";
   el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
-  buildFactionSelect(); renderCatbar();
+  renderCatbar();
   const def = DATA.ships["Bactrian"]||DATA.ships["Falcon"]||DATA.ships["Leviathan"]||Object.values(DATA.ships)[0];
-  el("facSel").value=def.faction;
-  buildModelSelect(def.faction);
-  el("shipSel").value=def.name; setShip(def.name);
+  setShip(def.name);
   document.querySelectorAll("#tierBtns button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tier==="0"));
   let savedTheme=null; try{ savedTheme=localStorage.getItem("drydock-theme"); }catch(e){}
   setTheme(savedTheme||"blue");
 
-  el("facSel").addEventListener("change",e=>{
-    buildModelSelect(e.target.value);
-    const first=el("shipSel").value; if(first) setShip(first);
-  });
-  el("shipSel").addEventListener("change",e=>setShip(e.target.value));
+  el("shipPickBtn").addEventListener("click",openShipPicker);
+  el("pickerX").addEventListener("click",closeShipPicker);
+  el("shipPicker").addEventListener("click",e=>{ if(e.target===el("shipPicker")) closeShipPicker(); });
+  el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; renderPickerGrid(); });
+  el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;renderPickerFac();renderPickerGrid();});
+  el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);closeShipPicker();});
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeShipPicker(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); } });
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("themeBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;setTheme(b.dataset.theme);});
   el("unrelBtn").addEventListener("click",()=>{
     state.showUnreleased=!state.showUnreleased;
     try{ localStorage.setItem("drydock-unreleased", state.showUnreleased?"1":"0"); }catch(e){}
     el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
-    refreshPickers(); renderCatalog();
+    if(el("shipPicker").classList.contains("open")){ renderPickerFac(); renderPickerGrid(); } renderCatalog();
   });
   el("resetBtn").addEventListener("click",()=>loadLoadout("empty"));
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;

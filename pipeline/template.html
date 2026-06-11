@@ -5,27 +5,16 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.10 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.11 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
-    <label for="facSel">Race</label>
-    <select id="facSel"></select>
-  </div>
-  <div class="ctrl">
-    <label for="shipSel">Ship model</label>
-    <select id="shipSel"></select>
-  </div>
-  <div class="ctrl spoiler">
-    <div>
-      <label>Spoiler / tech access</label>
-      <div class="tierbtns" id="tierBtns">
-        <button data-tier="0">Human</button>
-        <button data-tier="1">+First contact</button>
-        <button data-tier="2">+Deep space</button>
-        <button data-tier="3">All</button>
-      </div>
-    </div>
+    <label>Ship</label>
+    <button class="shippick" id="shipPickBtn" aria-haspopup="dialog">
+      <span class="sp-art" id="spArt"></span>
+      <span class="sp-txt"><b id="spName">—</b><small id="spMeta"></small></span>
+      <span class="sp-caret">▾</span>
+    </button>
   </div>
   <div class="spacer"></div>
   <div class="costchip">
@@ -119,6 +108,15 @@
     <button class="linkbtn x" id="settingsX">Close</button>
     <h2 style="color:var(--bright);margin:0 0 16px">Settings</h2>
     <div class="setrow">
+      <label>Spoiler / tech access</label>
+      <div class="tierbtns" id="tierBtns">
+        <button data-tier="0">Human</button>
+        <button data-tier="1">+First contact</button>
+        <button data-tier="2">+Deep space</button>
+        <button data-tier="3">All</button>
+      </div>
+    </div>
+    <div class="setrow">
       <label>Theme</label>
       <div class="tierbtns" id="themeBtns">
         <button data-theme="blue">Blue</button>
@@ -130,6 +128,16 @@
       <label>Content</label>
       <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
     </div>
+  </div>
+</div>
+
+<div class="modal" id="shipPicker">
+  <div class="sheet wide">
+    <button class="linkbtn x" id="pickerX">Close</button>
+    <h2 style="color:var(--bright);margin:0 0 12px">Choose a ship</h2>
+    <input type="search" id="pickerSearch" placeholder="Search ships…" autocomplete="off">
+    <div class="facfilter" id="pickerFac"></div>
+    <div class="shipgrid" id="pickerGrid"></div>
   </div>
 </div>
 

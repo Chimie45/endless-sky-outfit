@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.11 — 2026-06-11
+- Replaced the Race + Ship-model dropdowns with a **visual ship picker**: the header
+  shows the current ship (art + name + race/class) and opens a gallery modal with a
+  search box, race filter chips, and thumbnail cells grouped by class. Respects the
+  unreleased toggle. Esc closes modals.
+- Moved the spoiler/tech-access tier into Settings to declutter the header.
+
 ### v0.3.10 — 2026-06-11
 - Alerts collapse to a single row; removed the redundant "Loadout" label line.
 - Tightened stat spacing (meters, Energy & Heat, movement rows) so Energy & Heat no
