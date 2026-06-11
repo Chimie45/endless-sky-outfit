@@ -377,7 +377,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.41 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.42 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -1019,9 +1019,10 @@ function limitBlocked(o, delta){
   const turUse=-num(o.attributes["turret mounts"]);
   if(turUse>0 && (hp.turrets - installedOf(x=>x&&num(x.attributes["turret mounts"])<0)) < delta*turUse) return "turret mounts";
   // space / capacity limits are ship attributes -> use eff()
-  const CAP={"outfit space":"outfit space","weapon capacity":"weapon capacity","engine capacity":"engine capacity"};
+  const CAP={"outfit space":"outfit space","weapon capacity":"weapon capacity","engine capacity":"engine capacity","cargo space":"cargo space","fuel capacity":"fuel capacity"};
   const keys=new Set(Object.keys(CAP));
-  for(const k in o.attributes){ if(o.attributes[k]<0 && /capacity$/.test(k)) keys.add(k); }
+  // guard every capacity-like resource (ammo "* capacity", plus outfit/cargo space) from going negative
+  for(const k in o.attributes){ if(o.attributes[k]<0 && /(capacity|space)$/.test(k)) keys.add(k); }
   for(const k of keys){
     const consume=num(o.attributes[k]);            // negative => consumes that resource
     if(consume>=0) continue;

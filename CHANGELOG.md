@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.42 — 2026-06-11
+- Install lock now also guards cargo space (and fuel capacity) from going negative, matching
+  the game. Previously cargo-converting outfits like "Outfits Expansion" could push cargo to
+  negative values; now they're blocked (with the beep + notice) once cargo would drop below 0,
+  in both manual installs and the Max crew auto-fill.
+
 ### v0.3.41 — 2026-06-11
 - Added the Fleet tracker below the ship card. Left side shows live totals (Total cargo,
   Total crew, Total daily cost = 100 cr/day per crew, pilot unpaid); the middle lists fleet
