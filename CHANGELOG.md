@@ -11,6 +11,34 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.64 — 2026-06-12
+- The Outfitter is now a collapsible right-docked panel instead of a permanent column. Toggle it
+  with the header "Outfitter" button or the vertical "Outfitter" tab on the right edge (state is
+  remembered). When open it slides in and the page shifts left so you can still drag outfits onto
+  the ship; when closed the ship/fleet area gets the full window width. On phones it opens
+  full-screen. The main grid is now single-column so the left content uses all available space,
+  and the side-by-side ship/loadout split now holds down to ~1024px before stacking.
+
+### v0.3.63 — 2026-06-12
+- Outfitter cards are now a fixed, uniform size — no more stretch-to-fill. Every card is 110px
+  wide and 182px tall, with a uniform 90×90 image box (image centered, contained). The grid uses
+  fixed 110px columns (centered) instead of flexible 1fr, so all cards/images are identical at
+  every width.
+
+### v0.3.62 — 2026-06-12
+- Outfitter cards are more compact: the art area went from a square to a 3:2 box and the image
+  is a touch smaller (72%), so each card takes less vertical room and more fit on screen.
+
+### v0.3.61 — 2026-06-12
+- Responsive pass (per RESPONSIVE-AUDIT.md). Added breakpoints so the layout reflows instead of
+  crushing: ≤1400 stacks the ship area over the installed loadout (the left column scrolls) so
+  the fleet ship list and ship schematic keep full width on laptops; ≤900 reflows the ship card
+  (art+schematic on top, stats/presets full-width below) and stacks the fleet panel's three
+  columns with fluid (auto-fill) ship tiles; ≤640 collapses everything to a single column, wraps
+  the header, and turns the ship-picker's tab rail into a horizontal scroller. Desktop >1400 is
+  unchanged. (Built by hand-syncing index.html as the build VM was unavailable; re-run
+  pipeline/build.py when possible — output is identical.)
+
 ### v0.3.60 — 2026-06-12
 - Replaced the Crew/Fuel warning ideas (which can't actually occur — bunks always cover crew,
   hulls include fuel) with Weapons (a hull that has weapon hardpoints but no weapons installed)

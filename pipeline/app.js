@@ -758,6 +758,12 @@ function setTheme(t){
   try{ localStorage.setItem("drydock-theme",t); }catch(e){}
   document.querySelectorAll("#themeBtns button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.theme===t));
 }
+function setOutfitter(open){
+  document.body.classList.toggle("ofit-open", open);
+  var ob=el("outfitterBtn"); if(ob) ob.setAttribute("aria-pressed", open);
+  try{ localStorage.setItem("drydock-outfitter", open?"1":"0"); }catch(e){}
+}
+function toggleOutfitter(){ setOutfitter(!document.body.classList.contains("ofit-open")); }
 function init(){
   el("ver").textContent=DATA.version;
   let su=null; try{ su=localStorage.getItem("drydock-unreleased"); }catch(e){}
@@ -805,6 +811,10 @@ function init(){
     if(el("shipPicker").classList.contains("open")){ renderPickerFac(); renderPickerGrid(); } renderCatalog();
   });
   el("resetBtn").addEventListener("click",()=>loadLoadout("empty"));
+  el("outfitterBtn").addEventListener("click",toggleOutfitter);
+  el("outfitterTab").addEventListener("click",toggleOutfitter);
+  el("outfitterClose").addEventListener("click",()=>setOutfitter(false));
+  { let oo=null; try{ oo=localStorage.getItem("drydock-outfitter"); }catch(e){} setOutfitter(oo!=="0"); }
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
     state.tier=+b.dataset.tier;
     document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",x===b));

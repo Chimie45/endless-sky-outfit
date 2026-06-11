@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.60 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.64 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -21,6 +21,7 @@
     <div class="eyebrow">Total cost</div>
     <div class="v mono" id="totalCost">0</div>
   </div>
+  <button class="linkbtn" id="outfitterBtn" title="Show / hide the outfitter">Outfitter</button>
   <button class="linkbtn" id="resetBtn">Reset</button>
   <button class="linkbtn gear" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
 </header>
@@ -138,16 +139,17 @@
 
   </section>
 
-  <!-- RIGHT: outfitter catalog -->
-  <section class="col right">
+  <!-- RIGHT: outfitter catalog (collapsible side panel) -->
+  <section class="col right" id="outfitter">
     <div class="searchrow">
-      <div class="eyebrow" style="margin-bottom:6px">Outfitter</div>
+      <div class="of-head"><span class="eyebrow">Outfitter</span><button class="modalx" id="outfitterClose" aria-label="Close outfitter">×</button></div>
       <input type="search" id="search" placeholder="Search outfits…" autocomplete="off">
       <div class="catbar" id="catbar"></div>
     </div>
     <div class="ogrid" id="catalog"></div>
   </section>
 </main>
+<button id="outfitterTab" class="outfitter-tab" aria-label="Open outfitter">Outfitter</button>
 
 <div class="drawer" id="drawer">
   <div class="panel">

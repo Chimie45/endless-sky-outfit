@@ -122,7 +122,8 @@ select:focus,input:focus{border-color:var(--accent)}
 .shipcell .sc-cat{color:var(--dim);font-size:10px;letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
 
 /* ---- 2-column layout: loadout (left) | outfitter (right) ---- */
-main{display:grid;grid-template-columns:minmax(0,1fr) clamp(415px,38vw,680px);gap:0;flex:1;min-height:0}
+main{display:grid;grid-template-columns:1fr;gap:0;flex:1;min-height:0;transition:margin-right .22s ease}
+body.ofit-open main{margin-right:min(560px,90vw)}
 .col{overflow-y:auto;padding:18px 12px}
 .col.left{overflow:hidden;display:flex;flex-direction:column;gap:12px}
 .leftbody{flex:1;min-height:0;display:grid;grid-template-columns:2fr 1fr;gap:12px}
@@ -135,7 +136,12 @@ main{display:grid;grid-template-columns:minmax(0,1fr) clamp(415px,38vw,680px);ga
 .alerts{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;align-content:flex-start}
 .alerts .pill{width:86px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;padding:5px 4px;font-weight:600}
 .headright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.col.right{border-left:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),var(--bg))}
+.col.right{position:fixed;top:64px;right:0;bottom:0;width:min(560px,90vw);transform:translateX(100%);transition:transform .22s ease;z-index:40;border-left:1px solid var(--line2);background:linear-gradient(180deg,var(--bg2),var(--bg));box-shadow:-14px 0 36px rgba(0,0,0,.5)}
+body.ofit-open .col.right{transform:none}
+.of-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.outfitter-tab{position:fixed;right:0;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;text-orientation:mixed;background:var(--accent);color:#04121f;font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;padding:16px 7px;border:0;border-radius:8px 0 0 8px;cursor:pointer;z-index:39;box-shadow:-4px 0 14px rgba(0,0,0,.4)}
+.outfitter-tab:hover{background:var(--accent2)}
+body.ofit-open .outfitter-tab{display:none}
 .sect{margin-bottom:20px}
 .sect>.eyebrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
 .leftgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
@@ -316,14 +322,14 @@ table.eh tr.max td{color:var(--bright)}
 .catbar{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
 .catbar button{font-size:10.5px;letter-spacing:.05em;padding:5px 9px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--dim)}
 .catbar button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
-.ogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px}
-.ocard{position:relative;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:11px;background:var(--panel);cursor:grab;overflow:hidden}
+.ogrid{display:grid;grid-template-columns:repeat(auto-fill,110px);justify-content:center;gap:12px}
+.ocard{position:relative;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:11px;background:var(--panel);cursor:grab;overflow:hidden;height:182px}
 .ocard:hover{border-color:var(--accent2)}
 .ocard:active{cursor:grabbing}
-.ocard .art{aspect-ratio:1/1;border-bottom:1px solid var(--line)}
+.ocard .art{height:92px;display:grid;place-items:center;border-bottom:1px solid var(--line)}
 .ocard .art .tile{width:100%;height:100%;border-radius:0}
-.ocard .art .tile img{width:auto;height:auto;max-width:78%;max-height:78%;object-fit:contain}
-.ocard .meta{padding:8px 9px 9px}
+.ocard .art .tile img{width:90px;height:90px;object-fit:contain}
+.ocard .meta{padding:8px 9px 9px;flex:1;min-height:0;overflow:hidden}
 .ocard .meta b{display:block;color:var(--bright);font-weight:600;font-size:12px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .ocard .meta .price{color:var(--dim);font-size:11px}
 .ocard .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
@@ -392,17 +398,32 @@ table.eh tr.max td{color:var(--bright)}
 svg.schem text{font-size:9px;fill:var(--txt);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 svg.schem text.empty{fill:var(--dim)}
 svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
-@media(max-width:1080px){
-  main{grid-template-columns:1fr;height:auto}
-  .col{height:auto}
-  .col.right{border:0;border-top:1px solid var(--line)}
+/* ---- Below ~1024: stack ship-area over loadout so each gets the full width ---- */
+@media(max-width:1024px){
+  .leftbody{grid-template-columns:1fr;flex:none;min-height:auto}
+  .col.left{overflow-y:auto}
+  .maincol>.fleetpanel{flex:none}
+  .fleet-list{overflow:visible}
+  .loadpanel{min-height:auto}
+  .loadpanel #loadout{overflow:visible}
   .statcols{grid-template-columns:1fr 1fr}
-  .col.left{overflow:visible}
 }
-
-/* limit-reached toast */
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);
-  background:rgba(255,107,107,.16);border:1px solid var(--bad);color:#ffd0d0;
-  font-weight:700;letter-spacing:.03em;padding:11px 18px;border-radius:10px;z-index:80;
-  opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;backdrop-filter:blur(6px)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ---- Tablet: ship card + fleet panel reflow to stacked rows ---- */
+@media(max-width:900px){
+  .cardbody{grid-template-columns:120px minmax(0,1fr);gap:12px}
+  .rightstats{grid-column:1/-1;width:auto;flex-direction:row;flex-wrap:wrap;gap:14px}
+  .rightstats .statgroup{flex:1 1 200px;min-width:0}
+  .rightstats .presetgrid{flex:1 1 240px}
+  .fleet-body{flex-direction:column}
+  .fleet-stats,.fleet-right{width:auto}
+  .fleet-list{grid-template-columns:repeat(auto-fill,minmax(46px,1fr))}
+}
+/* ---- Phone: everything single column ---- */
+@media(max-width:640px){
+  .cardbody{grid-template-columns:1fr}
+  .infocol{width:auto}
+  .stagewrap{min-height:200px}
+  .shippick{min-width:0;flex:1 1 200px}
+  .fleet-select{min-width:0}
+  .col.right{top:0;width:100vw}
+  body.ofit-open main{margi
