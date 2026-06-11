@@ -207,12 +207,13 @@ svg.schem{width:100%;height:340px;display:block}
 .pbtn.act:hover{color:var(--bright)}
 .novar{font-size:10.5px;color:var(--dim)}
 .fleetpanel{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px 12px}
-.fleet-stats{flex:none;width:240px;display:flex;flex-direction:column;gap:6px}
+.fleet-stats{flex:none;width:196px;display:flex;flex-direction:column;gap:6px}
 .fleet-stats .fleet-title{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:700}
 .fleet-count{font-size:11px;color:var(--dim);line-height:1.4;border-top:1px solid var(--line);padding-top:6px;margin-top:2px}
 .fleet-count .fc-ships{color:#4aa6ff;font-weight:600}
 .fleet-count .fc-cost{color:#ffcf4d;font-weight:700}
-.fleet-right{flex:none;width:192px;display:flex;flex-direction:column;gap:6px}
+.fleet-right{flex:none;width:168px;display:flex;flex-direction:column;gap:6px}
+.fleet-main-title{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--bright);font-weight:800}
 .fleet-sect-title{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-top:2px}
 .fleet-issues{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .fstat{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2)}
@@ -410,7 +411,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.56 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.57 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -502,13 +503,14 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
         <div class="fleetpanel" id="fleetPanel">
           <div class="fleet-body">
             <div class="fleet-stats">
+              <div class="fleet-main-title">Fleet Manifest</div>
               <select class="fleet-select" id="fleetSelect"></select>
               <div class="fleet-minirow">
                 <button class="fleet-mini" id="fleetNew" title="New fleet">+ New</button>
                 <button class="fleet-mini" id="fleetRenameF" title="Rename this fleet">Rename</button>
                 <button class="fleet-mini" id="fleetDelete" title="Delete this fleet">Delete</button>
               </div>
-              <div class="fleet-sect-title">Fleet Manifest</div>
+              <div class="fleet-sect-title">Fleet Stats</div>
               <div class="fleet-totals statpills" id="fleetTotals"></div>
               <div class="fleet-count" id="fleetCount"></div>
             </div>
@@ -1235,13 +1237,14 @@ function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   const t=fleetTotals();
   el("fleetCount").innerHTML = t.n ? `<span class="fc-ships">${t.n} ship${t.n>1?"s":""}</span> · <span class="fc-cost">${MONEY(t.cost)} to buy</span>` : "";
   const fstat=(l,v)=>`<div class="fstat"><span>${l}</span><b>${v}</b></div>`;
+  const dailyTxt = t.daily>=1000 ? (t.daily/1000).toFixed(t.daily>=1e5?0:1).replace(/\.0$/,"")+"K/day" : t.daily+"/day";
   el("fleetTotals").innerHTML =
     fstat("Cargo", FMT(t.cargo)+" t") +
     fstat("Crew", FMT(t.crew)) +
     fstat("Bunks", FMT(t.bunks)) +
     fstat("Jumps", FMT(t.jumps)) +
-    fstat("Cost", MONEY(t.daily)+"/day") +
-    fstat("Fighters", `${t.smallCraft} / ${t.bays}`);
+    fstat("Cost", dailyTxt) +
+    fstat("Craft", `${t.smallCraft} / ${t.bays}`);
   const issue=(label,count,lvl)=>`<div class="issue ${count>0?(lvl||"bad"):"ok"}"><span>${label}</span><b>${count>0?count:"\u2713"}</b></div>`;
   el("fleetIssues").innerHTML =
     issue("Jump", t.stranded, "bad") + issue("Power", t.cantPower, "warn") +

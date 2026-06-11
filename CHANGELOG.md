@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.57 — 2026-06-12
+- Narrowed the fleet stats (196px) and right (168px) columns so the ship list — the main thing —
+  gets noticeably more room. Added a bold "FLEET MANIFEST" panel title plus a "FLEET STATS"
+  subheading above the stat boxes. Daily cost now shows compactly (e.g. 7.3K/day) and the
+  Fighters stat is labelled "Craft" so the boxes fit the narrower column.
+
 ### v0.3.56 — 2026-06-12
 - Fleet panel now fills the space under the ship card so its bottom lines up with the Installed
   Loadout box and the height stays consistent; the ship list scrolls if a fleet is too big to fit.

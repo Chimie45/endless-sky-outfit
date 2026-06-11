@@ -628,13 +628,14 @@ function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   const t=fleetTotals();
   el("fleetCount").innerHTML = t.n ? `<span class="fc-ships">${t.n} ship${t.n>1?"s":""}</span> · <span class="fc-cost">${MONEY(t.cost)} to buy</span>` : "";
   const fstat=(l,v)=>`<div class="fstat"><span>${l}</span><b>${v}</b></div>`;
+  const dailyTxt = t.daily>=1000 ? (t.daily/1000).toFixed(t.daily>=1e5?0:1).replace(/\.0$/,"")+"K/day" : t.daily+"/day";
   el("fleetTotals").innerHTML =
     fstat("Cargo", FMT(t.cargo)+" t") +
     fstat("Crew", FMT(t.crew)) +
     fstat("Bunks", FMT(t.bunks)) +
     fstat("Jumps", FMT(t.jumps)) +
-    fstat("Cost", MONEY(t.daily)+"/day") +
-    fstat("Fighters", `${t.smallCraft} / ${t.bays}`);
+    fstat("Cost", dailyTxt) +
+    fstat("Craft", `${t.smallCraft} / ${t.bays}`);
   const issue=(label,count,lvl)=>`<div class="issue ${count>0?(lvl||"bad"):"ok"}"><span>${label}</span><b>${count>0?count:"\u2713"}</b></div>`;
   el("fleetIssues").innerHTML =
     issue("Jump", t.stranded, "bad") + issue("Power", t.cantPower, "warn") +
