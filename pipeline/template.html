@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.11 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.12 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -105,7 +105,7 @@
 
 <div class="modal" id="settings">
   <div class="sheet">
-    <button class="linkbtn x" id="settingsX">Close</button>
+    <button class="modalx" id="settingsX" aria-label="Close">×</button>
     <h2 style="color:var(--bright);margin:0 0 16px">Settings</h2>
     <div class="setrow">
       <label>Spoiler / tech access</label>
@@ -132,12 +132,16 @@
 </div>
 
 <div class="modal" id="shipPicker">
-  <div class="sheet wide">
-    <button class="linkbtn x" id="pickerX">Close</button>
+  <div class="sheet picker">
+    <button class="modalx" id="pickerX" aria-label="Close">×</button>
     <h2 style="color:var(--bright);margin:0 0 12px">Choose a ship</h2>
-    <input type="search" id="pickerSearch" placeholder="Search ships…" autocomplete="off">
-    <div class="facfilter" id="pickerFac"></div>
-    <div class="shipgrid" id="pickerGrid"></div>
+    <div class="pickerbody">
+      <div class="pickertabs" id="pickerFac"></div>
+      <div class="pickermain">
+        <div class="shipgrid" id="pickerGrid"></div>
+        <input type="search" id="pickerSearch" placeholder="Search ships…" autocomplete="off">
+      </div>
+    </div>
   </div>
 </div>
 

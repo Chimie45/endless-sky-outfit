@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.12 — 2026-06-11
+- Ship picker reworked: race filters are now a **left-hand tab column**, the search box
+  moved to the **bottom**, and the oversized "Close" bar became a small corner ✕.
+- Picker now hides **"Model N" automata and ships with no artwork** (334 → 294 ships).
+- Settings modal close also switched to the corner ✕.
+
 ### v0.3.11 — 2026-06-11
 - Replaced the Race + Ship-model dropdowns with a **visual ship picker**: the header
   shows the current ship (art + name + race/class) and opens a gallery modal with a

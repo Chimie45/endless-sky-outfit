@@ -505,10 +505,13 @@ function loadLoadout(token){
 function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); }
 
 /* ---------- ship pickers (race -> model) ---------- */
+const MODEL_RE=/^Model \d+/i;
 function shipsByFaction(){
   const byFac={};
   for(const s of Object.values(DATA.ships)){
     if(!state.showUnreleased && !s.obtainable) continue;
+    if(!s.thumbnail) continue;                                  // no photo -> hide from picker
+    if(MODEL_RE.test(s.displayName||s.name)||MODEL_RE.test(s.name)) continue;  // "Model 8/16/.." automata
     (byFac[s.faction] ||= []).push(s);
   }
   return byFac;

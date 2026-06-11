@@ -102,14 +102,19 @@ select:focus,input:focus{border-color:var(--accent)}
 .shippick .sp-txt b{color:var(--bright);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .shippick .sp-txt small{color:var(--dim);font-size:10px;letter-spacing:.06em;text-transform:uppercase}
 .shippick .sp-caret{color:var(--dim);font-size:12px;flex:none}
-/* ship picker modal */
-.sheet.wide{width:min(900px,94vw);max-height:86vh;display:flex;flex-direction:column}
-#pickerSearch{width:100%;margin-bottom:10px}
-.facfilter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.fchip{font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--dim)}
+/* close X for modals */
+.modalx{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--dim);font-size:18px;line-height:1;display:grid;place-items:center;z-index:2}
+.modalx:hover{border-color:var(--bad);color:var(--bad)}
+/* ship picker modal (left race tabs + grid + bottom search) */
+.sheet.picker{width:min(960px,95vw);height:82vh;display:flex;flex-direction:column;position:relative}
+.pickerbody{flex:1;min-height:0;display:flex;gap:14px}
+.pickertabs{width:158px;flex:none;overflow-y:auto;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--line);padding-right:8px}
+.pickermain{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+.pickermain .shipgrid{flex:1;min-height:0}
+.fchip{font-size:11.5px;padding:7px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--dim);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fchip:hover{border-color:var(--accent)}
 .fchip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
-.shipgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:10px;overflow-y:auto;padding-right:4px}
+.shipgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:10px;overflow-y:auto;padding-right:4px;align-content:start}
 .shipcell{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:8px;cursor:pointer;text-align:center}
 .shipcell:hover{border-color:var(--accent2)}
 .shipcell.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
@@ -313,7 +318,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.11 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.12 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -413,7 +418,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <div class="modal" id="settings">
   <div class="sheet">
-    <button class="linkbtn x" id="settingsX">Close</button>
+    <button class="modalx" id="settingsX" aria-label="Close">×</button>
     <h2 style="color:var(--bright);margin:0 0 16px">Settings</h2>
     <div class="setrow">
       <label>Spoiler / tech access</label>
@@ -440,12 +445,16 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 </div>
 
 <div class="modal" id="shipPicker">
-  <div class="sheet wide">
-    <button class="linkbtn x" id="pickerX">Close</button>
+  <div class="sheet picker">
+    <button class="modalx" id="pickerX" aria-label="Close">×</button>
     <h2 style="color:var(--bright);margin:0 0 12px">Choose a ship</h2>
-    <input type="search" id="pickerSearch" placeholder="Search ships…" autocomplete="off">
-    <div class="facfilter" id="pickerFac"></div>
-    <div class="shipgrid" id="pickerGrid"></div>
+    <div class="pickerbody">
+      <div class="pickertabs" id="pickerFac"></div>
+      <div class="pickermain">
+        <div class="shipgrid" id="pickerGrid"></div>
+        <input type="search" id="pickerSearch" placeholder="Search ships…" autocomplete="off">
+      </div>
+    </div>
   </div>
 </div>
 
@@ -958,10 +967,13 @@ function loadLoadout(token){
 function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); }
 
 /* ---------- ship pickers (race -> model) ---------- */
+const MODEL_RE=/^Model \d+/i;
 function shipsByFaction(){
   const byFac={};
   for(const s of Object.values(DATA.ships)){
     if(!state.showUnreleased && !s.obtainable) continue;
+    if(!s.thumbnail) continue;                                  // no photo -> hide from picker
+    if(MODEL_RE.test(s.displayName||s.name)||MODEL_RE.test(s.name)) continue;  // "Model 8/16/.." automata
     (byFac[s.faction] ||= []).push(s);
   }
   return byFac;
