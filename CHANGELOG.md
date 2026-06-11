@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.58 — 2026-06-12
+- Narrowed the Outfitter column by ~20px and trimmed the columns' horizontal padding (18->12,
+  which was stacking with each panel's own padding — the "double padding"), then gave the
+  reclaimed width to the fleet stats/right box columns so the boxes breathe a bit more.
+
 ### v0.3.57 — 2026-06-12
 - Narrowed the fleet stats (196px) and right (168px) columns so the ship list — the main thing —
   gets noticeably more room. Added a bold "FLEET MANIFEST" panel title plus a "FLEET STATS"
