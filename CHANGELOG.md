@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.13 — 2026-06-11
+- Moved Capacity, Movement & Defense, and Energy & Heat into the left info column
+  (alongside cost/speed/etc.), narrowed the ship display, and freed the area below the
+  card for the preset loadout buttons.
+
 ### v0.3.12 — 2026-06-11
 - Ship picker reworked: race filters are now a **left-hand tab column**, the search box
   moved to the **bottom**, and the oversized "Close" bar became a small corner ✕.
