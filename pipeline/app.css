@@ -222,9 +222,9 @@ svg.schem{width:100%;height:340px;display:block}
 .fs-drive{position:absolute;top:-4px;left:-3px;font-size:12px;font-weight:800;line-height:1;letter-spacing:0;text-shadow:0 0 2px #000,0 0 3px #000,0 1px 2px #000}
 .fs-drive.dg{color:#36ff7a}
 .fs-drive.dj{color:#4aa6ff}
-.fs-warn{position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;border-radius:50%;font-size:12px;line-height:17px;text-align:center;font-weight:800;box-shadow:0 0 4px rgba(0,0,0,.7)}
-.fs-warn.red{background:#6e1414;color:#ff9a9a;border:1px solid #ff6a6a}
-.fs-warn.yellow{background:#5a4609;color:#ffdf6e;border:1px solid #ffce3a}
+.fs-warn{position:absolute;bottom:-5px;right:-4px;font-size:15px;line-height:1;font-weight:700;text-shadow:0 0 2px #000,0 0 3px #000,0 1px 2px #000}
+.fs-warn.red{color:#ff5a5a}
+.fs-warn.yellow{color:#ffce3a}
 .val.warn{border-color:#ffd24a;color:#ffd24a}
 .fleet-hover{position:fixed;z-index:60;pointer-events:none;display:none;min-width:150px;background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--txt);box-shadow:0 8px 22px rgba(0,0,0,.55)}
 .fleet-hover.show{display:block}

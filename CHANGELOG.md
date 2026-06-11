@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.47 — 2026-06-11
+- Warning badge is now just the ⚠ symbol (no circle/background), forced to monochrome so the
+  colour shows: red for serious issues, yellow for risks, with a dark outline for legibility.
+
 ### v0.3.46 — 2026-06-11
 - Importing a fleet now adds it as a new named fleet (carrying the shared fleet's name) instead
   of overwriting the active one; a name clash gets a numeric suffix (e.g. "Raiders 2"). The
