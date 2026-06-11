@@ -11,6 +11,15 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.68 — 2026-06-12
+- Add Parts: replaced the broad category rail with finer sections from the game's "series" data
+  (Guns, Turrets, Secondary Weapons, Ammunition, Anti-Missile, Generators, Batteries, Solar,
+  Shields, Coolers, Repair, Ramscoops, Fuel, Scanners, Jammers, Drives, Engines, Afterburners…).
+  Added a "race" dropdown in the panel head to filter parts by faction (respects the tech tier).
+- Fixed the sort-rail buttons resizing/wrapping when selected (they were going bold → reflow);
+  active state is now colour-only, constant width.
+- Skinnier, inset scrollbars (≈4px thumb with a 2px gap from content) site-wide.
+
 ### v0.3.67 — 2026-06-12
 - Fixed v0.3.66 breakage: closing a panel set data-panel="" which the `[data-panel]` selector
   still matched, so the edge tabs stayed hidden and the page stayed shifted — leaving no way to

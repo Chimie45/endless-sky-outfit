@@ -27,7 +27,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:0, cat:"All", q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1 };
+let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", faction:"" };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -380,14 +380,33 @@ function visibleOutfits(){
     if(!o.thumbnail) return false;            // hide outfits with no bundled art
     if(!state.showUnreleased && !o.obtainable) return false;  // hide unreleased/unused
     if(factionTier(o.faction)>state.tier) return false;
-    if(state.cat!=="All" && o.category!==state.cat) return false;
+    if((state.series||"All")!=="All" && (o.series||"")!==state.series) return false;
+    if(state.faction && o.faction!==state.faction) return false;
     if(q && !o.name.toLowerCase().includes(q)) return false;
     return true;
   });
 }
+const SERIES_ORDER=["Guns","Turrets","Secondary Weapons","Ammunition","Anti-Missile","H2H","Generators","Batteries","Solar","Shields","Cooling","Repair","Ramscoops","Fuel","Scanners","Jammers","Drives","Special Systems","Fortifications","Tractor Beams","Passenger","Expansions","Engines","Afterburners","Licenses"];
+const SERIES_LABEL={"H2H":"Hand to Hand","Cooling":"Coolers"};
 function renderCatbar(){
-  const cats=["All",...DATA.categoryOrder];
-  el("catbar").innerHTML = cats.map(c=>`<button data-cat="${c}" aria-pressed="${state.cat===c}">${c}</button>`).join("");
+  const present=new Set();
+  for(const o of Object.values(DATA.outfits)){ if(o.thumbnail && o.series) present.add(o.series); }
+  const order=["All",...SERIES_ORDER.filter(s=>present.has(s))];
+  const cur=state.series||"All";
+  el("catbar").innerHTML = order.map(s=>`<button data-series="${s.replace(/"/g,'&quot;')}" aria-pressed="${cur===s}">${SERIES_LABEL[s]||s}</button>`).join("");
+}
+function renderPartsFac(){
+  const sel=el("partsFac"); if(!sel) return;
+  const facs=new Set();
+  for(const o of Object.values(DATA.outfits)){
+    if(!o.thumbnail) continue;
+    if(!state.showUnreleased && !o.obtainable) continue;
+    if(factionTier(o.faction)>state.tier) continue;
+    facs.add(o.faction);
+  }
+  if(state.faction && !facs.has(state.faction)) state.faction="";
+  const list=[...facs].sort();
+  sel.innerHTML=`<option value="">All races</option>`+list.map(f=>`<option value="${f}"${f===state.faction?" selected":""}>${FACLABEL(f)}</option>`).join("");
 }
 function chipFor(o){
   const a=o.attributes, w=o.weapon, chips=[];
@@ -771,7 +790,7 @@ function init(){
   let su=null; try{ su=localStorage.getItem("drydock-unreleased"); }catch(e){}
   state.showUnreleased = su==="1";
   el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
-  renderCatbar();
+  renderCatbar(); renderPartsFac();
   loadFleet();
   const def = DATA.ships["Bactrian"]||DATA.ships["Falcon"]||DATA.ships["Leviathan"]||Object.values(DATA.ships)[0];
   setShip(def.name);
@@ -808,7 +827,7 @@ function init(){
     state.showUnreleased=!state.showUnreleased;
     try{ localStorage.setItem("drydock-unreleased", state.showUnreleased?"1":"0"); }catch(e){}
     el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
-    if(document.body.dataset.panel==="ship"){ renderPickerFac(); renderPickerGrid(); } renderCatalog();
+    if(document.body.dataset.panel==="ship"){ renderPickerFac(); renderPickerGrid(); } renderPartsFac(); renderCatalog();
   });
   el("resetBtn").addEventListener("click",()=>loadLoadout("empty"));
   el("outfitterBtn").addEventListener("click",()=>togglePanel("parts"));
@@ -819,10 +838,11 @@ function init(){
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
     state.tier=+b.dataset.tier;
     document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",x===b));
-    renderCatalog();});
+    renderPartsFac(); renderCatalog();});
   el("search").addEventListener("input",e=>{state.q=e.target.value;renderCatalog();});
-  el("catbar").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
-    state.cat=b.dataset.cat; renderCatbar(); renderCatalog();});
+  el("catbar").addEventListener("click",e=>{const b=e.target.closest("[data-series]");if(!b)return;
+    state.series=b.dataset.series; renderCatbar(); renderCatalog();});
+  el("partsFac").addEventListener("change",e=>{ state.faction=e.target.value; renderCatalog(); });
   document.body.addEventListener("click",e=>{
     const inc=e.target.closest("[data-inc]"), dec=e.target.closest("[data-dec]"), det=e.target.closest("[data-detail]");
     if(inc){ add(inc.dataset.inc, +1); }
