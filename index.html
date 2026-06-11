@@ -189,7 +189,8 @@ svg.schem{width:100%;height:340px;display:block}
 .loadpanel.dragover{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 
 /* variant chips */
-.variants{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:7px;margin-top:0}
+.variants{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:0}
+.rightstats .variants .vchip{font-size:10.5px;padding:6px 6px;width:100%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .variants .vchip{font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt)}
 .variants .vchip:hover{border-color:var(--accent)}
 .variants .vchip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
@@ -298,8 +299,9 @@ table.eh tr.max td{color:var(--bright)}
 .statgroup>.eyebrow{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:6px}
 .statpills{display:flex;flex-direction:column;gap:3px}
 .strow{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}
-.strow .lbl{color:var(--dim);font-size:9px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strow .lbl{color:var(--dim);font-size:9px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;min-width:0}
 .strow .vals{display:flex;gap:6px;flex:none}
+#ehPills .val{width:54px}
 .val{font-family:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;color:var(--bright);font-size:9.5px;line-height:1.3;text-align:right;white-space:nowrap}
 .val.en{color:var(--energy)} .val.ht{color:var(--heat)}
 .val.bad{border-color:var(--bad);color:var(--bad)}
@@ -343,7 +345,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.21 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.23 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -397,10 +399,9 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
             <div class="rightstats">
               <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
               <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">E · H /s</span></div><div class="statpills" id="ehPills"></div></div>
+              <div class="statgroup"><div class="eyebrow"><span>Loadout</span></div><div class="variants" id="variants"></div></div>
             </div>
           </div>
-          <div class="presetlabel eyebrow">Loadout</div>
-          <div class="variants" id="variants"></div>
           <div class="dropmsg">Drop to install</div>
         </div>
       </div>
@@ -614,12 +615,13 @@ function renderMeters(){
   const turrets = installedOf(o=>num(o.attributes["turret mounts"])<0);
   const v=(val,cls,bad)=>`<b class="val mono ${cls||''}${bad?' bad':''}">${val}</b>`;
   const row=(l,...vals)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals">${vals.join("")}</span></div>`;
-  const capRow=(l,key,unit)=>{const c=capacity(key);return row(l,v(`${FMT(c.used)} / ${FMT(c.total)}${unit||''}`,'',c.used>c.total+1e-6));};
+  const C=n=>Math.round(n).toLocaleString();
+  const capRow=(l,key,unit)=>{const c=capacity(key);return row(l,v(`${C(c.used)}/${C(c.total)}${unit||''}`,'',c.used>c.total+1e-6));};
 
   el("capPills").innerHTML =
     capRow("Outfit","outfit space"," t")+capRow("Weapon","weapon capacity"," t")+capRow("Engine","engine capacity"," t")+
-    row("Gun ports",v(`${guns} / ${hp.guns}`,'',guns>hp.guns))+
-    row("Turrets",v(`${turrets} / ${hp.turrets}`,'',turrets>hp.turrets))+
+    row("Gun ports",v(`${guns}/${hp.guns}`,'',guns>hp.guns))+
+    row("Turrets",v(`${turrets}/${hp.turrets}`,'',turrets>hp.turrets))+
     (totalBays?row("Bays",v(String(totalBays))):"");
   el("massReadout").textContent = FMT(s.emptyMass)+" t";
 
@@ -684,6 +686,12 @@ function renderArtbox(){
   if(url){ box.style.display=""; box.innerHTML=`<img src="${url}" alt="" onerror="this.parentNode.style.display='none'">`; }
   else { box.style.display="none"; box.innerHTML=""; }
 }
+function shortVariant(v){
+  let t=v;
+  for(const pre of [state.ship.displayName, state.ship.name]){ if(pre && t.startsWith(pre)) t=t.slice(pre.length); }
+  t=t.replace(/^[\s(]+/,'').replace(/[)\s]+$/,'').trim();
+  return t || v;
+}
 function renderVariants(){
   const ship = state.ship;
   const vnames = Object.keys(ship.variants||{});
@@ -693,7 +701,7 @@ function renderVariants(){
   for(const [tok,lab] of [["auto:dps","Max DPS"],["auto:cargo","Max cargo"],["auto:crew","Max crew"]])
     html += `<button class="vchip auto" data-load="${tok}" aria-pressed="${state.loadoutName===tok}">${lab}</button>`;
   for(const v of vnames)
-    html += `<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${v}</button>`;
+    html += `<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${shortVariant(v)}</button>`;
   el("variants").innerHTML = html;
 }
 

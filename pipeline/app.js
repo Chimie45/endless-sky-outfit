@@ -137,12 +137,13 @@ function renderMeters(){
   const turrets = installedOf(o=>num(o.attributes["turret mounts"])<0);
   const v=(val,cls,bad)=>`<b class="val mono ${cls||''}${bad?' bad':''}">${val}</b>`;
   const row=(l,...vals)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals">${vals.join("")}</span></div>`;
-  const capRow=(l,key,unit)=>{const c=capacity(key);return row(l,v(`${FMT(c.used)} / ${FMT(c.total)}${unit||''}`,'',c.used>c.total+1e-6));};
+  const C=n=>Math.round(n).toLocaleString();
+  const capRow=(l,key,unit)=>{const c=capacity(key);return row(l,v(`${C(c.used)}/${C(c.total)}${unit||''}`,'',c.used>c.total+1e-6));};
 
   el("capPills").innerHTML =
     capRow("Outfit","outfit space"," t")+capRow("Weapon","weapon capacity"," t")+capRow("Engine","engine capacity"," t")+
-    row("Gun ports",v(`${guns} / ${hp.guns}`,'',guns>hp.guns))+
-    row("Turrets",v(`${turrets} / ${hp.turrets}`,'',turrets>hp.turrets))+
+    row("Gun ports",v(`${guns}/${hp.guns}`,'',guns>hp.guns))+
+    row("Turrets",v(`${turrets}/${hp.turrets}`,'',turrets>hp.turrets))+
     (totalBays?row("Bays",v(String(totalBays))):"");
   el("massReadout").textContent = FMT(s.emptyMass)+" t";
 
@@ -207,6 +208,12 @@ function renderArtbox(){
   if(url){ box.style.display=""; box.innerHTML=`<img src="${url}" alt="" onerror="this.parentNode.style.display='none'">`; }
   else { box.style.display="none"; box.innerHTML=""; }
 }
+function shortVariant(v){
+  let t=v;
+  for(const pre of [state.ship.displayName, state.ship.name]){ if(pre && t.startsWith(pre)) t=t.slice(pre.length); }
+  t=t.replace(/^[\s(]+/,'').replace(/[)\s]+$/,'').trim();
+  return t || v;
+}
 function renderVariants(){
   const ship = state.ship;
   const vnames = Object.keys(ship.variants||{});
@@ -216,7 +223,7 @@ function renderVariants(){
   for(const [tok,lab] of [["auto:dps","Max DPS"],["auto:cargo","Max cargo"],["auto:crew","Max crew"]])
     html += `<button class="vchip auto" data-load="${tok}" aria-pressed="${state.loadoutName===tok}">${lab}</button>`;
   for(const v of vnames)
-    html += `<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${v}</button>`;
+    html += `<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${shortVariant(v)}</button>`;
   el("variants").innerHTML = html;
 }
 
