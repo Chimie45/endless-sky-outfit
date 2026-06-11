@@ -165,11 +165,11 @@ main{display:grid;grid-template-columns:minmax(0,1fr) clamp(430px,40vw,700px);ga
 .viewtoggle button{background:var(--panel2);border:0;padding:5px 9px;color:var(--dim);font-size:10.5px;letter-spacing:.05em;border-right:1px solid var(--line)}
 .viewtoggle button:last-child{border-right:0}
 .viewtoggle button[aria-pressed=true]{background:var(--accent2);color:#fff;font-weight:700}
-.stage{position:relative;flex:1;min-height:300px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:radial-gradient(ellipse 72% 82% at 50% 44%, var(--tile1), var(--tile2))}
+.stage{position:relative;height:250px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:radial-gradient(ellipse 72% 82% at 50% 44%, var(--tile1), var(--tile2))}
 .stage img.shipimg{max-width:96%;max-height:280px;object-fit:contain;filter:drop-shadow(0 8px 26px rgba(0,0,0,.6))}
 .stage .noimg{color:var(--dim);font-size:12px;text-align:center}
 svg.schem{width:100%;height:340px;display:block}
-.shipsprite{max-width:42%;max-height:88%;object-fit:contain;filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
+.shipsprite{max-width:34%;max-height:84%;object-fit:contain;filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
 .hpoverlay{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:4px;font-size:11px;color:var(--dim)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -277,8 +277,8 @@ table.eh tr.max td{color:var(--bright)}
 .note{font-size:11.5px;color:var(--dim);margin-top:8px}
 /* quick-stat overlay on ship image */
 .stagewrap{position:relative}
-.quickstats{position:static;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.qs{display:flex;flex-direction:row;justify-content:space-between;align-items:baseline;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+.quickstats{position:static;width:100%;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px}
+.qs{display:inline-flex;align-items:baseline;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 9px}
 .qs span{font-size:8px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
 .qs b{font-size:13px;color:var(--bright)}
 /* ship-card pills */

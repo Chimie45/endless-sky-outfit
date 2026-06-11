@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.15 — 2026-06-11
+- Reverted the cramped left-column experiment. The top-down ship image is now a small,
+  centered centerpiece; the redundant angled thumbnail was removed; quick stats sit as a
+  tidy row beneath it; and Capacity / Movement & Defense / Energy & Heat return as
+  readable columns below the card. Fixes the off-screen overflow.
+
 ### v0.3.14 — 2026-06-11
 - Added computed preset loadouts beside Empty/Stock/variants: **Max DPS** (fills gun &
   turret mounts with the highest-DPS weapons that fit), **Max cargo**, and **Max crew**
