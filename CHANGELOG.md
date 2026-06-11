@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.16 — 2026-06-11
+- Reverted the v0.3.13 and v0.3.15 left-column layout experiments (stats-in-narrow-column
+  and image-centerpiece) back to the v0.3.12 layout. Kept the ship picker and the computed
+  preset loadouts.
+
 ### v0.3.15 — 2026-06-11
 - Reverted the cramped left-column experiment. The top-down ship image is now a small,
   centered centerpiece; the redundant angled thumbnail was removed; quick stats sit as a
