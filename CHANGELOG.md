@@ -7,6 +7,17 @@ Versioning: **v1.0.0** = first public release. **vX.1.0** = a major update.
 Drydock's app version is shown in the header; the Endless Sky game-data version
 it was built against is shown next to it (currently ES data v0.11.0).
 
+## v0.2.1 — 2026-06-11 (minor)
+- Ship card now defaults to the **labeled hardpoint wireframe** (each gun/turret
+  shows its mounted weapon or `[empty]`, like the in-game outfitter); the real
+  art is still one click away via the Art toggle.
+- Added a **quick-stat overlay** on the ship image (cost, max speed, shields,
+  hull) and a row of **status pills** at the bottom of the card: crew/bunks,
+  cargo, fuel, bays, plus thruster / steering / energy / heat alerts.
+- **Capacity, Movement & Defense, and Energy & Heat now sit side-by-side in
+  three columns** instead of one long stack; the installed-loadout list moved
+  directly under the ship card.
+
 ## v0.2.0 — 2026-06-11 (major update)
 - **Real sprite art.** Bundled 996 ship & outfit thumbnails from Endless Sky
   v0.11.0 under `images/`. Outfit cards, the installed-loadout list, the ship

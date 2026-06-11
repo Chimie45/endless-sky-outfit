@@ -183,16 +183,38 @@ table.eh tr.max td{color:var(--bright)}
 .soldlist .p{padding:6px 0;border-bottom:1px solid var(--line)}
 .soldlist .p small{color:var(--dim)}
 .note{font-size:11.5px;color:var(--dim);margin-top:8px}
+/* quick-stat overlay on ship image */
+.stagewrap{position:relative}
+.quickstats{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.qs{display:flex;flex-direction:column;background:rgba(8,12,20,.5);border:1px solid var(--line);border-radius:7px;padding:3px 9px;backdrop-filter:blur(3px)}
+.qs span{font-size:8px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.qs b{font-size:13px;color:var(--bright)}
+/* ship-card pills */
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.pill{font-size:11px;padding:5px 10px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);color:var(--txt)}
+.pill b{color:var(--bright);font-weight:700}
+.pill.good{border-color:rgba(61,220,151,.35);background:rgba(61,220,151,.08);color:var(--ok)}
+.pill.bad{border-color:rgba(255,107,107,.4);background:rgba(255,107,107,.1);color:var(--bad)}
+/* 3-column stats */
+.statcols{display:grid;grid-template-columns:repeat(3,1fr);gap:0 18px;align-items:start}
+.statcols .sect{margin-bottom:8px}
+.statcols .meter{margin:7px 0}
+.statcols table.eh td,.statcols table.eh th{padding:4px 2px}
+/* schematic hardpoint labels */
+svg.schem text{font-size:9px;fill:var(--txt);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+svg.schem text.empty{fill:var(--dim)}
+svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 @media(max-width:1080px){
   main{grid-template-columns:1fr;height:auto}
   .col{height:auto}
   .col.right{border:0;border-top:1px solid var(--line)}
+  .statcols{grid-template-columns:1fr 1fr}
 }
 </style>
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.2.0 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.2.1 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -234,24 +256,33 @@ table.eh tr.max td{color:var(--bright)}
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
           <div class="fac" id="hullFaction"></div>
           <div class="viewtoggle" id="viewToggle">
-            <button data-view="art" aria-pressed="true">Art</button>
-            <button data-view="schem">Hardpoints</button>
+            <button data-view="schem" aria-pressed="true">Hardpoints</button>
+            <button data-view="art">Art</button>
           </div>
         </div>
       </div>
-      <div class="stage" id="stage"></div>
-      <div class="legend" id="legend" style="display:none">
+      <div class="stagewrap">
+        <div class="stage" id="stage"></div>
+        <div class="quickstats" id="quickStats"></div>
+      </div>
+      <div class="legend" id="legend">
         <span><i style="background:var(--gun)"></i>Gun</span>
         <span><i style="background:var(--turret)"></i>Turret</span>
         <span><i style="background:var(--engine)"></i>Engine</span>
         <span><i style="background:var(--bay)"></i>Bay</span>
       </div>
+      <div class="pills" id="pills"></div>
       <div class="variants" id="variants"></div>
       <div class="dropmsg">Drop to install</div>
     </div>
 
-    <div class="leftgrid">
-      <div class="sect span2">
+    <div class="sect">
+      <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
+      <div id="loadout"></div>
+    </div>
+
+    <div class="statcols">
+      <div class="sect">
         <div class="eyebrow"><span>Capacity</span><span id="massReadout" class="mono"></span></div>
         <div id="meters"></div>
       </div>
@@ -261,17 +292,9 @@ table.eh tr.max td{color:var(--bright)}
       </div>
       <div class="sect">
         <div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">/s</span></div>
-        <table class="eh"><thead><tr><th></th><th>Energy</th><th>Heat</th></tr></thead>
+        <table class="eh"><thead><tr><th></th><th>E</th><th>H</th></tr></thead>
           <tbody id="ehBody"></tbody></table>
       </div>
-      <div class="sect span2" style="margin-top:-6px">
-        <div class="flags" id="flags"></div>
-      </div>
-    </div>
-
-    <div class="sect">
-      <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
-      <div id="loadout"></div>
     </div>
   </section>
 
@@ -323,7 +346,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:3, cat:"All", q:"", view:"art", loadoutName:"empty" };
+let state = { ship:null, installed:{}, tier:3, cat:"All", q:"", view:"schem", loadoutName:"empty" };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -463,12 +486,8 @@ function renderMeters(){
     row("net change",s.eh.net[0],s.eh.net[1],"net")+
     row("max",s.eh.max[0],s.eh.max[1],"max");
 
-  el("flags").innerHTML =
-    flag(s.energyOK,"Energy sustainable while firing","Energy drains under full load — net energy negative")+
-    flag(s.heatOK,
-      `Heat manageable — ${FMT(s.totalHeatIn)} / ${FMT(s.maxHeat)} per s`,
-      `Overheats under full load — ${FMT(s.totalHeatIn)} heat/s exceeds ${FMT(s.maxHeat)} dissipation`);
   el("totalCost").textContent = MONEY(s.cost);
+  renderQuickStats(s); renderPills(s);
 }
 function meter(label, used, total, unit, infoOnly){
   const over = used>total+1e-6;
@@ -482,6 +501,27 @@ function flag(ok, goodText, badText){
   return `<div class="flag ${ok?'good':'bad'}"><span class="dot"></span><span>${ok?goodText:badText}</span></div>`;
 }
 
+function renderQuickStats(s){
+  const rows=[["Cost",MONEY(s.cost)],["Max speed",FMT(s.maxSpeed)],
+              ["Shields",FMT(s.shields)],["Hull",FMT(s.hull)]];
+  el("quickStats").innerHTML = rows.map(([k,v])=>`<div class="qs"><span>${k}</span><b class="mono">${v}</b></div>`).join("");
+}
+function renderPills(s){
+  const hp=state.ship.hardpoints;
+  const totalBays=Object.values(hp.bays||{}).reduce((a,b)=>a+b,0);
+  const crew=requiredCrew(), bunks=eff("bunks");
+  const hasThrust=eff("thrust")>0, hasTurn=eff("turn")>0;
+  const P=[];
+  P.push(`<span class="pill"><b>${FMT(crew)} / ${FMT(bunks)}</b> crew</span>`);
+  P.push(`<span class="pill"><b>${FMT(s.cargo)}</b> t cargo</span>`);
+  P.push(`<span class="pill"><b>${FMT(s.fuel)}</b> fuel</span>`);
+  if(totalBays) P.push(`<span class="pill"><b>${totalBays}</b> bays</span>`);
+  P.push(`<span class="pill ${hasThrust?'good':'bad'}">${hasThrust?'Thrusters':'No thrusters'}</span>`);
+  P.push(`<span class="pill ${hasTurn?'good':'bad'}">${hasTurn?'Steering':'No steering'}</span>`);
+  P.push(`<span class="pill ${s.energyOK?'good':'bad'}">${s.energyOK?'Energy OK':'Energy −'}</span>`);
+  P.push(`<span class="pill ${s.heatOK?'good':'bad'}">${s.heatOK?'Heat OK':'Overheats'}</span>`);
+  el("pills").innerHTML=P.join("");
+}
 function renderShipCard(){
   const ship = state.ship;
   el("hullName").textContent = ship.displayName || ship.name;
@@ -518,27 +558,34 @@ function renderVariants(){
 function renderSchem(){
   const ship = state.ship;
   const pts = ship.points||[];
-  const W=400,H=280,cx=W/2,cy=H/2;
-  let maxR=80;
+  const W=520,H=300,cx=W/2,cy=H/2;
+  let maxR=70;
   for(const p of pts) maxR=Math.max(maxR, Math.abs(p.x), Math.abs(p.y));
-  const sc = (H*0.42)/maxR;
-  const installedGuns = installedOf(o=>num(o.attributes["gun ports"])<0);
-  const installedTurrets = installedOf(o=>num(o.attributes["turret mounts"])<0);
-  const filledEngines = (eff("thrust")||eff("turn")) ? 99 : 0;
+  const sc = (H*0.40)/maxR;
+  // assign installed weapons to gun/turret hardpoints, in order
+  const guns=[], turrets=[];
+  for(const [nm,c] of Object.entries(state.installed)){
+    const o=DATA.outfits[nm]; if(!o) continue;
+    if(num(o.attributes["gun ports"])<0) for(let i=0;i<c;i++) guns.push(nm);
+    if(num(o.attributes["turret mounts"])<0) for(let i=0;i<c;i++) turrets.push(nm);
+  }
+  const filledEngines = (eff("thrust")||eff("turn")) ? 1 : 0;
   let gi=0,ti=0;
   const COLORS={gun:'var(--gun)',turret:'var(--turret)',engine:'var(--engine)',reverse:'var(--engine)',bay:'var(--bay)'};
-  let body=`<defs><radialGradient id="hg" cx="50%" cy="42%" r="60%">
-      <stop offset="0%" stop-color="#1b2c46"/><stop offset="100%" stop-color="#0c1422"/></radialGradient></defs>`;
-  body+=`<ellipse cx="${cx}" cy="${cy}" rx="${Math.min(120,maxR*sc*0.85)}" ry="${Math.min(130,maxR*sc*1.05)}"
+  const trunc = t => t.length>18 ? t.slice(0,17)+'…' : t;
+  let body=`<defs><radialGradient id="hg" cx="50%" cy="42%" r="62%">
+      <stop offset="0%" stop-color="#16243c"/><stop offset="100%" stop-color="#0b1420"/></radialGradient></defs>`;
+  body+=`<ellipse cx="${cx}" cy="${cy}" rx="${Math.min(92,maxR*sc*0.8)}" ry="${Math.min(140,maxR*sc*1.05)}"
       fill="url(#hg)" stroke="var(--line2)" stroke-width="1.2"/>`;
+  const labels=[];
   for(const p of pts){
     const x=cx+p.x*sc, y=cy+p.y*sc;
-    let lit=false;
-    if(p.t==='gun'){ lit = gi++ < installedGuns; }
-    else if(p.t==='turret'){ lit = ti++ < installedTurrets; }
-    else if(p.t==='engine'||p.t==='reverse'){ lit = filledEngines>0; }
     const col=COLORS[p.t];
-    const op = lit?1:0.28;
+    let label=null, lit=true;
+    if(p.t==='gun'){ const w=guns[gi++]; label=w||'[empty]'; lit=!!w; }
+    else if(p.t==='turret'){ const w=turrets[ti++]; label=w||'[empty]'; lit=!!w; }
+    else if(p.t==='engine'||p.t==='reverse'){ lit=filledEngines>0; }
+    const op=lit?1:0.3;
     if(p.t==='gun')
       body+=`<polygon points="${x},${y-6} ${x-5},${y+5} ${x+5},${y+5}" fill="${col}" opacity="${op}"/>`;
     else if(p.t==='turret')
@@ -547,8 +594,19 @@ function renderSchem(){
       body+=`<circle cx="${x}" cy="${y}" r="5.5" fill="none" stroke="${col}" stroke-width="2" opacity="${op}"/>`;
     else
       body+=`<rect x="${x-3}" y="${y-3}" width="6" height="9" rx="1.5" fill="${col}" opacity="${op}"/>`;
+    if(label!==null){ const left=p.x<0; labels.push({x,y,left,label,lit,
+      lx:left?12:W-12, anchor:left?'start':'end'}); }
   }
-  el("stage").innerHTML = `<svg class="schem" viewBox="0 0 400 280" preserveAspectRatio="xMidYMid meet">${body}</svg>`;
+  // stack labels per side so they don't overlap vertically
+  for(const side of [true,false]){
+    const arr=labels.filter(l=>l.left===side).sort((a,b)=>a.y-b.y);
+    let prev=-1e9; for(const l of arr){ l.ly=Math.max(l.y, prev+13); prev=l.ly; }
+  }
+  for(const l of labels){
+    body+=`<line class="lead" x1="${l.x}" y1="${l.y}" x2="${l.lx}" y2="${l.ly}"/>`;
+    body+=`<text class="${l.lit?'':'empty'}" x="${l.lx}" y="${l.ly+3}" text-anchor="${l.anchor}">${trunc(l.label)}</text>`;
+  }
+  el("stage").innerHTML = `<svg class="schem" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${body}</svg>`;
 }
 
 function renderLoadout(){
