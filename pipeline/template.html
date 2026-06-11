@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.55 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.56 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -97,18 +97,19 @@
         <div class="fleetpanel" id="fleetPanel">
           <div class="fleet-body">
             <div class="fleet-stats">
-              <div class="fleet-title">Fleet Stats</div>
               <select class="fleet-select" id="fleetSelect"></select>
               <div class="fleet-minirow">
                 <button class="fleet-mini" id="fleetNew" title="New fleet">+ New</button>
                 <button class="fleet-mini" id="fleetRenameF" title="Rename this fleet">Rename</button>
                 <button class="fleet-mini" id="fleetDelete" title="Delete this fleet">Delete</button>
               </div>
-              <div class="fleet-count" id="fleetCount"></div>
+              <div class="fleet-sect-title">Fleet Manifest</div>
               <div class="fleet-totals statpills" id="fleetTotals"></div>
+              <div class="fleet-count" id="fleetCount"></div>
             </div>
             <div class="fleet-list" id="fleetList"></div>
             <div class="fleet-right">
+              <div class="fleet-sect-title">Manage</div>
               <div class="fleet-actions">
                 <button class="fbtn" id="fleetImport">Import Fleet</button>
                 <button class="fbtn" id="fleetShare">Share Fleet</button>
@@ -117,7 +118,7 @@
                 <button class="fbtn" id="fleetCopy">Copy Ship</button>
                 <button class="fbtn" id="fleetFlag" title="Set as flagship (the ship you pilot)">Set Flagship</button>
               </div>
-              <div class="fleet-issues-title">Issues</div>
+              <div class="fleet-sect-title">Issues</div>
               <div class="fleet-issues" id="fleetIssues"></div>
             </div>
           </div>

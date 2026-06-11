@@ -11,6 +11,15 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.56 — 2026-06-12
+- Fleet panel now fills the space under the ship card so its bottom lines up with the Installed
+  Loadout box and the height stays consistent; the ship list scrolls if a fleet is too big to fit.
+- Left column reordered: name + New/Rename/Delete, then a "Fleet Manifest" heading, the stat
+  boxes, and the ships/price line moved to the bottom. Stats trimmed to Cargo, Crew, Bunks,
+  Jumps, Cost, Fighters — dropped Shields/Hull, renamed Daily to Cost, and Fuel is now "Jumps":
+  the number of jumps the lowest-fuel ship can make (fuel capacity / its drive's jump cost).
+- Added section titles: "Manage" above the action buttons (matching "Issues").
+
 ### v0.3.55 — 2026-06-12
 - Moved the fleet name + New/Rename/Delete into the left "Fleet Stats" column. Fleet stats now
   use the same boxed 2-column grid as the Issues panel. Dropped Firepower/DPS and added the

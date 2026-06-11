@@ -203,14 +203,14 @@ svg.schem{width:100%;height:340px;display:block}
 .pbtn.act{color:var(--accent2)}
 .pbtn.act:hover{color:var(--bright)}
 .novar{font-size:10.5px;color:var(--dim)}
-.fleetpanel{flex:none;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px 12px}
+.fleetpanel{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px 12px}
 .fleet-stats{flex:none;width:240px;display:flex;flex-direction:column;gap:6px}
 .fleet-stats .fleet-title{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:700}
-.fleet-count{font-size:11px;color:var(--dim);line-height:1.4;border-bottom:1px solid var(--line);padding-bottom:5px}
+.fleet-count{font-size:11px;color:var(--dim);line-height:1.4;border-top:1px solid var(--line);padding-top:6px;margin-top:2px}
 .fleet-count .fc-ships{color:#4aa6ff;font-weight:600}
 .fleet-count .fc-cost{color:#ffcf4d;font-weight:700}
 .fleet-right{flex:none;width:192px;display:flex;flex-direction:column;gap:6px}
-.fleet-issues-title{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-top:2px}
+.fleet-sect-title{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-top:2px}
 .fleet-issues{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .fstat{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2)}
 .fstat span{color:var(--dim);text-transform:uppercase;letter-spacing:.04em;font-size:9px}
@@ -227,11 +227,11 @@ svg.schem{width:100%;height:340px;display:block}
 .fleet-minirow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
 .fleet-mini{font-size:9.5px;line-height:1;padding:5px 2px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer;text-align:center}
 .fleet-mini:hover{border-color:var(--accent)}
-.fleet-body{display:flex;align-items:stretch;gap:14px}
+.fleet-body{flex:1;min-height:0;display:flex;align-items:stretch;gap:14px}
 .fleet-stats .fleet-totals{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .fleet-totals .strow{min-height:22px}
 .val.ok{color:#36ff7a}
-.fleet-list{flex:1;min-width:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;align-content:start;grid-auto-rows:min-content}
+.fleet-list{flex:1;min-width:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;align-content:start;grid-auto-rows:min-content;overflow-y:auto}
 .fleet-empty{grid-column:1/-1;font-size:11px;color:var(--dim);padding:10px 2px}
 .fleet-ship{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 3px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2);color:var(--txt);cursor:pointer}
 .fleet-ship:hover{border-color:var(--accent)}
