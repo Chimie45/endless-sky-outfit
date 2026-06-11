@@ -11,6 +11,16 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.4 — 2026-06-11
+- Installed loadout moved back to a column on the right of the ship card (beside the
+  faction), full card height with its own scroll.
+- Capacity and Movement/Energy stat blocks are now equal width; ship display enlarged.
+- Variant loadout chips right-aligned to the bottom of the card.
+- Restyled the Race / Ship-model / Spoiler controls (uniform 36px height, custom
+  dropdown arrow); Reset and the new gear button are the same size (gear is square).
+- Sticky outfitter search bar is now solid (no more see-through overlap on scroll);
+  category filter buttons squared off (no pills).
+
 ### v0.3.3 — 2026-06-11
 - **Left column now fits without scrolling** — it's a fixed flex column and only the
   installed-loadout list scrolls internally.

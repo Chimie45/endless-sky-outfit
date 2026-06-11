@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.3 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.4 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -55,15 +55,17 @@
           <div class="quickstats" id="quickStats"></div>
         </div>
         <div class="displaycol">
-          <div class="stagewrap">
-            <div class="stage" id="stage"></div>
-          </div>
+          <div class="stage" id="stage"></div>
           <div class="legend" id="legend">
             <span><i style="background:var(--gun)"></i>Gun</span>
             <span><i style="background:var(--turret)"></i>Turret</span>
             <span><i style="background:var(--engine)"></i>Engine</span>
             <span><i style="background:var(--bay)"></i>Bay</span>
           </div>
+        </div>
+        <div class="loadcol">
+          <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
+          <div id="loadout"></div>
         </div>
       </div>
       <div class="variants" id="variants"></div>
@@ -88,10 +90,6 @@
       </div>
     </div>
 
-    <div class="sect loadsect">
-      <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
-      <div id="loadout"></div>
-    </div>
   </section>
 
   <!-- RIGHT: outfitter catalog -->
