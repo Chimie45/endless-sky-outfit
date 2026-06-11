@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.19 — 2026-06-11
+- Recombined Energy & Heat into one group (E and H side by side per row) with a divider
+  separating the two columns so they no longer touch. Reduced the stat-pill number font
+  sizes so everything fits more comfortably.
+
 ### v0.3.18 — 2026-06-11
 - Header reordered to Race / Type / Name. Energy and Heat split into separate pill
   columns (label left, value right). Removed the duplicated Speed/Shields/Hull/Bays from

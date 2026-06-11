@@ -154,14 +154,13 @@ function renderMeters(){
     pill("Shields",`${FMT(s.shields)}${s.hasSR?" +"+FMT(s.shieldRegen)+"/s":""}`)+
     pill("Hull",`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair)+"/s":""}`);
 
-  el("enPills").innerHTML =
-    pill("Idle",FMT(s.eh.idle[0]),"en")+pill("Moving",FMT(s.eh.moving[0]),"en")+
-    pill("Firing",FMT(s.eh.firing[0]),"en")+pill("Net",FMT(s.eh.net[0]),"en")+
-    pill("Capacity",FMT(s.eh.max[0]),"en");
-  el("htPills").innerHTML =
-    pill("Idle",FMT(s.eh.idle[1]),"ht")+pill("Moving",FMT(s.eh.moving[1]),"ht")+
-    pill("Firing",FMT(s.eh.firing[1]),"ht")+pill("Net",FMT(s.eh.net[1]),"ht")+
-    pill("Max",FMT(s.eh.max[1]),"ht");
+  const eh=(lab,e,h)=>`<span class="qs2"><span>${lab}</span><b class="mono en">${FMT(e)}</b><b class="mono ht">${FMT(h)}</b></span>`;
+  el("ehPills").innerHTML =
+    eh("Idle",s.eh.idle[0],s.eh.idle[1])+
+    eh("Moving",s.eh.moving[0],s.eh.moving[1])+
+    eh("Firing",s.eh.firing[0],s.eh.firing[1])+
+    eh("Net",s.eh.net[0],s.eh.net[1])+
+    eh("Max",s.eh.max[0],s.eh.max[1]);
 
   el("totalCost").textContent = MONEY(s.cost);
   renderQuickStats(s); renderAlerts(s);

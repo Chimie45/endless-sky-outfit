@@ -285,12 +285,14 @@ table.eh tr.max td{color:var(--bright)}
 .stagewrap{position:relative}
 .quickstats{position:static;width:100%;display:flex;flex-direction:column;gap:4px}
 .qs{display:flex;flex-direction:row;justify-content:space-between;align-items:baseline;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
-.qs span{color:var(--dim);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase}
-.qs b{color:var(--bright);font-size:12px}
+.qs span{color:var(--dim);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase}
+.qs b{color:var(--bright);font-size:9.5px}
 .qs.bad{border-color:var(--bad)} .qs.bad b{color:var(--bad)}
 .qs b.en{color:var(--energy)} .qs b.ht{color:var(--heat)}
-.qs2{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:11px}
-.qs2 span{color:var(--dim);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase}
+.qs2{display:grid;grid-template-columns:1fr 46px 46px;column-gap:10px;align-items:baseline;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:9.5px}
+.qs2 span{color:var(--dim);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase}
+.qs2 b{text-align:right}
+.qs2 .ht{border-left:1px solid var(--line2);padding-left:9px}
 .qs2 .en{color:var(--energy)} .qs2 .ht{color:var(--heat)}
 .rightstats{width:196px;display:flex;flex-direction:column;gap:10px}
 .statgroup>.eyebrow{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:6px}
@@ -335,7 +337,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.18 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.19 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -388,8 +390,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
             </div>
             <div class="rightstats">
               <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
-              <div class="statgroup"><div class="eyebrow"><span>Energy</span><span class="mono">/s</span></div><div class="statpills" id="enPills"></div></div>
-              <div class="statgroup"><div class="eyebrow"><span>Heat</span><span class="mono">/s</span></div><div class="statpills" id="htPills"></div></div>
+              <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">E · H /s</span></div><div class="statpills" id="ehPills"></div></div>
             </div>
           </div>
           <div class="presetlabel eyebrow">Loadout</div>
@@ -624,14 +625,13 @@ function renderMeters(){
     pill("Shields",`${FMT(s.shields)}${s.hasSR?" +"+FMT(s.shieldRegen)+"/s":""}`)+
     pill("Hull",`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair)+"/s":""}`);
 
-  el("enPills").innerHTML =
-    pill("Idle",FMT(s.eh.idle[0]),"en")+pill("Moving",FMT(s.eh.moving[0]),"en")+
-    pill("Firing",FMT(s.eh.firing[0]),"en")+pill("Net",FMT(s.eh.net[0]),"en")+
-    pill("Capacity",FMT(s.eh.max[0]),"en");
-  el("htPills").innerHTML =
-    pill("Idle",FMT(s.eh.idle[1]),"ht")+pill("Moving",FMT(s.eh.moving[1]),"ht")+
-    pill("Firing",FMT(s.eh.firing[1]),"ht")+pill("Net",FMT(s.eh.net[1]),"ht")+
-    pill("Max",FMT(s.eh.max[1]),"ht");
+  const eh=(lab,e,h)=>`<span class="qs2"><span>${lab}</span><b class="mono en">${FMT(e)}</b><b class="mono ht">${FMT(h)}</b></span>`;
+  el("ehPills").innerHTML =
+    eh("Idle",s.eh.idle[0],s.eh.idle[1])+
+    eh("Moving",s.eh.moving[0],s.eh.moving[1])+
+    eh("Firing",s.eh.firing[0],s.eh.firing[1])+
+    eh("Net",s.eh.net[0],s.eh.net[1])+
+    eh("Max",s.eh.max[0],s.eh.max[1]);
 
   el("totalCost").textContent = MONEY(s.cost);
   renderQuickStats(s); renderAlerts(s);
