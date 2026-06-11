@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.72 — 2026-06-12
+- Put the four tabs (Add Ship / Add Parts / Outfitters / Shipyards) into the existing header
+  next to the logo, and removed the extra bar that v0.3.71 wrongly added.
+
 ### v0.3.71 — 2026-06-12
 - Moved the panel tabs to a centered bar at the top of the page, and added the two new tabs:
   Outfitters and Shipyards. Outfitters lists every station that sells parts (search to find one)

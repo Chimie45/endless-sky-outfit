@@ -5,8 +5,14 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.71 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.72 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
+  </div>
+  <div class="headtabs">
+    <button class="toptab" id="shipTab">Add Ship</button>
+    <button class="toptab" id="outfitterTab">Add Parts</button>
+    <button class="toptab" id="shopTab">Outfitters</button>
+    <button class="toptab" id="yardTab">Shipyards</button>
   </div>
   <div class="spacer"></div>
   <div class="costchip">
@@ -16,12 +22,6 @@
   <button class="linkbtn" id="resetBtn">Reset</button>
   <button class="linkbtn gear" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
 </header>
-<nav class="toptabs">
-  <button class="toptab" id="shipTab">Add Ship</button>
-  <button class="toptab" id="outfitterTab">Add Parts</button>
-  <button class="toptab" id="shopTab">Outfitters</button>
-  <button class="toptab" id="yardTab">Shipyards</button>
-</nav>
 
 <svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
   <filter id="esShip" color-interpolation-filters="sRGB" x="-15%" y="-15%" width="130%" height="130%">
