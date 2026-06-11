@@ -136,9 +136,11 @@ main{display:grid;grid-template-columns:1fr;gap:0;flex:1;min-height:0;transition
 .alerts{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;align-content:flex-start}
 .alerts .pill{width:86px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;padding:5px 4px;font-weight:600}
 .headright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.sidepanel{position:fixed;top:64px;right:0;bottom:0;width:min(560px,90vw);transform:translateX(101%);transition:transform .22s ease;z-index:40;display:flex;flex-direction:column;border-left:1px solid var(--line2);background:linear-gradient(180deg,var(--bg2),var(--bg));box-shadow:-14px 0 36px rgba(0,0,0,.5);padding:14px}
+.sidepanel{position:fixed;top:104px;right:0;bottom:0;width:min(560px,90vw);transform:translateX(101%);transition:transform .22s ease;z-index:40;display:flex;flex-direction:column;border-left:1px solid var(--line2);background:linear-gradient(180deg,var(--bg2),var(--bg));box-shadow:-14px 0 36px rgba(0,0,0,.5);padding:14px}
 body[data-panel="parts"] #outfitter{transform:none}
 body[data-panel="ship"] #shipPicker{transform:none}
+body[data-panel="shop"] #outfitters{transform:none}
+body[data-panel="yard"] #shipyards{transform:none}
 .sp-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex:none}
 .sp-title{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent2);font-weight:700;white-space:nowrap}
 .sp-head input[type=search]{flex:1;min-width:0;height:32px}
@@ -150,12 +152,10 @@ body[data-panel="ship"] #shipPicker{transform:none}
 .sp-rail button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f}
 .sp-fac{flex:none;height:32px;width:auto;min-width:0;max-width:120px;font-size:11px;padding:0 22px 0 8px}
 .sp-grid{flex:1;min-width:0;overflow-y:auto;padding-right:2px;align-content:start}
-.edge-tabs{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:39;display:flex;flex-direction:column;gap:8px}
-.edge-tab{writing-mode:vertical-rl;text-orientation:mixed;font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;padding:15px 7px;border:1px solid var(--line2);border-right:0;border-radius:8px 0 0 8px;cursor:pointer;background:var(--panel2);color:var(--txt);box-shadow:-4px 0 14px rgba(0,0,0,.35)}
-.edge-tab.accent{background:var(--accent);color:#04121f;border-color:var(--accent)}
-.edge-tab:hover{border-color:var(--accent2)}
-.edge-tab.accent:hover{background:var(--accent2)}
-body[data-panel] .edge-tabs{display:none}
+.toptabs{display:flex;justify-content:center;gap:8px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--line);flex:none;z-index:20}
+.toptab{font-size:12px;font-weight:600;letter-spacing:.03em;padding:7px 18px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2);color:var(--txt);cursor:pointer}
+.toptab:hover{border-color:var(--accent)}
+body[data-panel="ship"] #shipTab,body[data-panel="parts"] #outfitterTab,body[data-panel="shop"] #shopTab,body[data-panel="yard"] #yardTab{background:var(--accent);border-color:var(--accent);color:#04121f}
 .sect{margin-bottom:20px}
 .sect>.eyebrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
 .leftgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}

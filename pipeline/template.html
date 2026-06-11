@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.70 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.71 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="spacer"></div>
@@ -16,6 +16,12 @@
   <button class="linkbtn" id="resetBtn">Reset</button>
   <button class="linkbtn gear" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
 </header>
+<nav class="toptabs">
+  <button class="toptab" id="shipTab">Add Ship</button>
+  <button class="toptab" id="outfitterTab">Add Parts</button>
+  <button class="toptab" id="shopTab">Outfitters</button>
+  <button class="toptab" id="yardTab">Shipyards</button>
+</nav>
 
 <svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
   <filter id="esShip" color-interpolation-filters="sRGB" x="-15%" y="-15%" width="130%" height="130%">
@@ -146,10 +152,31 @@
   </div>
 </section>
 
-<div class="edge-tabs" id="edgeTabs">
-  <button class="edge-tab" id="shipTab" aria-label="Add ship">Add Ship</button>
-  <button class="edge-tab accent" id="outfitterTab" aria-label="Add parts">Add Parts</button>
-</div>
+<!-- Outfitters: browse stations -> outfits sold there -->
+<section class="sidepanel" id="outfitters" aria-label="Outfitters">
+  <div class="sp-head">
+    <span class="sp-title">Outfitters</span>
+    <input type="search" id="shopSearch" placeholder="Find station…" autocomplete="off">
+    <button class="modalx" id="shopClose" aria-label="Close">×</button>
+  </div>
+  <div class="sp-body">
+    <div class="sp-rail" id="shopRail"></div>
+    <div class="ogrid sp-grid" id="shopGrid"></div>
+  </div>
+</section>
+
+<!-- Shipyards: browse stations -> ships sold there -->
+<section class="sidepanel" id="shipyards" aria-label="Shipyards">
+  <div class="sp-head">
+    <span class="sp-title">Shipyards</span>
+    <input type="search" id="yardSearch" placeholder="Find station…" autocomplete="off">
+    <button class="modalx" id="yardClose" aria-label="Close">×</button>
+  </div>
+  <div class="sp-body">
+    <div class="sp-rail" id="yardRail"></div>
+    <div class="shipgrid sp-grid" id="yardGrid"></div>
+  </div>
+</section>
 
 <div class="drawer" id="drawer">
   <div class="panel">

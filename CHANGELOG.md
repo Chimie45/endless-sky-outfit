@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.71 — 2026-06-12
+- Moved the panel tabs to a centered bar at the top of the page, and added the two new tabs:
+  Outfitters and Shipyards. Outfitters lists every station that sells parts (search to find one)
+  and shows what's on sale there — drag straight onto your ship. Shipyards does the same for
+  ships (click one to load it into the builder). Both respect the spoiler/tech tier.
+
 ### v0.3.70 — 2026-06-12
 - Slimmer Add Parts / Add Ship rail tabs (shorter, tighter spacing). Removed the header
   "Add Parts" button (the edge tab handles it). The side panel now overlays the right edge

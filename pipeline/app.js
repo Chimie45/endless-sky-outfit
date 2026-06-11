@@ -27,7 +27,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", faction:"" };
+let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"" };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -415,21 +415,24 @@ function chipFor(o){
   if(a["outfit space"]<0) chips.push(`<span class="chip">space ${FMT(Math.abs(a["outfit space"]))}</span>`);
   return `<div class="chips"><span class="chip fac">${o.faction}</span>${chips.slice(0,3).join("")}</div>`;
 }
+function ocardHTML(o){
+  const n=o.name.replace(/"/g,'&quot;');
+  return `<div class="ocard" draggable="true" data-name="${n}">
+      <div class="art">${artTile(o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
+      <button class="addbtn" data-inc="${n}">+</button>
+      <div class="meta">
+        <b data-detail="${n}" title="${o.name}">${o.name}</b>
+        <span class="price mono">${MONEY(o.cost)}</span>
+        ${chipFor(o)}
+      </div>
+    </div>`;
+}
 function renderCatalog(){
   const list=visibleOutfits().sort((a,b)=>{
     const ai=DATA.categoryOrder.indexOf(a.category), bi=DATA.categoryOrder.indexOf(b.category);
     return ai-bi || a.cost-b.cost || a.name.localeCompare(b.name);
   });
-  el("catalog").innerHTML = list.length? list.slice(0,500).map(o=>`
-    <div class="ocard" draggable="true" data-name="${o.name.replace(/"/g,'&quot;')}">
-      <div class="art">${artTile(o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
-      <button class="addbtn" data-inc="${o.name.replace(/"/g,'&quot;')}">+</button>
-      <div class="meta">
-        <b data-detail="${o.name.replace(/"/g,'&quot;')}" title="${o.name}">${o.name}</b>
-        <span class="price mono">${MONEY(o.cost)}</span>
-        ${chipFor(o)}
-      </div>
-    </div>`).join("")
+  el("catalog").innerHTML = list.length? list.slice(0,500).map(ocardHTML).join("")
     : `<div class="empty">No outfits match. Raise the tech access or clear the search.</div>`;
 }
 
@@ -763,12 +766,39 @@ function renderPickerGrid(){
   const q=(state.pickerQ||"").toLowerCase();
   if(q) list=list.filter(s=>(s.displayName||s.name).toLowerCase().includes(q)||s.name.toLowerCase().includes(q));
   list.sort((a,b)=> a.category.localeCompare(b.category) || (a.displayName||a.name).localeCompare(b.displayName||b.name));
-  el("pickerGrid").innerHTML = list.length ? list.map(s=>`
-    <button class="shipcell ${state.ship&&state.ship.name===s.name?'sel':''}" data-ship="${s.name.replace(/"/g,'&quot;')}" title="${s.displayName||s.name}">
+  el("pickerGrid").innerHTML = list.length ? list.map(shipcellHTML).join("") : `<div class="empty">No ships match.</div>`;
+}
+function shipcellHTML(s){
+  return `<button class="shipcell ${state.ship&&state.ship.name===s.name?'sel':''}" data-ship="${s.name.replace(/"/g,'&quot;')}" title="${s.displayName||s.name}">
       <div class="sc-art">${artTile(s.thumbnail||s.sprite, mono2(s.displayName||s.name), "var(--accent)")}</div>
       <div class="sc-nm">${s.displayName||s.name}</div>
       <div class="sc-cat">${s.category}</div>
-    </button>`).join("") : `<div class="empty">No ships match.</div>`;
+    </button>`;
+}
+/* ---------- Outfitters / Shipyards (browse by station) ---------- */
+let _shopMap=null,_yardMap=null;
+function _stKey(loc){ return (loc.planet||"?")+"  \u00b7  "+(loc.system||"?"); }
+function buildShopMap(){ if(_shopMap) return _shopMap; _shopMap={};
+  for(const o of Object.values(DATA.outfits)){ if(!o.thumbnail) continue; for(const loc of (o.soldAt||[])){ const k=_stKey(loc); (_shopMap[k]=_shopMap[k]||[]).push(o); } } return _shopMap; }
+function buildYardMap(){ if(_yardMap) return _yardMap; _yardMap={};
+  for(const s of Object.values(DATA.ships)){ if(!s.thumbnail) continue; for(const loc of (s.soldAt||[])){ const k=_stKey(loc); (_yardMap[k]=_yardMap[k]||[]).push(s); } } return _yardMap; }
+function renderShop(){
+  const map=buildShopMap(), elig=o=>(state.showUnreleased||o.obtainable)&&factionTier(o.faction)<=state.tier;
+  const q=(state.shopQ||"").toLowerCase();
+  let st=Object.keys(map).filter(k=>map[k].some(elig)); if(q) st=st.filter(k=>k.toLowerCase().includes(q)); st.sort();
+  if(!st.includes(state.shopStation)) state.shopStation=st[0]||"";
+  el("shopRail").innerHTML = st.length? st.map(k=>`<button data-station="${k.replace(/"/g,'&quot;')}" aria-pressed="${k===state.shopStation}">${k}</button>`).join("") : `<div class="empty">No stations match.</div>`;
+  const items=(map[state.shopStation]||[]).filter(elig).sort((a,b)=>a.cost-b.cost||a.name.localeCompare(b.name));
+  el("shopGrid").innerHTML = items.length? items.map(ocardHTML).join("") : `<div class="empty">Nothing here at this tech level.</div>`;
+}
+function renderYard(){
+  const map=buildYardMap(), elig=s=>(state.showUnreleased||s.obtainable)&&factionTier(s.faction)<=state.tier;
+  const q=(state.yardQ||"").toLowerCase();
+  let st=Object.keys(map).filter(k=>map[k].some(elig)); if(q) st=st.filter(k=>k.toLowerCase().includes(q)); st.sort();
+  if(!st.includes(state.yardStation)) state.yardStation=st[0]||"";
+  el("yardRail").innerHTML = st.length? st.map(k=>`<button data-station="${k.replace(/"/g,'&quot;')}" aria-pressed="${k===state.yardStation}">${k}</button>`).join("") : `<div class="empty">No stations match.</div>`;
+  const ships=(map[state.yardStation]||[]).filter(elig).sort((a,b)=>(a.attributes.cost||0)-(b.attributes.cost||0)||(a.displayName||a.name).localeCompare(b.displayName||b.name));
+  el("yardGrid").innerHTML = ships.length? ships.map(shipcellHTML).join("") : `<div class="empty">No ships sold here at this tech level.</div>`;
 }
 
 function setTheme(t){
@@ -779,6 +809,8 @@ function setTheme(t){
 function openPanel(name){
   document.body.dataset.panel = name;
   if(name==="ship"){ renderPickerFac(); renderPickerGrid(); const ps=el("pickerSearch"); if(ps){ ps.value=state.pickerQ||""; setTimeout(()=>ps.focus(),30); } }
+  else if(name==="shop"){ renderShop(); }
+  else if(name==="yard"){ renderYard(); }
   try{ localStorage.setItem("drydock-panel", name); }catch(e){}
 }
 function closePanels(){ delete document.body.dataset.panel; try{ localStorage.setItem("drydock-panel",""); }catch(e){} }
@@ -827,17 +859,27 @@ function init(){
     state.showUnreleased=!state.showUnreleased;
     try{ localStorage.setItem("drydock-unreleased", state.showUnreleased?"1":"0"); }catch(e){}
     el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
-    if(document.body.dataset.panel==="ship"){ renderPickerFac(); renderPickerGrid(); } renderPartsFac(); renderCatalog();
+    if(document.body.dataset.panel==="ship"){ renderPickerFac(); renderPickerGrid(); } renderPartsFac(); renderCatalog(); if(document.body.dataset.panel==="shop")renderShop(); if(document.body.dataset.panel==="yard")renderYard();
   });
   el("resetBtn").addEventListener("click",()=>loadLoadout("empty"));
   el("outfitterTab").addEventListener("click",()=>togglePanel("parts"));
   el("outfitterClose").addEventListener("click",closePanels);
   el("shipTab").addEventListener("click",()=>togglePanel("ship"));
-  { let sp=null; try{ sp=localStorage.getItem("drydock-panel"); }catch(e){} if(sp==="ship") openPanel("ship"); else if(sp==="parts"||sp==null) openPanel("parts"); }
+  el("shopTab").addEventListener("click",()=>togglePanel("shop"));
+  el("yardTab").addEventListener("click",()=>togglePanel("yard"));
+  el("shopClose").addEventListener("click",closePanels);
+  el("yardClose").addEventListener("click",closePanels);
+  el("shopRail").addEventListener("click",e=>{const b=e.target.closest("[data-station]");if(b){state.shopStation=b.dataset.station;renderShop();}});
+  el("yardRail").addEventListener("click",e=>{const b=e.target.closest("[data-station]");if(b){state.yardStation=b.dataset.station;renderYard();}});
+  el("yardGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(b){setShip(b.dataset.ship);renderYard();}});
+  el("shopSearch").addEventListener("input",e=>{state.shopQ=e.target.value;renderShop();});
+  el("yardSearch").addEventListener("input",e=>{state.yardQ=e.target.value;renderYard();});
+  { let sp=null; try{ sp=localStorage.getItem("drydock-panel"); }catch(e){} if(sp==="ship") openPanel("ship"); else if(sp==="shop") openPanel("shop"); else if(sp==="yard") openPanel("yard"); else if(sp==="parts"||sp==null) openPanel("parts"); }
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
     state.tier=+b.dataset.tier;
     document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",x===b));
-    renderPartsFac(); renderCatalog();});
+    renderPartsFac(); renderCatalog();
+    if(document.body.dataset.panel==="shop")renderShop(); if(document.body.dataset.panel==="yard")renderYard();});
   el("search").addEventListener("input",e=>{state.q=e.target.value;renderCatalog();});
   el("catbar").addEventListener("click",e=>{const b=e.target.closest("[data-series]");if(!b)return;
     state.series=b.dataset.series; renderCatbar(); renderCatalog();});
