@@ -27,7 +27,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:3, cat:"All", q:"", view:"schem", loadoutName:"empty", showUnreleased:false };
+let state = { ship:null, installed:{}, tier:0, cat:"All", q:"", view:"schem", loadoutName:"empty", showUnreleased:false };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -145,9 +145,6 @@ function renderMeters(){
   meters.push(meter("Gun ports", guns, hp.guns,""));
   meters.push(meter("Turret mounts", turrets, hp.turrets,""));
   if(totalBays) meters.push(meter("Fighter / drone bays", 0, totalBays,"", true));
-  meters.push(meter("Crew / bunks", crew, bunks,""));
-  meters.push(meter("Cargo", 0, s.cargo," t", true));
-  meters.push(meter("Fuel", 0, s.fuel,"", true));
   el("meters").innerHTML = meters.join("");
   el("massReadout").textContent = FMT(s.emptyMass)+" t";
 
@@ -168,7 +165,7 @@ function renderMeters(){
     row("max",s.eh.max[0],s.eh.max[1],"max");
 
   el("totalCost").textContent = MONEY(s.cost);
-  renderQuickStats(s); renderPills(s);
+  renderQuickStats(s); renderAlerts(s);
 }
 function meter(label, used, total, unit, infoOnly){
   const over = used>total+1e-6;
@@ -183,25 +180,23 @@ function flag(ok, goodText, badText){
 }
 
 function renderQuickStats(s){
-  const rows=[["Cost",MONEY(s.cost)],["Max speed",FMT(s.maxSpeed)],
-              ["Shields",FMT(s.shields)],["Hull",FMT(s.hull)]];
-  el("quickStats").innerHTML = rows.map(([k,v])=>`<div class="qs"><span>${k}</span><b class="mono">${v}</b></div>`).join("");
-}
-function renderPills(s){
   const hp=state.ship.hardpoints;
   const totalBays=Object.values(hp.bays||{}).reduce((a,b)=>a+b,0);
   const crew=requiredCrew(), bunks=eff("bunks");
+  const rows=[["Cost",MONEY(s.cost)],["Speed",FMT(s.maxSpeed)],
+    ["Shields",FMT(s.shields)],["Hull",FMT(s.hull)],
+    ["Crew",`${FMT(crew)}/${FMT(bunks)}`],["Cargo",FMT(s.cargo)+"t"],["Fuel",FMT(s.fuel)]];
+  if(totalBays) rows.push(["Bays",String(totalBays)]);
+  el("quickStats").innerHTML = rows.map(([k,v])=>`<div class="qs"><span>${k}</span><b class="mono">${v}</b></div>`).join("");
+}
+function renderAlerts(s){
   const hasThrust=eff("thrust")>0, hasTurn=eff("turn")>0;
-  const P=[];
-  P.push(`<span class="pill"><b>${FMT(crew)} / ${FMT(bunks)}</b> crew</span>`);
-  P.push(`<span class="pill"><b>${FMT(s.cargo)}</b> t cargo</span>`);
-  P.push(`<span class="pill"><b>${FMT(s.fuel)}</b> fuel</span>`);
-  if(totalBays) P.push(`<span class="pill"><b>${totalBays}</b> bays</span>`);
-  P.push(`<span class="pill ${hasThrust?'good':'bad'}">${hasThrust?'Thrusters':'No thrusters'}</span>`);
-  P.push(`<span class="pill ${hasTurn?'good':'bad'}">${hasTurn?'Steering':'No steering'}</span>`);
-  P.push(`<span class="pill ${s.energyOK?'good':'bad'}">${s.energyOK?'Energy OK':'Energy −'}</span>`);
-  P.push(`<span class="pill ${s.heatOK?'good':'bad'}">${s.heatOK?'Heat OK':'Overheats'}</span>`);
-  el("pills").innerHTML=P.join("");
+  const A=[];
+  A.push(`<span class="pill ${hasThrust?'good':'bad'}">${hasThrust?'Thrusters':'No thrusters'}</span>`);
+  A.push(`<span class="pill ${hasTurn?'good':'bad'}">${hasTurn?'Steering':'No steering'}</span>`);
+  A.push(`<span class="pill ${s.energyOK?'good':'bad'}">${s.energyOK?'Energy OK':'Energy negative'}</span>`);
+  A.push(`<span class="pill ${s.heatOK?'good':'bad'}">${s.heatOK?'Heat OK':'Overheats'}</span>`);
+  el("alerts").innerHTML=A.join("");
 }
 function renderShipCard(){
   const ship = state.ship;
@@ -435,7 +430,11 @@ function add(nm,d=1){
   renderAll();
 }
 function setShip(name){
-  state.ship = DATA.ships[name]; state.installed={}; state.loadoutName="empty"; renderAll();
+  state.ship = DATA.ships[name];
+  const stock = state.ship.defaultOutfits || {};
+  if(Object.keys(stock).length){ state.installed = {...stock}; state.loadoutName = "stock"; }
+  else { state.installed = {}; state.loadoutName = "empty"; }
+  renderAll();
 }
 function loadLoadout(token){
   if(token==="empty"){ state.installed={}; }
@@ -500,7 +499,7 @@ function init(){
   el("facSel").value=def.faction;
   buildModelSelect(def.faction);
   el("shipSel").value=def.name; setShip(def.name);
-  document.querySelectorAll("#tierBtns button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tier==="3"));
+  document.querySelectorAll("#tierBtns button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tier==="0"));
   let savedTheme=null; try{ savedTheme=localStorage.getItem("drydock-theme"); }catch(e){}
   setTheme(savedTheme||"blue");
 
@@ -533,6 +532,9 @@ function init(){
   });
   el("drawerX").addEventListener("click",()=>el("drawer").classList.remove("open"));
   el("drawer").addEventListener("click",e=>{ if(e.target===el("drawer")) el("drawer").classList.remove("open"); });
+  el("gearBtn").addEventListener("click",()=>el("settings").classList.add("open"));
+  el("settingsX").addEventListener("click",()=>el("settings").classList.remove("open"));
+  el("settings").addEventListener("click",e=>{ if(e.target===el("settings")) el("settings").classList.remove("open"); });
 
   const card=el("shipcard");
   document.body.addEventListener("dragstart",e=>{const c=e.target.closest(".ocard");if(c)e.dataTransfer.setData("text/plain",c.dataset.name);});

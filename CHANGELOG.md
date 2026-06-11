@@ -11,6 +11,20 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.3 — 2026-06-11
+- **Left column now fits without scrolling** — it's a fixed flex column and only the
+  installed-loadout list scrolls internally.
+- Ship card compacted: a 130px info column (art + Cost / Max speed / Shields / Hull /
+  Crew / Cargo / Fuel / Bays) beside the wireframe; both art and wireframe shown.
+- **Status alerts (Thrusters / Steering / Energy / Heat) moved above the ship.**
+- Stats regrouped: Capacity on the left; Movement & Defense with Energy & Heat stacked
+  beneath it on the right.
+- **Installed loadout** is now a full-width section at the bottom, separate from the
+  wireframe.
+- New defaults: spoiler/tech access starts at **Human**; loadout starts at **Stock**.
+- **Settings gear** button (next to Reset) opens a modal holding Theme and the
+  Show-unreleased toggle, decluttering the header.
+
 ### v0.3.2 — 2026-06-11
 - **Unreleased/unobtainable filter.** The parser now flags any ship or outfit
   referenced only by its own definition (no shipyard, fleet, variant, mission, or
