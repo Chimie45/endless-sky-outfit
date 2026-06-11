@@ -208,21 +208,16 @@ function renderShipCard(){
   el("hullName").textContent = ship.displayName || ship.name;
   el("hullCat").textContent = ship.category;
   el("hullFaction").textContent = FACLABEL(ship.faction);
-  document.querySelectorAll("#viewToggle button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.view===state.view));
-  el("legend").style.display = state.view==="schem" ? "flex":"none";
-  if(state.view==="schem"){ renderSchem(); }
-  else { renderArt(); }
+  renderArtbox();
+  renderSchem();
   renderVariants();
 }
-function renderArt(){
+function renderArtbox(){
   const ship = state.ship;
-  const path = ship.thumbnail || ship.sprite;
-  const url = imgURL(path);
-  el("stage").innerHTML = url
-    ? `<img class="shipimg" src="${url}" alt="${ship.displayName||ship.name}"
-         onerror="this.style.display='none';this.parentNode.querySelector('.noimg').style.display='block'">
-       <div class="noimg" style="display:none">No art available — switch to Hardpoints view for the schematic.</div>`
-    : `<div class="noimg">No art for this hull. Switch to the Hardpoints view for its schematic.</div>`;
+  const url = imgURL(ship.thumbnail || ship.sprite);
+  const box = el("artbox"); if(!box) return;
+  if(url){ box.style.display=""; box.innerHTML=`<img src="${url}" alt="" onerror="this.parentNode.style.display='none'">`; }
+  else { box.style.display="none"; box.innerHTML=""; }
 }
 function renderVariants(){
   const ship = state.ship;
@@ -255,7 +250,7 @@ function renderSchem(){
   const COLORS={gun:'var(--gun)',turret:'var(--turret)',engine:'var(--engine)',reverse:'var(--engine)',bay:'var(--bay)'};
   const trunc = t => t.length>18 ? t.slice(0,17)+'…' : t;
   let body=`<defs><radialGradient id="hg" cx="50%" cy="42%" r="62%">
-      <stop offset="0%" stop-color="#16243c"/><stop offset="100%" stop-color="#0b1420"/></radialGradient></defs>`;
+      <stop offset="0%" stop-color="var(--tile1)"/><stop offset="100%" stop-color="var(--tile2)"/></radialGradient></defs>`;
   body+=`<ellipse cx="${cx}" cy="${cy}" rx="${Math.min(92,maxR*sc*0.8)}" ry="${Math.min(140,maxR*sc*1.05)}"
       fill="url(#hg)" stroke="var(--line2)" stroke-width="1.2"/>`;
   const labels=[];
@@ -317,6 +312,7 @@ function renderLoadout(){
 function visibleOutfits(){
   const q=state.q.toLowerCase();
   return Object.values(DATA.outfits).filter(o=>{
+    if(!o.thumbnail) return false;            // hide outfits with no bundled art
     if(factionTier(o.faction)>state.tier) return false;
     if(state.cat!=="All" && o.category!==state.cat) return false;
     if(q && !o.name.toLowerCase().includes(q)) return false;
@@ -474,6 +470,11 @@ function buildModelSelect(faction){
   }
 }
 
+function setTheme(t){
+  document.body.dataset.theme=t;
+  try{ localStorage.setItem("drydock-theme",t); }catch(e){}
+  document.querySelectorAll("#themeBtns button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.theme===t));
+}
 function init(){
   el("ver").textContent=DATA.version;
   buildFactionSelect(); renderCatbar();
@@ -482,6 +483,8 @@ function init(){
   buildModelSelect(def.faction);
   el("shipSel").value=def.name; setShip(def.name);
   document.querySelectorAll("#tierBtns button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tier==="3"));
+  let savedTheme=null; try{ savedTheme=localStorage.getItem("drydock-theme"); }catch(e){}
+  setTheme(savedTheme||"blue");
 
   el("facSel").addEventListener("change",e=>{
     buildModelSelect(e.target.value);
@@ -489,7 +492,7 @@ function init(){
   });
   el("shipSel").addEventListener("change",e=>setShip(e.target.value));
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
-  el("viewToggle").addEventListener("click",e=>{const b=e.target.closest("[data-view]");if(!b)return;state.view=b.dataset.view;renderShipCard();});
+  el("themeBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;setTheme(b.dataset.theme);});
   el("resetBtn").addEventListener("click",()=>loadLoadout("empty"));
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
     state.tier=+b.dataset.tier;

@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.2.5 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.1 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -27,6 +27,14 @@
       </div>
     </div>
   </div>
+  <div class="ctrl">
+    <label>Theme</label>
+    <div class="tierbtns" id="themeBtns">
+      <button data-theme="blue">Blue</button>
+      <button data-theme="dark">Dark</button>
+      <button data-theme="light">Light</button>
+    </div>
+  </div>
   <div class="spacer"></div>
   <div class="costchip">
     <div class="eyebrow">Total cost</div>
@@ -40,36 +48,34 @@
   <section class="col left">
     <div class="shipcard" id="shipcard">
       <div class="shiphead">
-        <div>
+        <div class="shipid">
           <div class="cat" id="hullCat"></div>
           <div class="nm" id="hullName"></div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <div class="fac" id="hullFaction"></div>
-          <div class="viewtoggle" id="viewToggle">
-            <button data-view="schem" aria-pressed="true">Hardpoints</button>
-            <button data-view="art">Art</button>
+        <div class="fac" id="hullFaction"></div>
+      </div>
+      <div class="cardbody">
+        <div class="displaycol">
+          <div class="artbox" id="artbox"></div>
+          <div class="stagewrap">
+            <div class="stage" id="stage"></div>
+            <div class="quickstats" id="quickStats"></div>
+          </div>
+          <div class="legend" id="legend">
+            <span><i style="background:var(--gun)"></i>Gun</span>
+            <span><i style="background:var(--turret)"></i>Turret</span>
+            <span><i style="background:var(--engine)"></i>Engine</span>
+            <span><i style="background:var(--bay)"></i>Bay</span>
           </div>
         </div>
-      </div>
-      <div class="stagewrap">
-        <div class="stage" id="stage"></div>
-        <div class="quickstats" id="quickStats"></div>
-      </div>
-      <div class="legend" id="legend">
-        <span><i style="background:var(--gun)"></i>Gun</span>
-        <span><i style="background:var(--turret)"></i>Turret</span>
-        <span><i style="background:var(--engine)"></i>Engine</span>
-        <span><i style="background:var(--bay)"></i>Bay</span>
+        <div class="loadcol">
+          <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
+          <div id="loadout"></div>
+        </div>
       </div>
       <div class="pills" id="pills"></div>
       <div class="variants" id="variants"></div>
       <div class="dropmsg">Drop to install</div>
-    </div>
-
-    <div class="sect">
-      <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
-      <div id="loadout"></div>
     </div>
 
     <div class="statcols">

@@ -9,6 +9,21 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ---
 
+## v0.3 — UX overhaul update
+
+### v0.3.1 — 2026-06-11
+- **Ship card rebuilt**: 130×130 art window under the ship name; the hardpoint
+  schematic is now the always-on display (Art/Hardpoints toggle removed); the
+  installed loadout moved to a scrolling vertical column to the right of the
+  display. The 3-column stats now stay put instead of being pushed to the bottom
+  as you add outfits.
+- **Theme toggle** in the header: Blue (default), Dark, and Light — remembered
+  across reloads.
+- **Outfitter capped at ~4 columns** so the left side gets more room; catalog
+  image boxes standardized with uniform padding; outfits with no bundled art are
+  hidden.
+- **Square pills** (8px radius) and more color throughout.
+
 ## v0.2 — first build-out update
 
 ### v0.2.5 — 2026-06-11
