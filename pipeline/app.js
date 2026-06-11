@@ -644,15 +644,20 @@ function fleetHoverShow(ev){ const b=ev.target.closest("[data-fleet]"); const bo
   box.classList.add("show"); fleetHoverMove(ev); }
 function fleetHoverMove(ev){ const box=el("fleetHover"); if(!box||!box.classList.contains("show")) return; const pad=14; let x=ev.clientX+pad,y=ev.clientY+pad; const w=box.offsetWidth,h=box.offsetHeight; if(x+w>window.innerWidth)x=ev.clientX-w-pad; if(y+h>window.innerHeight)y=ev.clientY-h-pad; box.style.left=x+"px"; box.style.top=y+"px"; }
 function fleetHoverHide(ev){ const box=el("fleetHover"); const to=ev.relatedTarget; if(box && !(to&&to.closest&&to.closest("#fleetList"))) box.classList.remove("show"); }
-function fleetToHash(){ try{ return "#f="+btoa(unescape(encodeURIComponent(JSON.stringify(state.fleet.map(e=>({s:e.ship,o:e.outfits,l:e.label,g:e.flag?1:0})))))); }catch(e){ return ""; } }
+function fleetToHash(){ try{ const payload={n:state.fleetName, s:state.fleet.map(e=>({s:e.ship,o:e.outfits,l:e.label,g:e.flag?1:0}))}; return "#f="+btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); }catch(e){ return ""; } }
 function shareFleet(){ if(!state.fleet.length){ showToast("Fleet is empty"); return; } const h=fleetToHash(); if(!h) return; const url=location.origin+location.pathname+h;
   try{ history.replaceState(null,"",h); }catch(e){}
   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(()=>showToast("Fleet link copied"),()=>prompt("Copy this fleet link:",url)); } else prompt("Copy this fleet link:",url); }
+function uniqueFleetName(base){ base=String(base||"").trim()||"Imported fleet"; if(!(base in state.fleets)) return base; let i=2; while((base+" "+i) in state.fleets) i++; return base+" "+i; }
 function parseFleetCode(str){ if(!str) return null; const m=String(str).match(/f=([^&\s]+)/); const code=m?m[1]:String(str).trim();
-  try{ const arr=JSON.parse(decodeURIComponent(escape(atob(code)))); if(Array.isArray(arr)) return arr.filter(e=>e&&DATA.ships[e.s]).map(e=>({ship:e.s,outfits:e.o||{},label:e.l,flag:!!e.g})); }catch(e){} return null; }
+  try{ const data=JSON.parse(decodeURIComponent(escape(atob(code))));
+    const arr=Array.isArray(data)?data:(data&&Array.isArray(data.s)?data.s:null); if(!arr) return null;
+    const ships=arr.filter(e=>e&&DATA.ships[e.s]).map(e=>({ship:e.s,outfits:e.o||{},label:e.l,flag:!!e.g}));
+    return {name:(!Array.isArray(data)&&data.n)?String(data.n):null, ships}; }catch(e){} return null; }
 function importFleet(){ const str=prompt("Paste a fleet link or code:"); if(str==null) return; const f=parseFleetCode(str);
-  if(!f||!f.length){ showToast("Couldn’t read that fleet code"); return; }
-  setActiveFleetArr(f); state.fleetSel=-1; saveFleet(); renderFleet(); showToast("Imported "+f.length+" ship"+(f.length>1?"s":"")); }
+  if(!f||!f.ships.length){ showToast("Couldn't read that fleet code"); return; }
+  const name=uniqueFleetName(f.name||"Imported fleet"); state.fleets[name]=f.ships; state.fleetName=name; state.fleet=state.fleets[name]; state.fleetSel=-1; saveFleet(); renderFleet();
+  showToast("Imported \""+name+"\" ("+f.ships.length+" ship"+(f.ships.length>1?"s":"")+")"); }
 
 /* ---------- share (current build encoded in the URL hash) ---------- */
 function buildToHash(){ try{ const payload={s:state.ship.name,o:state.installed,t:state.tier}; return "#b="+btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); }catch(e){ return ""; } }
@@ -662,15 +667,14 @@ function shareBuild(){ const h=buildToHash(); if(!h) return; const url=location.
   else prompt("Copy this build link:",url); }
 function loadFromHash(){ const hash=location.hash||"";
   const fm=hash.match(/f=([^&]+)/);
-  if(fm){ const f=parseFleetCode("f="+fm[1]); if(f&&f.length){ setActiveFleetArr(f); state.fleetSel=-1; saveFleet(); renderFleet(); } }
-  const m=hash.match(/b=([^&]+)/); if(!m){ return !!fm; }
-  try{ const p=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
-    if(p&&p.s&&DATA.ships[p.s]){
-      if(typeof p.t==="number"){ state.tier=p.t; document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",+x.dataset.tier===p.t)); }
-      state.ship=DATA.ships[p.s]; state.installed={};
-      for(const k in (p.o||{})){ if(DATA.outfits[k]) state.installed[k]=p.o[k]; }
-      state.loadoutName="shared"; renderAll(); updateShipPickBtn(); return true; }
-  }catch(e){} return !!fm; }
+  if(fm){ const f=parseFleetCode("f="+fm[1]); if(f&&f.ships.length){ const name=uniqueFleetName(f.name||"Imported fleet"); state.fleets[name]=f.ships; state.fleetName=name; state.fleet=state.fleets[name]; state.fleetSel=-1; saveFleet(); renderFleet(); } }
+  const m=hash.match(/b=([^&]+)/); let okb=false;
+  if(m){ try{ const p=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+    if(p&&p.s&&DATA.ships[p.s]){ if(typeof p.t==="number"){ state.tier=p.t; document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",+x.dataset.tier===p.t)); }
+      state.ship=DATA.ships[p.s]; state.installed={}; for(const k in (p.o||{})){ if(DATA.outfits[k]) state.installed[k]=p.o[k]; }
+      state.loadoutName="shared"; renderAll(); updateShipPickBtn(); okb=true; } }catch(e){} }
+  if(fm||m){ try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} }
+  return okb||!!fm; }
 
 /* ---------- ship pickers (race -> model) ---------- */
 const MODEL_RE=/^Model \d+/i;

@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.46 — 2026-06-11
+- Importing a fleet now adds it as a new named fleet (carrying the shared fleet's name) instead
+  of overwriting the active one; a name clash gets a numeric suffix (e.g. "Raiders 2"). The
+  fleet name is included in Share links. Opening a shared link clears the URL hash afterward so
+  reloading doesn't keep re-importing. Old (nameless) share codes still import.
+
 ### v0.3.45 — 2026-06-11
 - Drive badge restyled: no background, just a bold letter with a dark outline for legibility —
   bright green for H/S (hyperdrive / scram), blue for J (jump drive). Warning badge made larger
