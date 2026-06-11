@@ -570,15 +570,22 @@ function selectFleet(i){ const e=state.fleet[i]; if(!e) return; state.fleetSel=i
   if(DATA.ships[e.ship]){ state.ship=DATA.ships[e.ship]; state.installed={...(e.outfits||{})}; state.loadoutName="fleet:"+i; renderAll(); updateShipPickBtn(); }
   else renderFleet(); }
 function _withBuild(e,fn){ const sShip=state.ship,sInst=state.installed; state.ship=DATA.ships[e.ship]; state.installed={...(e.outfits||{})}; let r; try{ r=fn(); } finally{ state.ship=sShip; state.installed=sInst; } return r; }
-function fleetTotals(){ let cost=0,crew=0,cargo=0;
-  for(const e of state.fleet){ if(!DATA.ships[e.ship]) continue; _withBuild(e,()=>{ cost+=shipCost(); crew+=requiredCrew(); cargo+=eff("cargo space"); }); }
-  return {cost,crew,cargo,daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length}; }
+function fleetTotals(){ let cost=0,crew=0,cargo=0,bays=0,smallCraft=0;
+  for(const e of state.fleet){ const sh=DATA.ships[e.ship]; if(!sh) continue;
+    _withBuild(e,()=>{ cost+=shipCost(); crew+=requiredCrew(); cargo+=eff("cargo space"); });
+    bays += Object.values(sh.hardpoints.bays||{}).reduce((a,b)=>a+b,0);
+    if(sh.category==="Fighter"||sh.category==="Drone") smallCraft++; }
+  return {cost,crew,cargo,daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft}; }
 function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   const t=fleetTotals();
   el("fleetCount").textContent = t.n ? `${t.n} ship${t.n>1?"s":""} · ${MONEY(t.cost)} to buy` : "";
-  el("ftCargo").textContent = FMT(t.cargo)+" t";
-  el("ftCrew").textContent = FMT(t.crew);
-  el("ftCost").textContent = MONEY(t.daily)+"/day";
+  const trow=(l,val)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals"><b class="val mono">${val}</b></span></div>`;
+  el("fleetTotals").innerHTML =
+    trow("Total ships", FMT(t.n)) +
+    trow("Total cargo", FMT(t.cargo)+" t") +
+    trow("Total crew", FMT(t.crew)) +
+    trow("Daily cost", MONEY(t.daily)+"/day") +
+    trow("Fighters / drones", `${t.smallCraft} / ${t.bays}`);
   const list=el("fleetList");
   if(!state.fleet.length){ list.innerHTML=`<div class="fleet-empty">No ships yet \u2014 build one and press \u201c+ Add to Fleet\u201d.</div>`; }
   else{ list.innerHTML = state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const nm=sh?(sh.displayName||sh.name):e.ship;

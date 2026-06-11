@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.43 — 2026-06-11
+- Fleet panel now grows to fill the leftover space below the ship card (the ship list scrolls
+  inside it) instead of a fixed height. Fleet totals restyled to match the ship stat pills
+  (label left, value pill right) and expanded to: Total ships, Total cargo, Total crew, Daily
+  cost, and Fighters / drones (count of fighter/drone hulls out of the fleet's total bays).
+
 ### v0.3.42 — 2026-06-11
 - Install lock now also guards cargo space (and fuel capacity) from going negative, matching
   the game. Previously cargo-converting outfits like "Outfits Expansion" could push cargo to
