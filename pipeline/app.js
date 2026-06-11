@@ -100,8 +100,20 @@ function computeStats(){
     net:[60*(idleE-movE-firE-shE-huE), 60*(idleH+movH+firH+shH+huH)],
     max:[maxEnergy, maxHeat]
   };
-  // sustainability
-  const energyOK = eh.idle[0] >= -0.0001;
+  // --- sustainability breakpoints ---------------------------------------
+  // ENERGY: a build "runs out of power" if it either (a) has no generation
+  // source at all (empty hull, no reactor/solar/fuel cell), or (b) its idle
+  // draw already exceeds generation so batteries only ever deplete. Judge
+  // sustainability at idle (passive systems + cooling): thrust/fire are bursty
+  // and buffered by the capacitor, so a non-negative idle balance means the
+  // capacitor always recharges. No source at all => never recharges => bad.
+  const energyGen = A("energy generation")+A("solar collection")+A("fuel energy");
+  const hasEnergySource = energyGen > 1e-9;
+  const energyOK = hasEnergySource && eh.idle[0] >= -0.0001;
+  // HEAT: heat settles where dissipation == input; the ship overheats if that
+  // equilibrium sits above max heat, i.e. sustained heat input > maxHeat. Use
+  // the cruise load (idle + movement); weapon fire is bursty and the heat bar
+  // tolerates short spikes.
   const cruiseHeatIn = Math.max(0,eh.idle[1]) + Math.max(0,eh.moving[1]);
   const totalHeatIn = cruiseHeatIn + Math.max(0,eh.firing[1]) + Math.max(0,eh.shieldhull[1]);
   const heatOK = cruiseHeatIn <= maxHeat + 0.0001;

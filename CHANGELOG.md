@@ -11,6 +11,17 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.38 — 2026-06-11
+- Fixed the Energy alert reading "OK" on an empty hull. The check now requires an
+  actual generation source (reactor / solar / fuel cell) in addition to a non-negative
+  idle energy balance — a ship with no way to make power now correctly flags Energy x.
+  Documented the energy and heat sustainability breakpoints inline. Stock builds are
+  unaffected (still pass).
+
+### v0.3.37 — 2026-06-11
+- Top-down ship sprite: dialed back the edge blur and lightened the grayscale fill a
+  touch (less blur, less darkness) per feedback that it was slightly over-blurred and dark.
+
 ### v0.3.20 — 2026-06-11
 - Stats restyled to "label outside, value(s) in pill boxes" across Capacity, Movement,
   Energy & Heat, and the cost/crew/cargo/fuel quick-stats (Energy & Heat show two value
