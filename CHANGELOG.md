@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.20 — 2026-06-11
+- Stats restyled to "label outside, value(s) in pill boxes" across Capacity, Movement,
+  Energy & Heat, and the cost/crew/cargo/fuel quick-stats (Energy & Heat show two value
+  pills per row). Reduced number font sizes throughout. Left art now matches the pill
+  column width. Race/Type/Name header shrunk and kept to a single line (long ship names
+  like "Korsmanath A'awoj" no longer wrap).
+
 ### v0.3.19 — 2026-06-11
 - Recombined Energy & Heat into one group (E and H side by side per row) with a divider
   separating the two columns so they no longer touch. Reduced the stat-pill number font

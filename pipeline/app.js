@@ -135,32 +135,30 @@ function renderMeters(){
   const totalBays = Object.values(hp.bays||{}).reduce((a,b)=>a+b,0);
   const guns = installedOf(o=>num(o.attributes["gun ports"])<0);
   const turrets = installedOf(o=>num(o.attributes["turret mounts"])<0);
-  const pill=(lab,val,cls,bad)=>`<span class="qs${bad?' bad':''}"><span>${lab}</span><b class="mono ${cls||''}">${val}</b></span>`;
-  const capPill=(lab,key,unit)=>{const c=capacity(key);return pill(lab,`${FMT(c.used)} / ${FMT(c.total)}${unit||''}`,'',c.used>c.total+1e-6);};
+  const v=(val,cls,bad)=>`<b class="val mono ${cls||''}${bad?' bad':''}">${val}</b>`;
+  const row=(l,...vals)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals">${vals.join("")}</span></div>`;
+  const capRow=(l,key,unit)=>{const c=capacity(key);return row(l,v(`${FMT(c.used)} / ${FMT(c.total)}${unit||''}`,'',c.used>c.total+1e-6));};
 
   el("capPills").innerHTML =
-    capPill("Outfit","outfit space"," t")+
-    capPill("Weapon","weapon capacity"," t")+
-    capPill("Engine","engine capacity"," t")+
-    pill("Gun ports",`${guns} / ${hp.guns}`,'',guns>hp.guns)+
-    pill("Turrets",`${turrets} / ${hp.turrets}`,'',turrets>hp.turrets)+
-    (totalBays?pill("Bays",String(totalBays)):"");
+    capRow("Outfit","outfit space"," t")+capRow("Weapon","weapon capacity"," t")+capRow("Engine","engine capacity"," t")+
+    row("Gun ports",v(`${guns} / ${hp.guns}`,'',guns>hp.guns))+
+    row("Turrets",v(`${turrets} / ${hp.turrets}`,'',turrets>hp.turrets))+
+    (totalBays?row("Bays",v(String(totalBays))):"");
   el("massReadout").textContent = FMT(s.emptyMass)+" t";
 
   el("movePills").innerHTML =
-    pill("Max speed",FMT(s.maxSpeed))+
-    pill("Acceleration",`${FMT(s.accel[0])}–${FMT(s.accel[1])}`)+
-    pill("Turning",`${FMT(s.turn[0])}–${FMT(s.turn[1])}`)+
-    pill("Shields",`${FMT(s.shields)}${s.hasSR?" +"+FMT(s.shieldRegen)+"/s":""}`)+
-    pill("Hull",`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair)+"/s":""}`);
+    row("Max speed",v(FMT(s.maxSpeed)))+
+    row("Acceleration",v(`${FMT(s.accel[0])}–${FMT(s.accel[1])}`))+
+    row("Turning",v(`${FMT(s.turn[0])}–${FMT(s.turn[1])}`))+
+    row("Shields",v(`${FMT(s.shields)}${s.hasSR?" +"+FMT(s.shieldRegen):""}`))+
+    row("Hull",v(`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair):""}`));
 
-  const eh=(lab,e,h)=>`<span class="qs2"><span>${lab}</span><b class="mono en">${FMT(e)}</b><b class="mono ht">${FMT(h)}</b></span>`;
   el("ehPills").innerHTML =
-    eh("Idle",s.eh.idle[0],s.eh.idle[1])+
-    eh("Moving",s.eh.moving[0],s.eh.moving[1])+
-    eh("Firing",s.eh.firing[0],s.eh.firing[1])+
-    eh("Net",s.eh.net[0],s.eh.net[1])+
-    eh("Max",s.eh.max[0],s.eh.max[1]);
+    row("Idle",v(FMT(s.eh.idle[0]),"en"),v(FMT(s.eh.idle[1]),"ht"))+
+    row("Moving",v(FMT(s.eh.moving[0]),"en"),v(FMT(s.eh.moving[1]),"ht"))+
+    row("Firing",v(FMT(s.eh.firing[0]),"en"),v(FMT(s.eh.firing[1]),"ht"))+
+    row("Net",v(FMT(s.eh.net[0]),"en"),v(FMT(s.eh.net[1]),"ht"))+
+    row("Max",v(FMT(s.eh.max[0]),"en"),v(FMT(s.eh.max[1]),"ht"));
 
   el("totalCost").textContent = MONEY(s.cost);
   renderQuickStats(s); renderAlerts(s);
@@ -179,8 +177,8 @@ function flag(ok, goodText, badText){
 
 function renderQuickStats(s){
   const crew=requiredCrew(), bunks=eff("bunks");
-  const rows=[["Cost",MONEY(s.cost)],["Crew",`${FMT(crew)}/${FMT(bunks)}`],["Cargo",FMT(s.cargo)+"t"],["Fuel",FMT(s.fuel)]];
-  el("quickStats").innerHTML = rows.map(([k,v])=>`<div class="qs"><span>${k}</span><b class="mono">${v}</b></div>`).join("");
+  const row=(l,val)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals"><b class="val mono">${val}</b></span></div>`;
+  el("quickStats").innerHTML = row("Cost",MONEY(s.cost))+row("Crew",`${FMT(crew)} / ${FMT(bunks)}`)+row("Cargo",FMT(s.cargo)+" t")+row("Fuel",FMT(s.fuel));
 }
 function renderAlerts(s){
   const hasThrust=eff("thrust")>0, hasTurn=eff("turn")>0;
