@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.34 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.35 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -30,17 +30,18 @@
     <feColorMatrix type="saturate" values="0" result="g"/>
     <!-- darker grayscale fill -->
     <feComponentTransfer in="g" result="fill">
-      <feFuncR type="linear" slope="0.28"/><feFuncG type="linear" slope="0.28"/><feFuncB type="linear" slope="0.28"/>
+      <feFuncR type="linear" slope="0.46"/><feFuncG type="linear" slope="0.46"/><feFuncB type="linear" slope="0.46"/>
     </feComponentTransfer>
-    <!-- faint interior structure (low intensity, no lift = less noise) -->
+    <!-- faint, softened interior structure (muted, low noise) -->
     <feConvolveMatrix in="g" order="3" preserveAlpha="true" kernelMatrix="0 -1 0 -1 4 -1 0 -1 0" result="edge"/>
-    <feComponentTransfer in="edge" result="edgeB">
-      <feFuncR type="linear" slope="1.15"/><feFuncG type="linear" slope="1.15"/><feFuncB type="linear" slope="1.2"/>
+    <feGaussianBlur in="edge" stdDeviation="0.4" result="edgeS"/>
+    <feComponentTransfer in="edgeS" result="edgeB">
+      <feFuncR type="linear" slope="0.7"/><feFuncG type="linear" slope="0.7"/><feFuncB type="linear" slope="0.72"/>
     </feComponentTransfer>
-    <!-- crisp light-grey silhouette outline stroke -->
-    <feMorphology in="SourceAlpha" operator="dilate" radius="1.6" result="dil"/>
+    <!-- soft mid-grey silhouette outline stroke -->
+    <feMorphology in="SourceAlpha" operator="dilate" radius="1.4" result="dil"/>
     <feComposite in="dil" in2="SourceAlpha" operator="out" result="ring"/>
-    <feFlood flood-color="#b6c0d0" result="oc"/>
+    <feFlood flood-color="#8b96a6" result="oc"/>
     <feComposite in="oc" in2="ring" operator="in" result="outline"/>
     <feMerge><feMergeNode in="fill"/><feMergeNode in="edgeB"/><feMergeNode in="outline"/></feMerge>
   </filter>
