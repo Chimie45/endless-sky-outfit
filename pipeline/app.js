@@ -623,7 +623,7 @@ function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   if(!state.fleet.length){ list.innerHTML=`<div class="fleet-empty">No ships yet. Build one and press “+ Add to Fleet”.</div>`; }
   else{ list.innerHTML = state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const base=sh?(sh.displayName||sh.name):e.ship; const nm=e.label||base;
       const dr=buildDrive(e), iss=buildIssue(e);
-      const drB=dr?`<span class="fs-drive" title="${dr==="J"?"Jump drive":dr==="S"?"Scram drive":"Hyperdrive"}">${dr}</span>`:"";
+      const drB=dr?`<span class="fs-drive ${dr==="J"?"dj":"dg"}" title="${dr==="J"?"Jump drive":dr==="S"?"Scram drive":"Hyperdrive"}">${dr}</span>`:"";
       const wB=iss?`<span class="fs-warn ${iss.lvl}" title="${iss.msg}">⚠</span>`:"";
       return `<button class="fleet-ship${i===state.fleetSel?' sel':''}${e.flag?' flag':''}" data-fleet="${i}" title="${base}">`+
         `<span class="fs-art">${artTile(sh?(sh.thumbnail||sh.sprite):null, mono2(base), "var(--accent)")}${drB}${wB}</span>`+

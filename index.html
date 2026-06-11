@@ -222,10 +222,12 @@ svg.schem{width:100%;height:340px;display:block}
 .fleet-ship.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--panel)}
 .fleet-ship .fs-art{position:relative;width:40px;height:40px;display:block}
 .fleet-ship.flag{border-color:#5aa9ff;box-shadow:0 0 0 1px #5aa9ff,0 0 10px 1px rgba(90,169,255,.55)}
-.fs-drive{position:absolute;top:-3px;left:-3px;min-width:13px;height:13px;padding:0 2px;border-radius:4px;background:rgba(6,10,18,.9);border:1px solid var(--line2);color:var(--accent2);font-size:8px;font-weight:700;line-height:13px;text-align:center}
-.fs-warn{position:absolute;bottom:-3px;right:-3px;width:14px;height:14px;border-radius:50%;font-size:9px;line-height:13px;text-align:center;font-weight:700}
-.fs-warn.red{background:#5a1414;color:#ff8080;border:1px solid #ff8080}
-.fs-warn.yellow{background:#4a3a0e;color:#ffd24a;border:1px solid #ffd24a}
+.fs-drive{position:absolute;top:-4px;left:-3px;font-size:12px;font-weight:800;line-height:1;letter-spacing:0;text-shadow:0 0 2px #000,0 0 3px #000,0 1px 2px #000}
+.fs-drive.dg{color:#36ff7a}
+.fs-drive.dj{color:#4aa6ff}
+.fs-warn{position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;border-radius:50%;font-size:12px;line-height:17px;text-align:center;font-weight:800;box-shadow:0 0 4px rgba(0,0,0,.7)}
+.fs-warn.red{background:#6e1414;color:#ff9a9a;border:1px solid #ff6a6a}
+.fs-warn.yellow{background:#5a4609;color:#ffdf6e;border:1px solid #ffce3a}
 .val.warn{border-color:#ffd24a;color:#ffd24a}
 .fleet-hover{position:fixed;z-index:60;pointer-events:none;display:none;min-width:150px;background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--txt);box-shadow:0 8px 22px rgba(0,0,0,.55)}
 .fleet-hover.show{display:block}
@@ -389,7 +391,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.44 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.45 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -1202,7 +1204,7 @@ function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   if(!state.fleet.length){ list.innerHTML=`<div class="fleet-empty">No ships yet. Build one and press “+ Add to Fleet”.</div>`; }
   else{ list.innerHTML = state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const base=sh?(sh.displayName||sh.name):e.ship; const nm=e.label||base;
       const dr=buildDrive(e), iss=buildIssue(e);
-      const drB=dr?`<span class="fs-drive" title="${dr==="J"?"Jump drive":dr==="S"?"Scram drive":"Hyperdrive"}">${dr}</span>`:"";
+      const drB=dr?`<span class="fs-drive ${dr==="J"?"dj":"dg"}" title="${dr==="J"?"Jump drive":dr==="S"?"Scram drive":"Hyperdrive"}">${dr}</span>`:"";
       const wB=iss?`<span class="fs-warn ${iss.lvl}" title="${iss.msg}">⚠</span>`:"";
       return `<button class="fleet-ship${i===state.fleetSel?' sel':''}${e.flag?' flag':''}" data-fleet="${i}" title="${base}">`+
         `<span class="fs-art">${artTile(sh?(sh.thumbnail||sh.sprite):null, mono2(base), "var(--accent)")}${drB}${wB}</span>`+

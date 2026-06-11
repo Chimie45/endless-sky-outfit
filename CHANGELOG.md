@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.45 — 2026-06-11
+- Drive badge restyled: no background, just a bold letter with a dark outline for legibility —
+  bright green for H/S (hyperdrive / scram), blue for J (jump drive). Warning badge made larger
+  and higher-contrast.
+
 ### v0.3.44 — 2026-06-11
 - Fleet ships now show two corner badges on their icon: a drive type top-left (H hyperdrive,
   S scram, J jump) and a status warning bottom-right — red for a broken ship (no thrust /
