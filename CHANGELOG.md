@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.52 — 2026-06-12
+- Fleet panel cleanup + readability. Fleet stats now flow in two columns (numbers on the left,
+  health warnings on the right) so the panel is about half as tall and no longer pushes its
+  bottom rows off-screen. Bumped font sizes across the ship-card stats and the fleet panel
+  (labels, values, ship names, controls). Shortened stat labels (Cargo, Crew, Daily, Fighters,
+  Drones) to fit the two-column layout, and arranged the fleet action buttons in a 2-wide grid.
+
 ### v0.3.51 — 2026-06-11
 - Removed all scrollbars from the fleet panel. Audit found three sources (the stats column, the
   ship list, and the right/buttons column each had overflow-y:auto); the panel now sizes to its
