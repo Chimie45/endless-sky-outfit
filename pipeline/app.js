@@ -279,7 +279,11 @@ function drawHardpoints(){
       body+=`<circle cx="${x}" cy="${y}" r="5" fill="none" stroke="${col}" stroke-width="2" opacity="${op}"/>`;
     else
       body+=`<rect x="${x-2.5}" y="${y-3}" width="5" height="8" rx="1.5" fill="${col}" opacity="${op}"/>`;
-    if(label!==null){ const left=p.x<0; labels.push({x,y,left,label,lit,lx:left?6:SW-6,anchor:left?'start':'end'}); }
+    if(label!==null){
+      const left=p.x<0, halfW=dispW/2, pad=16;
+      const lx = left ? Math.max(4, cx-halfW-pad) : Math.min(SW-4, cx+halfW+pad);
+      labels.push({x,y,left,label,lit,lx,anchor:left?'end':'start'});
+    }
   }
   for(const side of [true,false]){
     const arr=labels.filter(l=>l.left===side).sort((a,b)=>a.y-b.y);

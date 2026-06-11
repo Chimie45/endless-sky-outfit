@@ -11,6 +11,15 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.7 — 2026-06-11
+- Installed loadout is now its own full-height panel occupying the right 1/3 of the
+  left column (top of the ship card down to the bottom of Energy & Heat), separate
+  from the ship display. The ship card + Capacity/Movement/Energy fill the left 2/3.
+- Top-down sprite shrunk further (≤280px tall, well under the 400px cap) so the hull
+  diagram is more compact.
+- Hardpoint labels pulled in close to the hull edges (short lead lines) instead of
+  pinned to the panel edges.
+
 ### v0.3.6 — 2026-06-11
 - Top-down ship sprite shrunk and capped (max 600px / ~84% of the display) so it no
   longer fills the frame, leaving room for hardpoint labels.
