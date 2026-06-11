@@ -27,7 +27,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:3, cat:"All", q:"", view:"schem", loadoutName:"empty" };
+let state = { ship:null, installed:{}, tier:3, cat:"All", q:"", view:"schem", loadoutName:"empty", showUnreleased:false };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -313,6 +313,7 @@ function visibleOutfits(){
   const q=state.q.toLowerCase();
   return Object.values(DATA.outfits).filter(o=>{
     if(!o.thumbnail) return false;            // hide outfits with no bundled art
+    if(!state.showUnreleased && !o.obtainable) return false;  // hide unreleased/unused
     if(factionTier(o.faction)>state.tier) return false;
     if(state.cat!=="All" && o.category!==state.cat) return false;
     if(q && !o.name.toLowerCase().includes(q)) return false;
@@ -447,8 +448,22 @@ function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderC
 /* ---------- ship pickers (race -> model) ---------- */
 function shipsByFaction(){
   const byFac={};
-  for(const s of Object.values(DATA.ships)){ (byFac[s.faction] ||= []).push(s); }
+  for(const s of Object.values(DATA.ships)){
+    if(!state.showUnreleased && !s.obtainable) continue;
+    (byFac[s.faction] ||= []).push(s);
+  }
   return byFac;
+}
+function refreshPickers(){
+  const curFac = state.ship ? state.ship.faction : null;
+  const curShip = state.ship ? state.ship.name : null;
+  buildFactionSelect();
+  const facOpts=[...el("facSel").options].map(o=>o.value);
+  const fac = facOpts.includes(curFac)?curFac:facOpts[0];
+  el("facSel").value=fac; buildModelSelect(fac);
+  const shipOpts=[...el("shipSel").options].map(o=>o.value);
+  if(curShip && shipOpts.includes(curShip)) el("shipSel").value=curShip;
+  else if(shipOpts.length){ el("shipSel").value=shipOpts[0]; setShip(shipOpts[0]); }
 }
 function buildFactionSelect(){
   const byFac=shipsByFaction();
@@ -477,6 +492,9 @@ function setTheme(t){
 }
 function init(){
   el("ver").textContent=DATA.version;
+  let su=null; try{ su=localStorage.getItem("drydock-unreleased"); }catch(e){}
+  state.showUnreleased = su==="1";
+  el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
   buildFactionSelect(); renderCatbar();
   const def = DATA.ships["Bactrian"]||DATA.ships["Falcon"]||DATA.ships["Leviathan"]||Object.values(DATA.ships)[0];
   el("facSel").value=def.faction;
@@ -493,6 +511,12 @@ function init(){
   el("shipSel").addEventListener("change",e=>setShip(e.target.value));
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("themeBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;setTheme(b.dataset.theme);});
+  el("unrelBtn").addEventListener("click",()=>{
+    state.showUnreleased=!state.showUnreleased;
+    try{ localStorage.setItem("drydock-unreleased", state.showUnreleased?"1":"0"); }catch(e){}
+    el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
+    refreshPickers(); renderCatalog();
+  });
   el("resetBtn").addEventListener("click",()=>loadLoadout("empty"));
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
     state.tier=+b.dataset.tier;

@@ -1,4 +1,4 @@
-import json, os, re, sys, glob
+import json, os, re, sys, glob, collections
 ROOT = sys.argv[1] if len(sys.argv) > 1 else "."
 DATA = os.path.join(ROOT, "data")
 VERSION = os.path.basename(os.path.abspath(ROOT)).replace("endless-sky-", "")
@@ -187,6 +187,21 @@ for nm, o in outfits.items():
 for nm, s in ships.items():
     locs = buy_ship.get(nm, [])
     s["soldAt"] = [{"planet": a, "system": b} for a, b in sorted({(l["planet"], l["system"]) for l in locs})]
+# ---- obtainable / unreleased flag ------------------------------------------
+# Count exact quoted-name occurrences across all data files. A ship/outfit whose
+# name appears only once (its own definition) and nowhere else - no shipyard,
+# fleet, variant, mission or default loadout - is unreleased / unused content
+# (e.g. the "Emperor Beetle"). Anything referenced elsewhere is obtainable.
+_ref = collections.Counter()
+_q = re.compile(r'"([^"]*)"')
+for _p in files:
+    with open(_p, encoding="utf-8", errors="replace") as _fh:
+        for _line in _fh:
+            if _line.lstrip().startswith("#"): continue
+            for _m in _q.finditer(_line): _ref[_m.group(1)] += 1
+for _nm, _s in ships.items():   _s["obtainable"] = _ref[_nm] > 1
+for _nm, _o in outfits.items(): _o["obtainable"] = _ref[_nm] > 1
+
 OUTFIT_ORDER = ["Guns","Turrets","Secondary Weapons","Ammunition","Systems","Power","Engines","Hand to Hand","Unique","Minerals","Special","Licenses"]
 out = {"version":VERSION,"generated":"endless-sky stable data pipeline (phase 0)","categoryOrder":OUTFIT_ORDER,"ships":ships,"outfits":outfits}
 dst = sys.argv[2] if len(sys.argv) > 2 else "endless-sky-data.json"
@@ -194,4 +209,6 @@ os.makedirs(os.path.dirname(os.path.abspath(dst)), exist_ok=True)
 with open(dst, "w", encoding="utf-8") as fh: json.dump(out, fh, separators=(",", ":"), ensure_ascii=False)
 nvar = sum(len(s["variants"]) for s in ships.values())
 ndisp = sum(1 for s in ships.values() if s["displayName"] != s["name"])
-print(f"version {VERSION} | ships {len(ships)} (display-named {ndisp}) | variants {nvar} | outfits {len(outfits)} | bytes {os.path.getsize(dst):,}")
+nso = sum(1 for s in ships.values() if not s["obtainable"])
+noo = sum(1 for o in outfits.values() if not o["obtainable"])
+print(f"version {VERSION} | ships {len(ships)} (display-named {ndisp}, unreleased {nso}) | variants {nvar} | outfits {len(outfits)} (unreleased {noo}) | bytes {os.path.getsize(dst):,}")

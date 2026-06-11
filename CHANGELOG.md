@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.2 — 2026-06-11
+- **Unreleased/unobtainable filter.** The parser now flags any ship or outfit
+  referenced only by its own definition (no shipyard, fleet, variant, mission, or
+  default loadout) as unreleased — e.g. the Emperor Beetle and 4 other ships, plus
+  ~79 unused outfits. A header **"Show unreleased"** toggle (default off, persisted)
+  reveals them when you want.
+
 ### v0.3.1 — 2026-06-11
 - **Ship card rebuilt**: 130×130 art window under the ship name; the hardpoint
   schematic is now the always-on display (Art/Hardpoints toggle removed); the

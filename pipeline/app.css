@@ -74,6 +74,9 @@ select:focus,input:focus{border-color:var(--accent)}
 .costchip .v{font-size:20px;color:var(--accent);font-weight:700}
 .linkbtn{background:transparent;border:1px solid var(--line2);border-radius:7px;padding:8px 12px;color:var(--dim)}
 .linkbtn:hover{border-color:var(--bad);color:var(--bad)}
+.toggle{background:var(--panel2);border:1px solid var(--line2);color:var(--dim);border-radius:8px;padding:7px 11px;font-size:12px}
+.toggle:hover{border-color:var(--accent)}
+.toggle[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
 
 /* ---- 2-column layout: loadout (left) | outfitter (right) ---- */
 main{display:grid;grid-template-columns:minmax(0,1fr) clamp(430px,40vw,700px);gap:0;height:calc(100vh - 61px)}
