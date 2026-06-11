@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.16 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.17 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -33,9 +33,8 @@
         <div class="shipcard" id="shipcard">
           <div class="shiphead">
             <div class="shipid">
-              <div class="fac" id="hullFaction"></div>
-              <div class="cat" id="hullCat"></div>
               <div class="nm" id="hullName"></div>
+              <div class="idmeta"><span class="fac" id="hullFaction"></span> · <span class="cat" id="hullCat"></span></div>
             </div>
             <div class="alerts" id="alerts"></div>
           </div>
@@ -45,35 +44,25 @@
               <div class="quickstats" id="quickStats"></div>
             </div>
             <div class="displaycol">
-              <div class="stage" id="stage"></div>
+              <div class="stagewrap">
+                <div class="stage" id="stage"></div>
+                <div class="legend" id="legend">
+                  <span><i style="background:var(--gun)"></i>Gun</span>
+                  <span><i style="background:var(--turret)"></i>Turret</span>
+                  <span><i style="background:var(--engine)"></i>Engine</span>
+                  <span><i style="background:var(--bay)"></i>Bay</span>
+                </div>
+              </div>
+            </div>
+            <div class="rightstats">
+              <div class="statgroup"><div class="eyebrow"><span>Capacity</span><span id="massReadout" class="mono"></span></div><div class="statpills" id="capPills"></div></div>
+              <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
+              <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">/s</span></div><div class="statpills" id="ehPills"></div></div>
             </div>
           </div>
-          <div class="legend" id="legend">
-            <span><i style="background:var(--gun)"></i>Gun</span>
-            <span><i style="background:var(--turret)"></i>Turret</span>
-            <span><i style="background:var(--engine)"></i>Engine</span>
-            <span><i style="background:var(--bay)"></i>Bay</span>
-          </div>
+          <div class="presetlabel eyebrow">Loadout</div>
           <div class="variants" id="variants"></div>
           <div class="dropmsg">Drop to install</div>
-        </div>
-
-        <div class="statcols">
-          <div class="sect">
-            <div class="eyebrow"><span>Capacity</span><span id="massReadout" class="mono"></span></div>
-            <div id="meters"></div>
-          </div>
-          <div class="statstack">
-            <div class="sect">
-              <div class="eyebrow"><span>Movement &amp; defense</span></div>
-              <div class="rows" id="moveRows"></div>
-            </div>
-            <div class="sect">
-              <div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">/s</span></div>
-              <table class="eh"><thead><tr><th></th><th>E</th><th>H</th></tr></thead>
-                <tbody id="ehBody"></tbody></table>
-            </div>
-          </div>
         </div>
       </div>
 

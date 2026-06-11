@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.17 — 2026-06-11
+- Ship card relayout: ship name now sits inline with its faction/class; the
+  Gun/Turret/Engine/Bay key is overlaid inside the (skinnier, centered) top-down image;
+  and Capacity / Movement & Defense / Energy & Heat are shown as pill boxes to the right
+  of the image (matching the cost/speed/shields style). Presets re-labeled "Loadout" and
+  tidied. Frees the area below the card for the fleet tracker.
+
 ### v0.3.16 — 2026-06-11
 - Reverted the v0.3.13 and v0.3.15 left-column layout experiments (stats-in-narrow-column
   and image-centerpiece) back to the v0.3.12 layout. Kept the ship picker and the computed

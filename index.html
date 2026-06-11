@@ -146,13 +146,16 @@ main{display:grid;grid-template-columns:minmax(0,1fr) clamp(430px,40vw,700px);ga
 .shipcard{position:relative;border:1px solid var(--line);border-radius:14px;background:
   radial-gradient(460px 320px at 50% 34%, rgba(57,182,246,.08), transparent 70%),var(--panel);
   padding:12px;margin-bottom:0}
-.shiphead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
-.cardbody{display:grid;grid-template-columns:130px minmax(0,1fr);gap:16px;align-items:stretch}
+.shiphead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px}
+.shipid{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.idmeta{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.idmeta .fac{color:var(--accent2)}
+.cardbody{display:grid;grid-template-columns:150px minmax(0,1fr) 236px;gap:14px;align-items:stretch}
 .displaycol{display:flex;min-width:0}
 .loadcol{min-width:0;max-height:360px;display:flex;flex-direction:column}
 .loadcol>.eyebrow{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:8px}
 .loadcol #loadout{flex:1;min-height:0;overflow-y:auto;padding-right:4px}
-.infocol{width:130px;display:flex;flex-direction:column;gap:7px}
+.infocol{width:150px;display:flex;flex-direction:column;gap:7px}
 .displaycol{min-width:0}
 .displaycol{min-width:0}
 .artbox{width:130px;height:130px;border:1px solid var(--line);border-radius:10px;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle at 50% 38%,var(--tile1),var(--tile2))}
@@ -160,20 +163,21 @@ main{display:grid;grid-template-columns:minmax(0,1fr) clamp(430px,40vw,700px);ga
 .loadsect{flex:1;min-height:0;display:flex;flex-direction:column}
 .loadsect>.eyebrow{margin-bottom:8px}
 .loadsect #loadout{flex:1;min-height:0;overflow-y:auto;padding-right:4px}
-.shiphead .nm{font-size:21px;color:var(--bright);font-weight:700;line-height:1.15}
+.shiphead .nm{font-size:20px;color:var(--bright);font-weight:700;line-height:1.1}
 .shiphead .cat{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
 .shiphead .fac{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent2)}
 .viewtoggle{display:flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden;flex:none}
 .viewtoggle button{background:var(--panel2);border:0;padding:5px 9px;color:var(--dim);font-size:10.5px;letter-spacing:.05em;border-right:1px solid var(--line)}
 .viewtoggle button:last-child{border-right:0}
 .viewtoggle button[aria-pressed=true]{background:var(--accent2);color:#fff;font-weight:700}
-.stage{position:relative;flex:1;min-height:236px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:radial-gradient(ellipse 72% 82% at 50% 44%, var(--tile1), var(--tile2))}
+.stagewrap{position:relative;flex:1;display:flex;min-height:300px}
+.stage{position:relative;flex:1;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:radial-gradient(ellipse 72% 82% at 50% 44%, var(--tile1), var(--tile2))}
 .stage img.shipimg{max-width:96%;max-height:280px;object-fit:contain;filter:drop-shadow(0 8px 26px rgba(0,0,0,.6))}
 .stage .noimg{color:var(--dim);font-size:12px;text-align:center}
 svg.schem{width:100%;height:340px;display:block}
 .shipsprite{max-width:46%;max-height:280px;object-fit:contain;filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
 .hpoverlay{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:4px;font-size:11px;color:var(--dim)}
+.legend{position:absolute;left:0;right:0;bottom:8px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:10.5px;color:var(--dim);pointer-events:none}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
 .dropmsg{position:absolute;inset:10px;border:2px dashed var(--accent);border-radius:12px;
@@ -183,7 +187,7 @@ svg.schem{width:100%;height:340px;display:block}
 .loadpanel.dragover{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 
 /* variant chips */
-.variants{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;margin-top:10px}
+.variants{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:7px;margin-top:0}
 .variants .vchip{font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt)}
 .variants .vchip:hover{border-color:var(--accent)}
 .variants .vchip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
@@ -277,8 +281,18 @@ table.eh tr.max td{color:var(--bright)}
 .note{font-size:11.5px;color:var(--dim);margin-top:8px}
 /* quick-stat overlay on ship image */
 .stagewrap{position:relative}
-.quickstats{position:static;width:130px;display:flex;flex-direction:column;gap:3px}
-.qs{display:flex;flex-direction:row;justify-content:space-between;align-items:baseline;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+.quickstats{position:static;width:100%;display:flex;flex-direction:column;gap:4px}
+.qs{display:flex;flex-direction:row;justify-content:space-between;align-items:baseline;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.qs span{color:var(--dim);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase}
+.qs b{color:var(--bright);font-size:12px}
+.qs.bad{border-color:var(--bad)} .qs.bad b{color:var(--bad)}
+.qs2{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:11px}
+.qs2 span{color:var(--dim);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase}
+.qs2 .en{color:var(--energy)} .qs2 .ht{color:var(--heat)}
+.rightstats{width:236px;display:flex;flex-direction:column;gap:10px}
+.statgroup>.eyebrow{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:6px}
+.statpills{display:flex;flex-direction:column;gap:4px}
+.presetlabel{margin:12px 0 6px}
 .qs span{font-size:8px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
 .qs b{font-size:13px;color:var(--bright)}
 /* ship-card pills */
@@ -318,7 +332,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.16 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.17 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -346,9 +360,8 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
         <div class="shipcard" id="shipcard">
           <div class="shiphead">
             <div class="shipid">
-              <div class="fac" id="hullFaction"></div>
-              <div class="cat" id="hullCat"></div>
               <div class="nm" id="hullName"></div>
+              <div class="idmeta"><span class="fac" id="hullFaction"></span> · <span class="cat" id="hullCat"></span></div>
             </div>
             <div class="alerts" id="alerts"></div>
           </div>
@@ -358,35 +371,25 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
               <div class="quickstats" id="quickStats"></div>
             </div>
             <div class="displaycol">
-              <div class="stage" id="stage"></div>
+              <div class="stagewrap">
+                <div class="stage" id="stage"></div>
+                <div class="legend" id="legend">
+                  <span><i style="background:var(--gun)"></i>Gun</span>
+                  <span><i style="background:var(--turret)"></i>Turret</span>
+                  <span><i style="background:var(--engine)"></i>Engine</span>
+                  <span><i style="background:var(--bay)"></i>Bay</span>
+                </div>
+              </div>
+            </div>
+            <div class="rightstats">
+              <div class="statgroup"><div class="eyebrow"><span>Capacity</span><span id="massReadout" class="mono"></span></div><div class="statpills" id="capPills"></div></div>
+              <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
+              <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">/s</span></div><div class="statpills" id="ehPills"></div></div>
             </div>
           </div>
-          <div class="legend" id="legend">
-            <span><i style="background:var(--gun)"></i>Gun</span>
-            <span><i style="background:var(--turret)"></i>Turret</span>
-            <span><i style="background:var(--engine)"></i>Engine</span>
-            <span><i style="background:var(--bay)"></i>Bay</span>
-          </div>
+          <div class="presetlabel eyebrow">Loadout</div>
           <div class="variants" id="variants"></div>
           <div class="dropmsg">Drop to install</div>
-        </div>
-
-        <div class="statcols">
-          <div class="sect">
-            <div class="eyebrow"><span>Capacity</span><span id="massReadout" class="mono"></span></div>
-            <div id="meters"></div>
-          </div>
-          <div class="statstack">
-            <div class="sect">
-              <div class="eyebrow"><span>Movement &amp; defense</span></div>
-              <div class="rows" id="moveRows"></div>
-            </div>
-            <div class="sect">
-              <div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">/s</span></div>
-              <table class="eh"><thead><tr><th></th><th>E</th><th>H</th></tr></thead>
-                <tbody id="ehBody"></tbody></table>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -595,36 +598,34 @@ function renderMeters(){
   const s = computeStats();
   const hp = state.ship.hardpoints;
   const totalBays = Object.values(hp.bays||{}).reduce((a,b)=>a+b,0);
-  const crew = requiredCrew(), bunks = eff("bunks");
   const guns = installedOf(o=>num(o.attributes["gun ports"])<0);
   const turrets = installedOf(o=>num(o.attributes["turret mounts"])<0);
+  const pill=(lab,val,bad)=>`<span class="qs${bad?' bad':''}"><span>${lab}</span><b class="mono">${val}</b></span>`;
+  const capPill=(lab,key,unit)=>{const c=capacity(key);const over=c.used>c.total+1e-6;return pill(lab,`${FMT(c.used)} / ${FMT(c.total)}${unit||''}`,over);};
 
-  const meters = [];
-  const cap = (label,key,unit)=>{const c=capacity(key); meters.push(meter(label,c.used,c.total,unit));};
-  cap("Outfit space","outfit space"," t");
-  cap("Weapon capacity","weapon capacity"," t");
-  cap("Engine capacity","engine capacity"," t");
-  meters.push(meter("Gun ports", guns, hp.guns,""));
-  meters.push(meter("Turret mounts", turrets, hp.turrets,""));
-  if(totalBays) meters.push(meter("Fighter / drone bays", 0, totalBays,"", true));
-  el("meters").innerHTML = meters.join("");
+  el("capPills").innerHTML =
+    capPill("Outfit","outfit space"," t")+
+    capPill("Weapon","weapon capacity"," t")+
+    capPill("Engine","engine capacity"," t")+
+    pill("Gun ports",`${guns} / ${hp.guns}`, guns>hp.guns)+
+    pill("Turrets",`${turrets} / ${hp.turrets}`, turrets>hp.turrets)+
+    (totalBays?pill("Bays",String(totalBays)):"");
   el("massReadout").textContent = FMT(s.emptyMass)+" t";
 
-  el("moveRows").innerHTML = `
-    <div class="k">Max speed</div><div class="v mono">${FMT(s.maxSpeed)}</div>
-    <div class="k">Acceleration</div><div class="v mono">${FMT(s.accel[0])} – ${FMT(s.accel[1])}</div>
-    <div class="k">Turning</div><div class="v mono">${FMT(s.turn[0])} – ${FMT(s.turn[1])}</div>
-    <div class="k">Shields</div><div class="v mono">${FMT(s.shields)}${s.hasSR?` <span style="color:var(--dim)">(${FMT(s.shieldRegen)}/s)</span>`:''}</div>
-    <div class="k">Hull</div><div class="v mono">${FMT(s.hull)}${s.hasHR?` <span style="color:var(--dim)">(${FMT(s.hullRepair)}/s)</span>`:''}</div>`;
+  el("movePills").innerHTML =
+    pill("Max speed",FMT(s.maxSpeed))+
+    pill("Acceleration",`${FMT(s.accel[0])}–${FMT(s.accel[1])}`)+
+    pill("Turning",`${FMT(s.turn[0])}–${FMT(s.turn[1])}`)+
+    pill("Shields",`${FMT(s.shields)}${s.hasSR?" (+"+FMT(s.shieldRegen)+"/s)":""}`)+
+    pill("Hull",`${FMT(s.hull)}${s.hasHR?" (+"+FMT(s.hullRepair)+"/s)":""}`);
 
-  const row=(lab,e,h,cls="")=>`<tr class="${cls}"><td>${lab}</td><td class="mono en">${FMT(e)}</td><td class="mono ht">${FMT(h)}</td></tr>`;
-  el("ehBody").innerHTML =
-    row("idle",s.eh.idle[0],s.eh.idle[1])+
-    row("moving",s.eh.moving[0],s.eh.moving[1])+
-    row("firing",s.eh.firing[0],s.eh.firing[1])+
-    row("shields / hull",s.eh.shieldhull[0],s.eh.shieldhull[1])+
-    row("net change",s.eh.net[0],s.eh.net[1],"net")+
-    row("max",s.eh.max[0],s.eh.max[1],"max");
+  const eh=(lab,e,h)=>`<span class="qs2"><span>${lab}</span><b class="mono en">${FMT(e)}</b><b class="mono ht">${FMT(h)}</b></span>`;
+  el("ehPills").innerHTML =
+    eh("Idle",s.eh.idle[0],s.eh.idle[1])+
+    eh("Moving",s.eh.moving[0],s.eh.moving[1])+
+    eh("Firing",s.eh.firing[0],s.eh.firing[1])+
+    eh("Net",s.eh.net[0],s.eh.net[1])+
+    eh("Max",s.eh.max[0],s.eh.max[1]);
 
   el("totalCost").textContent = MONEY(s.cost);
   renderQuickStats(s); renderAlerts(s);
