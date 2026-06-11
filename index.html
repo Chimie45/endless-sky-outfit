@@ -189,8 +189,10 @@ svg.schem{width:100%;height:340px;display:block}
 .loadpanel.dragover{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 
 /* variant chips */
-.variants{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:0}
-.rightstats .variants .vchip{font-size:10.5px;padding:6px 6px;width:100%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.variants{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px;margin-top:0}
+.variants .vchip{font-size:10.5px;padding:6px 6px;width:100%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.presetbar{margin-bottom:12px}
+.presetbar>.eyebrow{margin-bottom:6px}
 .variants .vchip{font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt)}
 .variants .vchip:hover{border-color:var(--accent)}
 .variants .vchip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
@@ -345,7 +347,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.23 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.24 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -399,7 +401,6 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
             <div class="rightstats">
               <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
               <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">E · H /s</span></div><div class="statpills" id="ehPills"></div></div>
-              <div class="statgroup"><div class="eyebrow"><span>Loadout</span></div><div class="variants" id="variants"></div></div>
             </div>
           </div>
           <div class="dropmsg">Drop to install</div>
@@ -407,6 +408,10 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
       </div>
 
       <div class="loadpanel">
+        <div class="presetbar">
+          <div class="eyebrow">Loadout</div>
+          <div class="variants" id="variants"></div>
+        </div>
         <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
         <div id="loadout"></div>
       </div>
