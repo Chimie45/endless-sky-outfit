@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.18 — 2026-06-11
+- Header reordered to Race / Type / Name. Energy and Heat split into separate pill
+  columns (label left, value right). Removed the duplicated Speed/Shields/Hull/Bays from
+  the left; moved Capacity to the left column (left = Cost/Crew/Cargo/Fuel + Capacity;
+  right = Movement & Defense, Energy, Heat).
+
 ### v0.3.17 — 2026-06-11
 - Ship card relayout: ship name now sits inline with its faction/class; the
   Gun/Turret/Engine/Bay key is overlaid inside the (skinnier, centered) top-down image;

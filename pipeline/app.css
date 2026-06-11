@@ -144,15 +144,17 @@ main{display:grid;grid-template-columns:minmax(0,1fr) clamp(430px,40vw,700px);ga
   radial-gradient(460px 320px at 50% 34%, rgba(57,182,246,.08), transparent 70%),var(--panel);
   padding:12px;margin-bottom:0}
 .shiphead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px}
-.shipid{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.idmeta{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
-.idmeta .fac{color:var(--accent2)}
-.cardbody{display:grid;grid-template-columns:150px minmax(0,1fr) 236px;gap:14px;align-items:stretch}
+.shipid{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.shipid .fac{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent2)}
+.shipid .cat{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.shipid .nm{font-size:20px;font-weight:700;color:var(--bright);line-height:1.1}
+.shipid .sep{color:var(--line2)}
+.cardbody{display:grid;grid-template-columns:168px minmax(0,1fr) 196px;gap:14px;align-items:stretch}
 .displaycol{display:flex;min-width:0}
 .loadcol{min-width:0;max-height:360px;display:flex;flex-direction:column}
 .loadcol>.eyebrow{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:8px}
 .loadcol #loadout{flex:1;min-height:0;overflow-y:auto;padding-right:4px}
-.infocol{width:150px;display:flex;flex-direction:column;gap:7px}
+.infocol{width:168px;display:flex;flex-direction:column;gap:9px}
 .displaycol{min-width:0}
 .displaycol{min-width:0}
 .artbox{width:130px;height:130px;border:1px solid var(--line);border-radius:10px;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle at 50% 38%,var(--tile1),var(--tile2))}
@@ -283,10 +285,11 @@ table.eh tr.max td{color:var(--bright)}
 .qs span{color:var(--dim);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase}
 .qs b{color:var(--bright);font-size:12px}
 .qs.bad{border-color:var(--bad)} .qs.bad b{color:var(--bad)}
+.qs b.en{color:var(--energy)} .qs b.ht{color:var(--heat)}
 .qs2{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:11px}
 .qs2 span{color:var(--dim);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase}
 .qs2 .en{color:var(--energy)} .qs2 .ht{color:var(--heat)}
-.rightstats{width:236px;display:flex;flex-direction:column;gap:10px}
+.rightstats{width:196px;display:flex;flex-direction:column;gap:10px}
 .statgroup>.eyebrow{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:6px}
 .statpills{display:flex;flex-direction:column;gap:4px}
 .presetlabel{margin:12px 0 6px}
