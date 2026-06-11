@@ -629,7 +629,7 @@ function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   const wrow=(l,count,txt,lvl)=> count>0 ? trow(l, `${lvl==="red"?"✗":"⚠"} ${count} ${txt}`, lvl==="red"?"bad":"warn") : trow(l, "✓", "ok");
   const jumpTxt = !t.n?"—" : t.jumpMode==="strand"?`✗ ${t.stranded} can't jump` : t.jumpMode==="jump"?"Jump drive":"Hyperlink";
   el("fleetTotals").innerHTML =
-    trow("Total ships", FMT(t.n)) + trow("Total cargo", FMT(t.cargo)+" t") + trow("Total crew", FMT(t.crew)) +
+    trow("Total cargo", FMT(t.cargo)+" t") + trow("Total crew", FMT(t.crew)) +
     trow("Daily cost", MONEY(t.daily)+"/day") + trow("Firepower", FMT(t.dps)+" dps") +
     trow("Fighters / drones", `${t.smallCraft} / ${t.bays}`) +
     trow("Jump", jumpTxt, t.jumpMode==="strand"?"bad":(t.n?"ok":"")) +
