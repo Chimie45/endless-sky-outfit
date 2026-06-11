@@ -258,7 +258,7 @@ function drawHardpoints(){
   const {guns,turrets}=weaponSlots();
   let gi=0,ti=0;
   const COLORS={gun:'var(--gun)',turret:'var(--turret)',engine:'var(--engine)',reverse:'var(--engine)',bay:'var(--bay)'};
-  const trunc=t=>t.length>18?t.slice(0,17)+'…':t;
+  const wrap=t=>{ if(t.length<=15) return [t]; const w=t.split(' '); let p='',q=''; for(const x of w){ if(!q && (p?p+' '+x:x).length<=15) p=p?p+' '+x:x; else q=q?q+' '+x:x; } if(!q) return [p]; if(q.length>16) q=q.slice(0,15)+'…'; return [p,q]; };
   let body="", labels=[];
   for(const p of pts){
     const x=cx+p.x*scale, y=cy+p.y*scale, col=COLORS[p.t];
@@ -283,13 +283,14 @@ function drawHardpoints(){
   }
   for(const side of [true,false]){
     const arr=labels.filter(l=>l.left===side).sort((a,b)=>a.y-b.y);
-    let prev=-1e9; for(const l of arr){ l.ly=Math.max(l.y, prev+13); prev=l.ly; }
+    let prev=-1e9; for(const l of arr){ const h=wrap(l.label).length>1?20:12; l.ly=Math.max(l.y, prev+h); prev=l.ly; }
   }
   let lab="";
   for(const l of labels){
     lab+=`<line x1="${l.x}" y1="${l.y}" x2="${l.lx}" y2="${l.ly}" stroke="var(--accent)" stroke-width="1" opacity="0.5"/>`;
     lab+=`<circle cx="${l.x}" cy="${l.y}" r="2" fill="var(--accent)" opacity="0.7"/>`;
-    lab+=`<text x="${l.lx}" y="${l.ly+3}" text-anchor="${l.anchor}" font-size="9.5" fill="${l.lit?'var(--bright)':'var(--dim)'}">${trunc(l.label)}</text>`;
+    {const lines=wrap(l.label); const y0=l.ly+3-(lines.length>1?5:0);
+     lab+=`<text x="${l.lx}" y="${y0}" text-anchor="${l.anchor}" font-size="9.5" fill="${l.lit?'var(--bright)':'var(--dim)'}">`+lines.map((ln,i)=>`<tspan x="${l.lx}" dy="${i?10:0}">${ln}</tspan>`).join('')+`</text>`;}
   }
   svg.innerHTML=body+lab;
 }
