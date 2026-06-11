@@ -287,8 +287,9 @@ function drawHardpoints(){
   }
   let lab="";
   for(const l of labels){
-    lab+=`<line x1="${l.x}" y1="${l.y}" x2="${l.lx}" y2="${l.ly}" stroke="var(--line2)" stroke-width="1" opacity="0.65"/>`;
-    lab+=`<text x="${l.lx}" y="${l.ly+3}" text-anchor="${l.anchor}" font-size="9" fill="${l.lit?'var(--txt)':'var(--dim)'}">${trunc(l.label)}</text>`;
+    lab+=`<line x1="${l.x}" y1="${l.y}" x2="${l.lx}" y2="${l.ly}" stroke="var(--accent)" stroke-width="1" opacity="0.5"/>`;
+    lab+=`<circle cx="${l.x}" cy="${l.y}" r="2" fill="var(--accent)" opacity="0.7"/>`;
+    lab+=`<text x="${l.lx}" y="${l.ly+3}" text-anchor="${l.anchor}" font-size="9.5" fill="${l.lit?'var(--bright)':'var(--dim)'}">${trunc(l.label)}</text>`;
   }
   svg.innerHTML=body+lab;
 }

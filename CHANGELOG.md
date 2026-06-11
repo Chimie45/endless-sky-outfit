@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.6 — 2026-06-11
+- Top-down ship sprite shrunk and capped (max 600px / ~84% of the display) so it no
+  longer fills the frame, leaving room for hardpoint labels.
+- Ship display restyled toward the in-game outfitter look: a dark "screen" backdrop,
+  ES-blue hardpoint lead lines with small node dots, and brighter labels.
+
 ### v0.3.5 — 2026-06-11
 - The ship display now shows the **real top-down sprite** with gun/turret/engine/bay
   hardpoints drawn directly on the hull (weapon name or `[empty]` per mount), like the
