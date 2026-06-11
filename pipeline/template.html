@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.35 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.36 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -34,15 +34,16 @@
     </feComponentTransfer>
     <!-- faint, softened interior structure (muted, low noise) -->
     <feConvolveMatrix in="g" order="3" preserveAlpha="true" kernelMatrix="0 -1 0 -1 4 -1 0 -1 0" result="edge"/>
-    <feGaussianBlur in="edge" stdDeviation="0.4" result="edgeS"/>
+    <feGaussianBlur in="edge" stdDeviation="0.9" result="edgeS"/>
     <feComponentTransfer in="edgeS" result="edgeB">
-      <feFuncR type="linear" slope="0.7"/><feFuncG type="linear" slope="0.7"/><feFuncB type="linear" slope="0.72"/>
+      <feFuncR type="linear" slope="0.42"/><feFuncG type="linear" slope="0.42"/><feFuncB type="linear" slope="0.44"/>
     </feComponentTransfer>
     <!-- soft mid-grey silhouette outline stroke -->
     <feMorphology in="SourceAlpha" operator="dilate" radius="1.4" result="dil"/>
     <feComposite in="dil" in2="SourceAlpha" operator="out" result="ring"/>
-    <feFlood flood-color="#8b96a6" result="oc"/>
-    <feComposite in="oc" in2="ring" operator="in" result="outline"/>
+    <feFlood flood-color="#7c8696" result="oc"/>
+    <feComposite in="oc" in2="ring" operator="in" result="outlineS"/>
+    <feGaussianBlur in="outlineS" stdDeviation="0.6" result="outline"/>
     <feMerge><feMergeNode in="fill"/><feMergeNode in="edgeB"/><feMergeNode in="outline"/></feMerge>
   </filter>
 </defs></svg>
