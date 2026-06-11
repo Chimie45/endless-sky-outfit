@@ -191,11 +191,13 @@ function renderQuickStats(s){
 }
 function renderAlerts(s){
   const hasThrust=eff("thrust")>0, hasTurn=eff("turn")>0;
+  const ne=s.eh.net[0];                       // net energy /s
+  const over=s.totalHeatIn-s.maxHeat;         // heat over dissipation /s
   const A=[];
-  A.push(`<span class="pill ${hasThrust?'good':'bad'}">${hasThrust?'Thrusters':'No thrusters'}</span>`);
-  A.push(`<span class="pill ${hasTurn?'good':'bad'}">${hasTurn?'Steering':'No steering'}</span>`);
-  A.push(`<span class="pill ${s.energyOK?'good':'bad'}">${s.energyOK?'Energy OK':'Energy negative'}</span>`);
-  A.push(`<span class="pill ${s.heatOK?'good':'bad'}">${s.heatOK?'Heat OK':'Overheats'}</span>`);
+  A.push(`<span class="pill ${hasThrust?'good':'bad'}">${hasThrust?'Thrusters ✓':'No thrusters'}</span>`);
+  A.push(`<span class="pill ${hasTurn?'good':'bad'}">${hasTurn?'Steering ✓':'No steering'}</span>`);
+  A.push(`<span class="pill ${s.energyOK?'good':'bad'}">Energy ${ne>=0?'+':''}${FMT(ne)}/s</span>`);
+  A.push(`<span class="pill ${s.heatOK?'good':'bad'}">${s.heatOK?'Heat OK ('+FMT(s.totalHeatIn)+'/'+FMT(s.maxHeat)+')':'Overheats +'+FMT(over)+'/s'}</span>`);
   el("alerts").innerHTML=A.join("");
 }
 function renderShipCard(){
@@ -595,12 +597,16 @@ function init(){
   el("settingsX").addEventListener("click",()=>el("settings").classList.remove("open"));
   el("settings").addEventListener("click",e=>{ if(e.target===el("settings")) el("settings").classList.remove("open"); });
 
-  const card=el("shipcard");
   document.body.addEventListener("dragstart",e=>{const c=e.target.closest(".ocard");if(c)e.dataTransfer.setData("text/plain",c.dataset.name);});
-  card.addEventListener("dragover",e=>{e.preventDefault();card.classList.add("dragover");});
-  card.addEventListener("dragleave",e=>{ if(!card.contains(e.relatedTarget)) card.classList.remove("dragover");});
-  card.addEventListener("drop",e=>{e.preventDefault();card.classList.remove("dragover");
-    const nm=e.dataTransfer.getData("text/plain"); if(DATA.outfits[nm]) add(nm,1);});
+  function dropTarget(elm){
+    if(!elm) return;
+    elm.addEventListener("dragover",e=>{e.preventDefault();elm.classList.add("dragover");});
+    elm.addEventListener("dragleave",e=>{ if(!elm.contains(e.relatedTarget)) elm.classList.remove("dragover");});
+    elm.addEventListener("drop",e=>{e.preventDefault();elm.classList.remove("dragover");
+      const nm=e.dataTransfer.getData("text/plain"); if(DATA.outfits[nm]) add(nm,1);});
+  }
+  dropTarget(el("shipcard"));
+  dropTarget(document.querySelector(".loadpanel"));
 }
 let _rz=null;
 window.addEventListener("resize",()=>{ clearTimeout(_rz); _rz=setTimeout(()=>{ if(state.ship) renderShipCard(); },150); });

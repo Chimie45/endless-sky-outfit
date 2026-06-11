@@ -31,6 +31,7 @@ body[data-theme="light"]{
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{
+  height:100vh;overflow:hidden;display:flex;flex-direction:column;
   background:
     radial-gradient(1200px 600px at 78% -10%, var(--glow1) 0%, transparent 55%),
     radial-gradient(900px 500px at 8% 110%, var(--glow2) 0%, transparent 50%),
@@ -52,7 +53,7 @@ header{
   display:flex;align-items:center;gap:16px;flex-wrap:wrap;
   padding:12px 20px;border-bottom:1px solid var(--line);
   background:var(--headbg);
-  position:sticky;top:0;z-index:30;backdrop-filter:blur(6px)
+  flex:none;z-index:30;backdrop-filter:blur(6px)
 }
 .brand{display:flex;flex-direction:column;gap:2px;min-width:140px}
 .brand .name{font-size:19px;letter-spacing:.22em;text-transform:uppercase;color:var(--bright);font-weight:700}
@@ -91,7 +92,7 @@ select:focus,input:focus{border-color:var(--accent)}
 .setrow label{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
 
 /* ---- 2-column layout: loadout (left) | outfitter (right) ---- */
-main{display:grid;grid-template-columns:minmax(0,1fr) clamp(430px,40vw,700px);gap:0;height:calc(100vh - 61px)}
+main{display:grid;grid-template-columns:minmax(0,1fr) clamp(430px,40vw,700px);gap:0;flex:1;min-height:0}
 .col{overflow-y:auto;padding:18px}
 .col.left{overflow:hidden;display:flex;flex-direction:column;gap:12px}
 .leftbody{flex:1;min-height:0;display:grid;grid-template-columns:2fr 1fr;gap:12px}
@@ -146,10 +147,11 @@ svg.schem{width:100%;height:340px;display:block}
   display:none;align-items:center;justify-content:center;color:var(--accent);font-weight:700;
   letter-spacing:.1em;text-transform:uppercase;background:rgba(57,182,246,.08);pointer-events:none}
 .shipcard.dragover .dropmsg{display:flex}
+.loadpanel.dragover{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 
 /* variant chips */
 .variants{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;margin-top:10px}
-.variants .vchip{font-size:11px;padding:5px 10px;border-radius:20px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt)}
+.variants .vchip{font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt)}
 .variants .vchip:hover{border-color:var(--accent)}
 .variants .vchip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
 .variants .vlabel{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);width:100%;margin-bottom:1px}

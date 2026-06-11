@@ -11,6 +11,15 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.9 — 2026-06-11
+- Fixed the page overflowing the viewport: the body is now a fixed-height flex column,
+  so the layout fills exactly one screen (right catalog and loadout scroll internally).
+- Variant/loadout chips squared off to match the alert buttons (no pills).
+- Alert buttons now show live values (net energy /s, heat over/under dissipation,
+  thruster/steering checks).
+- Faction moved to the left above the category and ship name.
+- Outfits can now also be dragged onto the Installed Loadout panel, not just the ship.
+
 ### v0.3.8 — 2026-06-11
 - Status alerts moved under the faction label inside the ship card (frees the row at
   the top, lifts everything up).
