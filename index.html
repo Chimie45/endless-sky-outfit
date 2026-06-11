@@ -215,10 +215,12 @@ svg.schem{width:100%;height:340px;display:block}
 .fleet-right{flex:none;width:180px;display:flex;flex-direction:column;gap:6px}
 .fleet-main-title{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--bright);font-weight:800}
 .fleet-sect-title{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-top:2px}
+.fleet-sect-title.divtop{border-top:1px solid var(--line);padding-top:9px;margin-top:5px}
 .fleet-issues{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .fstat{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2)}
 .fstat span{color:var(--dim);text-transform:uppercase;letter-spacing:.04em;font-size:9px}
-.fstat b{font-weight:700;font-size:11px;color:var(--bright);font-family:ui-monospace,Menlo,Consolas,monospace}
+.fstat b{font-weight:700;font-size:11px;color:var(--bright);font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap;flex:none}
+.fstat span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .issue{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2)}
 .issue span{color:var(--dim);text-transform:uppercase;letter-spacing:.04em;font-size:9px}
 .issue b{font-weight:700;font-size:11px;font-family:ui-monospace,Menlo,Consolas,monospace}
@@ -227,7 +229,7 @@ svg.schem{width:100%;height:340px;display:block}
 .issue.bad b{color:#ff6a6a}
 .issue.warn{border-color:#ffce3a66}
 .issue.warn b{color:#ffce3a}
-.fleet-select{font-size:11px;background:var(--panel2);color:var(--txt);border:1px solid var(--line2);border-radius:6px;padding:4px 6px;width:100%}
+.fleet-select{font-size:11px;background:var(--panel2);color:var(--txt);border:1px solid var(--line2);border-radius:6px;padding:0 8px;height:30px;box-sizing:border-box;width:100%}
 .fleet-minirow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
 .fleet-mini{font-size:9.5px;line-height:1;padding:5px 2px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer;text-align:center}
 .fleet-mini:hover{border-color:var(--accent)}
@@ -411,7 +413,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.58 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.59 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -510,7 +512,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
                 <button class="fleet-mini" id="fleetRenameF" title="Rename this fleet">Rename</button>
                 <button class="fleet-mini" id="fleetDelete" title="Delete this fleet">Delete</button>
               </div>
-              <div class="fleet-sect-title">Fleet Stats</div>
+              <div class="fleet-sect-title divtop">Fleet Stats</div>
               <div class="fleet-totals statpills" id="fleetTotals"></div>
               <div class="fleet-count" id="fleetCount"></div>
             </div>
@@ -525,7 +527,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
                 <button class="fbtn" id="fleetCopy">Copy Ship</button>
                 <button class="fbtn" id="fleetFlag" title="Set as flagship (the ship you pilot)">Set Flagship</button>
               </div>
-              <div class="fleet-sect-title">Issues</div>
+              <div class="fleet-sect-title divtop">Issues</div>
               <div class="fleet-issues" id="fleetIssues"></div>
             </div>
           </div>
@@ -1214,7 +1216,7 @@ function buildIssue(e){ if(!DATA.ships[e.ship]) return null; return _withBuild(e
   if(noThr||noTurn) return {lvl:"red", msg:[noThr?"No thrust":null,noTurn?"No steering":null].filter(Boolean).join(" & ")};
   const s=computeStats(); if(!s.energyOK||!s.heatOK){ const m=[]; if(!s.energyOK)m.push("power"); if(!s.heatOK)m.push("heat"); return {lvl:"yellow", msg:"At risk of running out of "+m.join(" / ")}; }
   return null; }); }
-function fleetTotals(){ let cost=0,crew=0,cargo=0,bunks=0,fuel=0,shields=0,hull=0,figBays=0,droBays=0,figCraft=0,droCraft=0,stranded=0,dps=0,allJump=true,cantThrust=0,cantSteer=0,cantPower=0,overheat=0,jumpsMin=Infinity;
+function fleetTotals(){ let cost=0,crew=0,cargo=0,bunks=0,fuel=0,shields=0,hull=0,figBays=0,droBays=0,figCraft=0,droCraft=0,stranded=0,dps=0,allJump=true,cantThrust=0,cantSteer=0,cantPower=0,overheat=0,jumpsMin=Infinity,underCrew=0,noFuel=0;
   for(const e of state.fleet){ const sh=DATA.ships[e.ship]; if(!sh) continue;
     const b=sh.hardpoints.bays||{}; figBays+=(b.Fighter||0); droBays+=(b.Drone||0);
     if(sh.category==="Fighter") figCraft++; else if(sh.category==="Drone") droCraft++;
@@ -1226,10 +1228,12 @@ function fleetTotals(){ let cost=0,crew=0,cargo=0,bunks=0,fuel=0,shields=0,hull=
       let dr=null; if(eff("jump drive")>0)dr="J"; else if(eff("scram drive")>0)dr="S"; else if(eff("hyperdrive")>0)dr="H";
       if(!dr) stranded++; if(dr!=="J") allJump=false;
       const jf=eff("jump fuel"); if(jf>0) jumpsMin=Math.min(jumpsMin, Math.floor(eff("fuel capacity")/jf));
+      if(dr && jf>0 && eff("fuel capacity")<jf) noFuel++;
+      if(requiredCrew() > eff("bunks")+1e-9) underCrew++;
       for(const [nm,c] of Object.entries(state.installed)){ const wp=DATA.outfits[nm]?.weapon; if(wp&&wp.reload) dps+=c*(num(wp["shield damage"])+num(wp["hull damage"]))*60/wp.reload; }
     }); }
   const bays=figBays+droBays, smallCraft=figCraft+droCraft, lackBay=Math.max(0,figCraft-figBays)+Math.max(0,droCraft-droBays);
-  return {cost,crew,cargo,bunks,fuel,shields,hull,jumps:(isFinite(jumpsMin)?jumpsMin:0),daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft,figBays,droBays,figCraft,droCraft,stranded,dps,cantThrust,cantSteer,cantPower,overheat,lackBay,
+  return {cost,crew,cargo,bunks,fuel,shields,hull,jumps:(isFinite(jumpsMin)?jumpsMin:0),daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft,figBays,droBays,figCraft,droCraft,stranded,dps,cantThrust,cantSteer,cantPower,overheat,underCrew,noFuel,lackBay,
     jumpMode: stranded?"strand":(allJump?"jump":"hyper")}; }
 function renderFleetSelect(){ const sel=el("fleetSelect"); if(!sel) return; sel.innerHTML=Object.keys(state.fleets).map(n=>`<option value="${n.replace(/"/g,'&quot;')}"${n===state.fleetName?" selected":""}>${n}</option>`).join(""); }
 function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
@@ -1237,11 +1241,12 @@ function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   const t=fleetTotals();
   el("fleetCount").innerHTML = t.n ? `<span class="fc-ships">${t.n} ship${t.n>1?"s":""}</span> · <span class="fc-cost">${MONEY(t.cost)} to buy</span>` : "";
   const fstat=(l,v)=>`<div class="fstat"><span>${l}</span><b>${v}</b></div>`;
+  const cnum=n=> n>=1e6?(n/1e6).toFixed(n>=1e7?0:1).replace(/\.0$/,"")+"M" : n>=1e4?(n/1e3).toFixed(n>=1e5?0:1).replace(/\.0$/,"")+"K" : Math.round(n).toLocaleString();
   const dailyTxt = t.daily>=1000 ? (t.daily/1000).toFixed(t.daily>=1e5?0:1).replace(/\.0$/,"")+"K/day" : t.daily+"/day";
   el("fleetTotals").innerHTML =
-    fstat("Cargo", FMT(t.cargo)+" t") +
-    fstat("Crew", FMT(t.crew)) +
-    fstat("Bunks", FMT(t.bunks)) +
+    fstat("Cargo", cnum(t.cargo)+" t") +
+    fstat("Crew", cnum(t.crew)) +
+    fstat("Bunks", cnum(t.bunks)) +
     fstat("Jumps", FMT(t.jumps)) +
     fstat("Cost", dailyTxt) +
     fstat("Craft", `${t.smallCraft} / ${t.bays}`);
@@ -1249,7 +1254,8 @@ function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   el("fleetIssues").innerHTML =
     issue("Jump", t.stranded, "bad") + issue("Power", t.cantPower, "warn") +
     issue("Thrust", t.cantThrust, "bad") + issue("Steer", t.cantSteer, "bad") +
-    issue("Bays", t.lackBay, "bad") + issue("Heat", t.overheat, "warn");
+    issue("Bays", t.lackBay, "bad") + issue("Heat", t.overheat, "warn") +
+    issue("Crew", t.underCrew, "bad") + issue("Fuel", t.noFuel, "warn");
   const list=el("fleetList");
   if(!state.fleet.length){ list.innerHTML=`<div class="fleet-empty">No ships yet. Build one and press “+ Add to Fleet”.</div>`; }
   else{ list.innerHTML = state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const base=sh?(sh.displayName||sh.name):e.ship; const nm=e.label||base;

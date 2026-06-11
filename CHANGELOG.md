@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.59 — 2026-06-12
+- Two more fleet warnings: Crew (a ship's required crew exceeds its bunks) and Fuel (a ship has
+  a drive but not enough fuel for even one jump). Issues grid is now 8 (4x2).
+- Big stat numbers are compacted (e.g. 21.2K) so they no longer wrap. Fixed the too-tall fleet
+  dropdown, and added divider lines above "Fleet Stats" and "Issues" to clean up the spacing.
+
 ### v0.3.58 — 2026-06-12
 - Narrowed the Outfitter column by ~20px and trimmed the columns' horizontal padding (18->12,
   which was stacking with each panel's own padding — the "double padding"), then gave the
