@@ -723,7 +723,7 @@ function shipsByFaction(){
   return byFac;
 }
 function updateShipPickBtn(){
-  const sh=state.ship; if(!sh) return;
+  const sh=state.ship; if(!sh||!el("spName")) return;
   el("spArt").innerHTML = artTile(sh.thumbnail||sh.sprite, mono2(sh.displayName||sh.name), "var(--accent)");
   el("spName").textContent = sh.displayName || sh.name;
   el("spMeta").textContent = FACLABEL(sh.faction)+" · "+sh.category;
@@ -762,7 +762,7 @@ function openPanel(name){
   if(name==="ship"){ renderPickerFac(); renderPickerGrid(); const ps=el("pickerSearch"); if(ps){ ps.value=state.pickerQ||""; setTimeout(()=>ps.focus(),30); } }
   try{ localStorage.setItem("drydock-panel", name); }catch(e){}
 }
-function closePanels(){ document.body.dataset.panel=""; try{ localStorage.setItem("drydock-panel",""); }catch(e){} }
+function closePanels(){ delete document.body.dataset.panel; try{ localStorage.setItem("drydock-panel",""); }catch(e){} }
 function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
 function openShipPicker(){ togglePanel("ship"); }
 function closeShipPicker(){ closePanels(); }
@@ -779,7 +779,6 @@ function init(){
   let savedTheme=null; try{ savedTheme=localStorage.getItem("drydock-theme"); }catch(e){}
   setTheme(savedTheme||"blue");
 
-  el("shipPickBtn").addEventListener("click",()=>togglePanel("ship"));
   el("pickerX").addEventListener("click",closePanels);
   el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; renderPickerGrid(); });
   el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;renderPickerFac();renderPickerGrid();});

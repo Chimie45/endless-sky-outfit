@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.67 — 2026-06-12
+- Fixed v0.3.66 breakage: closing a panel set data-panel="" which the `[data-panel]` selector
+  still matched, so the edge tabs stayed hidden and the page stayed shifted — leaving no way to
+  reopen a panel. Closing now removes the attribute, so the Add Ship / Add Parts tabs reappear
+  and the layout resets to full width. Also removed the redundant header Ship control (ship
+  selection now lives entirely in the Add Ship tab).
+
 ### v0.3.66 — 2026-06-12
 - Unified Add Ship and Add Parts into the same side-drawer pattern: search at the top, a left
   vertical sort rail, and the grid. "Add Ship" (renamed from "Ship") now opens as a right drawer
