@@ -557,54 +557,102 @@ function loadLoadout(token){
 }
 function renderAll(){ renderMeters(); renderShipCard(); renderLoadout(); renderCatalog(); renderFleet(); setPresetPressed(); }
 
-/* ---------- fleet tracker (persisted in localStorage) ---------- */
-const FLEET_KEY="drydock-fleet";
-const CREW_SALARY=100;   // credits/day per crew member; the pilot (1) is unpaid
-function loadFleet(){ try{ state.fleet=JSON.parse(localStorage.getItem(FLEET_KEY))||[]; }catch(e){ state.fleet=[]; } if(!Array.isArray(state.fleet)) state.fleet=[]; state.fleetSel=-1; }
-function saveFleet(){ try{ localStorage.setItem(FLEET_KEY, JSON.stringify(state.fleet)); }catch(e){} }
+/* ---------- fleet tracker (named fleets, persisted in localStorage) ---------- */
+const FLEETS_KEY="drydock-fleets";
+const OLD_FLEET_KEY="drydock-fleet";
+const CREW_SALARY=100;   // credits/day per crew member; the flagship pilot is unpaid
+function _blankFleets(){ return {active:"Fleet 1", fleets:{"Fleet 1":[]}}; }
+function loadFleet(){
+  let data=null; try{ data=JSON.parse(localStorage.getItem(FLEETS_KEY)); }catch(e){}
+  if(!data || typeof data!=="object" || !data.fleets){
+    let old=null; try{ old=JSON.parse(localStorage.getItem(OLD_FLEET_KEY)); }catch(e){}
+    data=_blankFleets(); if(Array.isArray(old)&&old.length) data.fleets["Fleet 1"]=old;
+  }
+  state.fleets=data.fleets;
+  state.fleetName=(data.active in state.fleets)?data.active:Object.keys(state.fleets)[0];
+  if(!state.fleetName){ state.fleets={"Fleet 1":[]}; state.fleetName="Fleet 1"; }
+  state.fleet=state.fleets[state.fleetName]; state.fleetSel=-1;
+}
+function saveFleet(){ try{ localStorage.setItem(FLEETS_KEY, JSON.stringify({active:state.fleetName, fleets:state.fleets})); }catch(e){} }
+function setActiveFleetArr(arr){ state.fleets[state.fleetName]=arr; state.fleet=arr; }
 function addToFleet(){ if(!state.ship) return; state.fleet.push({ship:state.ship.name, outfits:{...state.installed}}); state.fleetSel=state.fleet.length-1; saveFleet(); renderFleet(); showToast("Added to fleet ("+state.fleet.length+")"); }
 function removeSelected(){ if(state.fleetSel<0||state.fleetSel>=state.fleet.length) return; state.fleet.splice(state.fleetSel,1); state.fleetSel=Math.min(state.fleetSel,state.fleet.length-1); saveFleet(); renderFleet(); }
-function copySelected(){ if(state.fleetSel<0||state.fleetSel>=state.fleet.length) return; const e=state.fleet[state.fleetSel]; state.fleet.splice(state.fleetSel+1,0,{ship:e.ship,outfits:{...e.outfits}}); state.fleetSel++; saveFleet(); renderFleet(); }
-function clearFleet(){ state.fleet=[]; state.fleetSel=-1; saveFleet(); renderFleet(); }
+function copySelected(){ if(state.fleetSel<0||state.fleetSel>=state.fleet.length) return; const e=state.fleet[state.fleetSel]; state.fleet.splice(state.fleetSel+1,0,{ship:e.ship,outfits:{...e.outfits},label:e.label}); state.fleetSel++; saveFleet(); renderFleet(); }
+function clearFleet(){ state.fleet.length=0; state.fleetSel=-1; saveFleet(); renderFleet(); }
+function setFlagship(){ if(state.fleetSel<0||state.fleetSel>=state.fleet.length) return; const cur=state.fleet[state.fleetSel]; const was=cur.flag; state.fleet.forEach(e=>{ delete e.flag; }); if(!was) cur.flag=true; saveFleet(); renderFleet(); }
+function renameSelected(){ if(state.fleetSel<0||state.fleetSel>=state.fleet.length) return; const e=state.fleet[state.fleetSel]; const v=prompt("Label for this ship (blank to clear):", e.label||""); if(v==null) return; if(v.trim()) e.label=v.trim(); else delete e.label; saveFleet(); renderFleet(); }
 function selectFleet(i){ const e=state.fleet[i]; if(!e) return; state.fleetSel=i;
-  if(DATA.ships[e.ship]){ state.ship=DATA.ships[e.ship]; state.installed={...(e.outfits||{})}; state.loadoutName="fleet:"+i; renderAll(); updateShipPickBtn(); }
-  else renderFleet(); }
+  if(DATA.ships[e.ship]){ state.ship=DATA.ships[e.ship]; state.installed={...(e.outfits||{})}; state.loadoutName="fleet:"+i; renderAll(); updateShipPickBtn(); } else renderFleet(); }
+/* ---- named-fleet management ---- */
+function switchFleet(name){ if(!(name in state.fleets)) return; state.fleetName=name; state.fleet=state.fleets[name]; state.fleetSel=-1; saveFleet(); renderFleet(); }
+function newFleet(){ let n=1; while(("Fleet "+n) in state.fleets) n++; const name=prompt("Name the new fleet:", "Fleet "+n); if(name==null) return; const nm=name.trim()||("Fleet "+n); if(!(nm in state.fleets)) state.fleets[nm]=[]; state.fleetName=nm; state.fleet=state.fleets[nm]; state.fleetSel=-1; saveFleet(); renderFleet(); }
+function renameFleet(){ const cur=state.fleetName; const name=prompt("Rename fleet:", cur); if(name==null) return; const nm=name.trim(); if(!nm||nm===cur) return; if(nm in state.fleets){ showToast("A fleet with that name already exists"); return; } state.fleets[nm]=state.fleets[cur]; delete state.fleets[cur]; state.fleetName=nm; saveFleet(); renderFleet(); }
+function deleteFleet(){ if(Object.keys(state.fleets).length<=1){ clearFleet(); return; } delete state.fleets[state.fleetName]; state.fleetName=Object.keys(state.fleets)[0]; state.fleet=state.fleets[state.fleetName]; state.fleetSel=-1; saveFleet(); renderFleet(); }
+/* ---- per-build analysis ---- */
 function _withBuild(e,fn){ const sShip=state.ship,sInst=state.installed; state.ship=DATA.ships[e.ship]; state.installed={...(e.outfits||{})}; let r; try{ r=fn(); } finally{ state.ship=sShip; state.installed=sInst; } return r; }
-function fleetTotals(){ let cost=0,crew=0,cargo=0,bays=0,smallCraft=0;
+function buildDrive(e){ if(!DATA.ships[e.ship]) return null; return _withBuild(e,()=>{ if(eff("jump drive")>0) return "J"; if(eff("scram drive")>0) return "S"; if(eff("hyperdrive")>0) return "H"; return null; }); }
+function buildDPS(e){ if(!DATA.ships[e.ship]) return 0; return _withBuild(e,()=>{ let d=0; for(const [nm,c] of Object.entries(state.installed)){ const w=DATA.outfits[nm]?.weapon; if(w&&w.reload) d+=c*(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload; } return d; }); }
+function buildIssue(e){ if(!DATA.ships[e.ship]) return null; return _withBuild(e,()=>{ const noThr=eff("thrust")<=0, noTurn=eff("turn")<=0;
+  if(noThr||noTurn) return {lvl:"red", msg:[noThr?"No thrust":null,noTurn?"No steering":null].filter(Boolean).join(" & ")};
+  const s=computeStats(); if(!s.energyOK||!s.heatOK){ const m=[]; if(!s.energyOK)m.push("power"); if(!s.heatOK)m.push("heat"); return {lvl:"yellow", msg:"At risk of running out of "+m.join(" / ")}; }
+  return null; }); }
+function fleetTotals(){ let cost=0,crew=0,cargo=0,figBays=0,droBays=0,figCraft=0,droCraft=0,stranded=0,dps=0,allJump=true;
   for(const e of state.fleet){ const sh=DATA.ships[e.ship]; if(!sh) continue;
     _withBuild(e,()=>{ cost+=shipCost(); crew+=requiredCrew(); cargo+=eff("cargo space"); });
-    bays += Object.values(sh.hardpoints.bays||{}).reduce((a,b)=>a+b,0);
-    if(sh.category==="Fighter"||sh.category==="Drone") smallCraft++; }
-  return {cost,crew,cargo,daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft}; }
+    const b=sh.hardpoints.bays||{}; figBays+=(b.Fighter||0); droBays+=(b.Drone||0);
+    if(sh.category==="Fighter") figCraft++; else if(sh.category==="Drone") droCraft++;
+    const dr=buildDrive(e); if(!dr) stranded++; if(dr!=="J") allJump=false; dps+=buildDPS(e); }
+  const bays=figBays+droBays, smallCraft=figCraft+droCraft;
+  return {cost,crew,cargo,daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft,figBays,droBays,figCraft,droCraft,stranded,dps,
+    jumpMode: stranded?"strand":(allJump?"jump":"hyper")}; }
+function renderFleetSelect(){ const sel=el("fleetSelect"); if(!sel) return; sel.innerHTML=Object.keys(state.fleets).map(n=>`<option value="${n.replace(/"/g,'&quot;')}"${n===state.fleetName?" selected":""}>${n}</option>`).join(""); }
 function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
+  renderFleetSelect();
   const t=fleetTotals();
   el("fleetCount").textContent = t.n ? `${t.n} ship${t.n>1?"s":""} · ${MONEY(t.cost)} to buy` : "";
-  const trow=(l,val)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals"><b class="val mono">${val}</b></span></div>`;
+  const trow=(l,val,cls)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals"><b class="val mono${cls?' '+cls:''}">${val}</b></span></div>`;
+  const fdOver=t.smallCraft>t.bays, fdMismatch=(t.figCraft>t.figBays)||(t.droCraft>t.droBays);
+  const fdCls=fdOver?"bad":(fdMismatch?"warn":""), fdWarn=(fdOver||fdMismatch)?" ⚠":"";
+  const jumpTxt = !t.n?"—" : t.jumpMode==="strand"?`⚠ ${t.stranded} can’t jump` : t.jumpMode==="jump"?"Jump drive":"Hyperlink";
   el("fleetTotals").innerHTML =
-    trow("Total ships", FMT(t.n)) +
-    trow("Total cargo", FMT(t.cargo)+" t") +
-    trow("Total crew", FMT(t.crew)) +
-    trow("Daily cost", MONEY(t.daily)+"/day") +
-    trow("Fighters / drones", `${t.smallCraft} / ${t.bays}`);
+    trow("Total ships", FMT(t.n)) + trow("Total cargo", FMT(t.cargo)+" t") + trow("Total crew", FMT(t.crew)) +
+    trow("Daily cost", MONEY(t.daily)+"/day") + trow("Firepower", FMT(t.dps)+" dps") +
+    trow("Fighters / drones", `${t.smallCraft} / ${t.bays}${fdWarn}`, fdCls) +
+    trow("Jump", jumpTxt, t.jumpMode==="strand"?"bad":"");
   const list=el("fleetList");
-  if(!state.fleet.length){ list.innerHTML=`<div class="fleet-empty">No ships yet \u2014 build one and press \u201c+ Add to Fleet\u201d.</div>`; }
-  else{ list.innerHTML = state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const nm=sh?(sh.displayName||sh.name):e.ship;
-      return `<button class="fleet-ship${i===state.fleetSel?' sel':''}" data-fleet="${i}" title="${nm}">`+
-        `<span class="fs-art">${artTile(sh?(sh.thumbnail||sh.sprite):null, mono2(nm), "var(--accent)")}</span>`+
+  if(!state.fleet.length){ list.innerHTML=`<div class="fleet-empty">No ships yet. Build one and press “+ Add to Fleet”.</div>`; }
+  else{ list.innerHTML = state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const base=sh?(sh.displayName||sh.name):e.ship; const nm=e.label||base;
+      const dr=buildDrive(e), iss=buildIssue(e);
+      const drB=dr?`<span class="fs-drive" title="${dr==="J"?"Jump drive":dr==="S"?"Scram drive":"Hyperdrive"}">${dr}</span>`:"";
+      const wB=iss?`<span class="fs-warn ${iss.lvl}" title="${iss.msg}">⚠</span>`:"";
+      return `<button class="fleet-ship${i===state.fleetSel?' sel':''}${e.flag?' flag':''}" data-fleet="${i}" title="${base}">`+
+        `<span class="fs-art">${artTile(sh?(sh.thumbnail||sh.sprite):null, mono2(base), "var(--accent)")}${drB}${wB}</span>`+
         `<span class="fs-nm">${nm}</span></button>`; }).join(""); }
   const hasSel = state.fleetSel>=0 && state.fleetSel<state.fleet.length;
-  el("fleetRemove").disabled=!hasSel; el("fleetCopy").disabled=!hasSel;
+  el("fleetRemove").disabled=!hasSel; el("fleetCopy").disabled=!hasSel; el("fleetFlag").disabled=!hasSel;
   el("fleetClearBtn").disabled=!state.fleet.length; el("fleetShare").disabled=!state.fleet.length; }
-function fleetToHash(){ try{ return "#f="+btoa(unescape(encodeURIComponent(JSON.stringify(state.fleet.map(e=>({s:e.ship,o:e.outfits})))))); }catch(e){ return ""; } }
+/* ---- hover card ---- */
+function fleetHoverShow(ev){ const b=ev.target.closest("[data-fleet]"); const box=el("fleetHover"); if(!box) return;
+  if(!b){ box.classList.remove("show"); return; }
+  const e=state.fleet[+b.dataset.fleet]; if(!e){ box.classList.remove("show"); return; }
+  const sh=DATA.ships[e.ship]; const base=sh?(sh.displayName||sh.name):e.ship;
+  let cost=0,crew=0,cargo=0; _withBuild(e,()=>{ cost=shipCost(); crew=requiredCrew(); cargo=eff("cargo space"); });
+  const dps=buildDPS(e), dr=buildDrive(e), drT=dr==="J"?"Jump drive":dr==="S"?"Scram drive":dr==="H"?"Hyperdrive":"No drive";
+  const row=(l,v)=>`<div class="fh-row"><span>${l}</span><b>${v}</b></div>`;
+  box.innerHTML=`<div class="fh-nm">${base}${e.label?` <span style="color:var(--dim)">(${e.label})</span>`:""}${e.flag?" ★":""}</div>`+
+    row("Cost",MONEY(cost))+row("Crew",FMT(crew))+row("Cargo",FMT(cargo)+" t")+row("Firepower",FMT(dps)+" dps")+row("Drive",drT);
+  box.classList.add("show"); fleetHoverMove(ev); }
+function fleetHoverMove(ev){ const box=el("fleetHover"); if(!box||!box.classList.contains("show")) return; const pad=14; let x=ev.clientX+pad,y=ev.clientY+pad; const w=box.offsetWidth,h=box.offsetHeight; if(x+w>window.innerWidth)x=ev.clientX-w-pad; if(y+h>window.innerHeight)y=ev.clientY-h-pad; box.style.left=x+"px"; box.style.top=y+"px"; }
+function fleetHoverHide(ev){ const box=el("fleetHover"); const to=ev.relatedTarget; if(box && !(to&&to.closest&&to.closest("#fleetList"))) box.classList.remove("show"); }
+function fleetToHash(){ try{ return "#f="+btoa(unescape(encodeURIComponent(JSON.stringify(state.fleet.map(e=>({s:e.ship,o:e.outfits,l:e.label,g:e.flag?1:0})))))); }catch(e){ return ""; } }
 function shareFleet(){ if(!state.fleet.length){ showToast("Fleet is empty"); return; } const h=fleetToHash(); if(!h) return; const url=location.origin+location.pathname+h;
   try{ history.replaceState(null,"",h); }catch(e){}
-  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(()=>showToast("Fleet link copied"),()=>prompt("Copy this fleet link:",url)); }
-  else prompt("Copy this fleet link:",url); }
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(()=>showToast("Fleet link copied"),()=>prompt("Copy this fleet link:",url)); } else prompt("Copy this fleet link:",url); }
 function parseFleetCode(str){ if(!str) return null; const m=String(str).match(/f=([^&\s]+)/); const code=m?m[1]:String(str).trim();
-  try{ const arr=JSON.parse(decodeURIComponent(escape(atob(code)))); if(Array.isArray(arr)) return arr.filter(e=>e&&DATA.ships[e.s]).map(e=>({ship:e.s,outfits:e.o||{}})); }catch(e){} return null; }
+  try{ const arr=JSON.parse(decodeURIComponent(escape(atob(code)))); if(Array.isArray(arr)) return arr.filter(e=>e&&DATA.ships[e.s]).map(e=>({ship:e.s,outfits:e.o||{},label:e.l,flag:!!e.g})); }catch(e){} return null; }
 function importFleet(){ const str=prompt("Paste a fleet link or code:"); if(str==null) return; const f=parseFleetCode(str);
-  if(!f||!f.length){ showToast("Couldn\u2019t read that fleet code"); return; }
-  state.fleet=f; state.fleetSel=-1; saveFleet(); renderFleet(); showToast("Imported "+f.length+" ship"+(f.length>1?"s":"")); }
+  if(!f||!f.length){ showToast("Couldn’t read that fleet code"); return; }
+  setActiveFleetArr(f); state.fleetSel=-1; saveFleet(); renderFleet(); showToast("Imported "+f.length+" ship"+(f.length>1?"s":"")); }
 
 /* ---------- share (current build encoded in the URL hash) ---------- */
 function buildToHash(){ try{ const payload={s:state.ship.name,o:state.installed,t:state.tier}; return "#b="+btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); }catch(e){ return ""; } }
@@ -614,7 +662,7 @@ function shareBuild(){ const h=buildToHash(); if(!h) return; const url=location.
   else prompt("Copy this build link:",url); }
 function loadFromHash(){ const hash=location.hash||"";
   const fm=hash.match(/f=([^&]+)/);
-  if(fm){ const f=parseFleetCode("f="+fm[1]); if(f&&f.length){ state.fleet=f; state.fleetSel=-1; saveFleet(); renderFleet(); } }
+  if(fm){ const f=parseFleetCode("f="+fm[1]); if(f&&f.length){ setActiveFleetArr(f); state.fleetSel=-1; saveFleet(); renderFleet(); } }
   const m=hash.match(/b=([^&]+)/); if(!m){ return !!fm; }
   try{ const p=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
     if(p&&p.s&&DATA.ships[p.s]){
@@ -697,11 +745,20 @@ function init(){
   el("fleetAddBtn").addEventListener("click",addToFleet);
   el("shareBtn").addEventListener("click",shareBuild);
   el("fleetList").addEventListener("click",e=>{const b=e.target.closest("[data-fleet]");if(b)selectFleet(+b.dataset.fleet);});
+  el("fleetList").addEventListener("dblclick",e=>{const b=e.target.closest("[data-fleet]");if(b){state.fleetSel=+b.dataset.fleet;renameSelected();}});
+  el("fleetList").addEventListener("mouseover",fleetHoverShow);
+  el("fleetList").addEventListener("mousemove",fleetHoverMove);
+  el("fleetList").addEventListener("mouseout",fleetHoverHide);
   el("fleetRemove").addEventListener("click",removeSelected);
   el("fleetCopy").addEventListener("click",copySelected);
+  el("fleetFlag").addEventListener("click",setFlagship);
   el("fleetClearBtn").addEventListener("click",clearFleet);
   el("fleetShare").addEventListener("click",shareFleet);
   el("fleetImport").addEventListener("click",importFleet);
+  el("fleetSelect").addEventListener("change",e=>switchFleet(e.target.value));
+  el("fleetNew").addEventListener("click",newFleet);
+  el("fleetRenameF").addEventListener("click",renameFleet);
+  el("fleetDelete").addEventListener("click",deleteFleet);
   el("themeBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;setTheme(b.dataset.theme);});
   el("unrelBtn").addEventListener("click",()=>{
     state.showUnreleased=!state.showUnreleased;

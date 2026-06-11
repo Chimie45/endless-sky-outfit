@@ -11,6 +11,22 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.44 — 2026-06-11
+- Fleet ships now show two corner badges on their icon: a drive type top-left (H hyperdrive,
+  S scram, J jump) and a status warning bottom-right — red for a broken ship (no thrust /
+  no steering), yellow for a risk (will run out of power, or will overheat).
+- "Flagship" button (under Copy Ship) marks one ship as the ship you pilot; it gets a blue
+  glow. Only one flagship at a time (click again to clear).
+- New "Jump" total reports the fleet's shared travel: "Jump drive" if every ship has one,
+  "Hyperlink" if all can at least follow links, or a red "N can't jump" if any ship has no
+  drive. Added a "Firepower" (total DPS) total too. (Endless Sky has no per-ship jump-range
+  number in the data — range is a fixed game constant — so this shows shared drive capability.)
+- Fighters / drones total turns red when small craft outnumber total bays, and yellow when a
+  craft can't be loaded for lack of the right bay type (e.g. a drone with only fighter bays).
+- Multiple named fleets: a dropdown to switch, plus New / Rename / Delete. Existing single
+  fleet is migrated automatically. Per-ship rename/label via double-click. Hover a ship for a
+  card with cost, crew, cargo, firepower and drive. Share/Import now carry labels and the flagship.
+
 ### v0.3.43 — 2026-06-11
 - Fleet panel now grows to fill the leftover space below the ship card (the ship list scrolls
   inside it) instead of a fixed height. Fleet totals restyled to match the ship stat pills

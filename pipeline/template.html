@@ -5,7 +5,7 @@
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.43 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.44 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -95,7 +95,14 @@
           <div class="dropmsg">Drop to install</div>
         </div>
         <div class="fleetpanel" id="fleetPanel">
-          <div class="fleet-head"><span class="fleet-title">Fleet</span><span class="fleet-count" id="fleetCount"></span></div>
+          <div class="fleet-head">
+            <span class="fleet-title">Fleet</span>
+            <select class="fleet-select" id="fleetSelect"></select>
+            <button class="fleet-mini" id="fleetNew" title="New fleet">+ New</button>
+            <button class="fleet-mini" id="fleetRenameF" title="Rename this fleet">Rename</button>
+            <button class="fleet-mini" id="fleetDelete" title="Delete this fleet">Delete</button>
+            <span class="fleet-count" id="fleetCount"></span>
+          </div>
           <div class="fleet-body">
             <div class="fleet-totals statpills" id="fleetTotals"></div>
             <div class="fleet-list" id="fleetList"></div>
@@ -105,6 +112,7 @@
               <button class="fbtn" id="fleetClearBtn">Clear</button>
               <button class="fbtn" id="fleetRemove">Remove</button>
               <button class="fbtn" id="fleetCopy">Copy Ship</button>
+              <button class="fbtn" id="fleetFlag" title="Set as flagship (the ship you pilot)">Flagship</button>
             </div>
           </div>
         </div>
@@ -182,6 +190,7 @@
   </div>
 </div>
 
+<div id="fleetHover" class="fleet-hover"></div>
 <div id="toast" class="toast"></div>
 
 <script>/*__JS__*/</script>
