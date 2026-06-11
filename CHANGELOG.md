@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.69 — 2026-06-12
+- Flagship highlight is now an inset ring so the flagged ship tile stays the same size as the
+  others (was an outer ring that made it look bigger).
+- With the freed width, widened the ship-card stat columns — the left info column +50px (130→180)
+  and Movement/Energy +44px (196→240) — and shrank the top-down schematic to suit. Increased
+  label letter-spacing, added a little more row spacing, and stopped truncating stat labels.
+
 ### v0.3.68 — 2026-06-12
 - Add Parts: replaced the broad category rail with finer sections from the game's "series" data
   (Guns, Turrets, Secondary Weapons, Ammunition, Anti-Missile, Generators, Batteries, Solar,

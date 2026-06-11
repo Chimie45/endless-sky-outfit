@@ -175,12 +175,12 @@ body[data-panel] .edge-tabs{display:none}
 .shipid .cat{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);white-space:nowrap;flex:none}
 .shipid .nm{font-size:16px;font-weight:700;color:var(--bright);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .shipid .sep{color:var(--line2)}
-.cardbody{display:grid;grid-template-columns:130px minmax(0,1fr) 196px;gap:14px;align-items:stretch}
+.cardbody{display:grid;grid-template-columns:180px minmax(0,1fr) 240px;gap:16px;align-items:stretch}
 .displaycol{display:flex;min-width:0}
 .loadcol{min-width:0;max-height:360px;display:flex;flex-direction:column}
 .loadcol>.eyebrow{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:8px}
 .loadcol #loadout{flex:1;min-height:0;overflow-y:auto;padding-right:4px}
-.infocol{width:130px;display:flex;flex-direction:column;gap:9px}
+.infocol{width:180px;display:flex;flex-direction:column;gap:10px}
 .displaycol{min-width:0}
 .displaycol{min-width:0}
 .artbox{width:130px;height:130px;border:1px solid var(--line);border-radius:10px;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle at 50% 38%,var(--tile1),var(--tile2))}
@@ -264,7 +264,7 @@ svg.schem{width:100%;height:340px;display:block}
 .fleet-ship:hover{border-color:var(--accent)}
 .fleet-ship.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--panel)}
 .fleet-ship .fs-art{position:relative;width:100%;max-width:50px;aspect-ratio:1/1;display:block;margin:0 auto}
-.fleet-ship.flag{border-color:#5aa9ff;box-shadow:0 0 0 1px #5aa9ff,0 0 10px 1px rgba(90,169,255,.55)}
+.fleet-ship.flag{border-color:#5aa9ff;box-shadow:inset 0 0 0 2px #5aa9ff}
 .fs-drive{position:absolute;top:-4px;left:-3px;font-size:12px;font-weight:800;line-height:1;letter-spacing:0;text-shadow:0 0 2px #000,0 0 3px #000,0 1px 2px #000}
 .fs-drive.dg{color:#36ff7a}
 .fs-drive.dj{color:#4aa6ff}
@@ -384,11 +384,11 @@ table.eh tr.max td{color:var(--bright)}
 .qs2 b{text-align:right}
 .qs2 .ht{border-left:1px solid var(--line2);padding-left:9px}
 .qs2 .en{color:var(--energy)} .qs2 .ht{color:var(--heat)}
-.rightstats{width:196px;display:flex;flex-direction:column;gap:10px}
+.rightstats{width:240px;display:flex;flex-direction:column;gap:12px}
 .statgroup>.eyebrow{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:6px}
-.statpills{display:flex;flex-direction:column;gap:3px}
+.statpills{display:flex;flex-direction:column;gap:5px}
 .strow{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}
-.strow .lbl{color:var(--dim);font-size:10px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;min-width:0}
+.strow .lbl{color:var(--dim);font-size:10px;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;flex:0 0 auto}
 .strow .vals{display:flex;gap:6px;flex:none}
 #ehPills .val{width:54px}
 .val{font-family:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;color:var(--bright);font-size:10.5px;line-height:1.3;text-align:right;white-space:nowrap}
@@ -455,7 +455,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.68 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.69 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="spacer"></div>
