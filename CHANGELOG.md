@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.53 — 2026-06-12
+- Fixed the fleet stats not splitting into two columns (the element also had the .statpills
+  flex class, which disables CSS multi-column; bumped selector specificity to force a 2-column
+  block). Stats now correctly read numbers-left / warnings-right and the panel is short again.
+  Narrowed the stats and button columns and made the ship icons scale to their grid cell so the
+  center list is no longer cramped.
+
 ### v0.3.52 — 2026-06-12
 - Fleet panel cleanup + readability. Fleet stats now flow in two columns (numbers on the left,
   health warnings on the right) so the panel is about half as tall and no longer pushes its
