@@ -207,14 +207,20 @@ svg.schem{width:100%;height:340px;display:block}
 .pbtn.act:hover{color:var(--bright)}
 .novar{font-size:10.5px;color:var(--dim)}
 .fleetpanel{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px 12px}
-.fleet-head{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:8px}
-.fleet-title{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:700}
-.fleet-select{font-size:11px;background:var(--panel2);color:var(--txt);border:1px solid var(--line2);border-radius:6px;padding:3px 6px;max-width:170px}
-.fleet-mini{font-size:10.5px;line-height:1;padding:4px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer}
+.fleet-right{flex:none;width:150px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.fleet-namebar{display:flex;flex-direction:column;gap:5px}
+.fleet-right .fleet-title{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:700}
+.fleet-select{font-size:11px;background:var(--panel2);color:var(--txt);border:1px solid var(--line2);border-radius:6px;padding:3px 6px;width:100%}
+.fleet-minirow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+.fleet-mini{font-size:9.5px;line-height:1;padding:5px 3px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer;text-align:center}
 .fleet-mini:hover{border-color:var(--accent)}
-.fleet-count{margin-left:auto;font-size:9.5px;color:var(--dim)}
+.fleet-count{font-size:9px;color:var(--dim);line-height:1.45}
+.fleet-count .fc-ships{color:#4aa6ff;font-weight:600}
+.fleet-count .fc-cost{color:#ffcf4d;font-weight:700}
 .fleet-body{flex:1;min-height:0;display:flex;align-items:stretch;gap:14px}
-.fleet-totals{flex:none;width:150px}
+.fleet-totals{flex:none;width:172px;overflow-y:auto}
+.fleet-totals .strow{min-height:19px}
+.val.ok{color:#36ff7a}
 .fleet-list{flex:1;min-width:0;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px;overflow-y:auto;align-content:start;grid-auto-rows:min-content}
 .fleet-empty{grid-column:1/-1;font-size:11px;color:var(--dim);padding:10px 2px}
 .fleet-ship{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 3px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2);color:var(--txt);cursor:pointer}
@@ -236,7 +242,7 @@ svg.schem{width:100%;height:340px;display:block}
 .fleet-hover .fh-row b{color:var(--txt);font-weight:600}
 .fleet-ship .fs-art .tile{width:40px;height:40px;border-radius:6px}
 .fleet-ship .fs-nm{font-size:8.5px;line-height:1.1;text-align:center;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.fleet-actions{flex:none;display:grid;grid-template-columns:1fr;gap:5px;width:92px}
+.fleet-actions{display:grid;grid-template-columns:1fr;gap:5px}
 .fbtn{font-size:10.5px;font-weight:600;padding:5px 8px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);cursor:pointer;text-align:center}
 .fbtn:hover{border-color:var(--accent)}
 .fbtn:disabled{opacity:.4;cursor:default}
@@ -391,7 +397,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.48 · ES data v<span id="ver"></span></span>
+    <span class="eyebrow">Drydock v0.3.49 · ES data v<span id="ver"></span></span>
     <span class="name">DRY<b>DOCK</b></span>
   </div>
   <div class="ctrl">
@@ -481,24 +487,28 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
           <div class="dropmsg">Drop to install</div>
         </div>
         <div class="fleetpanel" id="fleetPanel">
-          <div class="fleet-head">
-            <span class="fleet-title">Fleet</span>
-            <select class="fleet-select" id="fleetSelect"></select>
-            <button class="fleet-mini" id="fleetNew" title="New fleet">+ New</button>
-            <button class="fleet-mini" id="fleetRenameF" title="Rename this fleet">Rename</button>
-            <button class="fleet-mini" id="fleetDelete" title="Delete this fleet">Delete</button>
-            <span class="fleet-count" id="fleetCount"></span>
-          </div>
           <div class="fleet-body">
             <div class="fleet-totals statpills" id="fleetTotals"></div>
             <div class="fleet-list" id="fleetList"></div>
-            <div class="fleet-actions">
-              <button class="fbtn" id="fleetImport">Import</button>
-              <button class="fbtn" id="fleetShare">Share</button>
-              <button class="fbtn" id="fleetClearBtn">Clear</button>
-              <button class="fbtn" id="fleetRemove">Remove</button>
-              <button class="fbtn" id="fleetCopy">Copy Ship</button>
-              <button class="fbtn" id="fleetFlag" title="Set as flagship (the ship you pilot)">Flagship</button>
+            <div class="fleet-right">
+              <div class="fleet-namebar">
+                <div class="fleet-title">Fleet</div>
+                <select class="fleet-select" id="fleetSelect"></select>
+                <div class="fleet-minirow">
+                  <button class="fleet-mini" id="fleetNew" title="New fleet">+ New</button>
+                  <button class="fleet-mini" id="fleetRenameF" title="Rename this fleet">Rename</button>
+                  <button class="fleet-mini" id="fleetDelete" title="Delete this fleet">Delete</button>
+                </div>
+                <div class="fleet-count" id="fleetCount"></div>
+              </div>
+              <div class="fleet-actions">
+                <button class="fbtn" id="fleetImport">Import</button>
+                <button class="fbtn" id="fleetShare">Share</button>
+                <button class="fbtn" id="fleetClearBtn">Clear</button>
+                <button class="fbtn" id="fleetRemove">Remove</button>
+                <button class="fbtn" id="fleetCopy">Copy Ship</button>
+                <button class="fbtn" id="fleetFlag" title="Set as flagship (the ship you pilot)">Flagship</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1186,29 +1196,38 @@ function buildIssue(e){ if(!DATA.ships[e.ship]) return null; return _withBuild(e
   if(noThr||noTurn) return {lvl:"red", msg:[noThr?"No thrust":null,noTurn?"No steering":null].filter(Boolean).join(" & ")};
   const s=computeStats(); if(!s.energyOK||!s.heatOK){ const m=[]; if(!s.energyOK)m.push("power"); if(!s.heatOK)m.push("heat"); return {lvl:"yellow", msg:"At risk of running out of "+m.join(" / ")}; }
   return null; }); }
-function fleetTotals(){ let cost=0,crew=0,cargo=0,figBays=0,droBays=0,figCraft=0,droCraft=0,stranded=0,dps=0,allJump=true;
+function fleetTotals(){ let cost=0,crew=0,cargo=0,figBays=0,droBays=0,figCraft=0,droCraft=0,stranded=0,dps=0,allJump=true,cantMove=0,cantPower=0,overheat=0;
   for(const e of state.fleet){ const sh=DATA.ships[e.ship]; if(!sh) continue;
-    _withBuild(e,()=>{ cost+=shipCost(); crew+=requiredCrew(); cargo+=eff("cargo space"); });
     const b=sh.hardpoints.bays||{}; figBays+=(b.Fighter||0); droBays+=(b.Drone||0);
     if(sh.category==="Fighter") figCraft++; else if(sh.category==="Drone") droCraft++;
-    const dr=buildDrive(e); if(!dr) stranded++; if(dr!=="J") allJump=false; dps+=buildDPS(e); }
-  const bays=figBays+droBays, smallCraft=figCraft+droCraft;
-  return {cost,crew,cargo,daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft,figBays,droBays,figCraft,droCraft,stranded,dps,
+    _withBuild(e,()=>{
+      cost+=shipCost(); crew+=requiredCrew(); cargo+=eff("cargo space");
+      if(eff("thrust")<=0||eff("turn")<=0) cantMove++;
+      const st=computeStats(); if(!st.energyOK) cantPower++; if(!st.heatOK) overheat++;
+      let dr=null; if(eff("jump drive")>0)dr="J"; else if(eff("scram drive")>0)dr="S"; else if(eff("hyperdrive")>0)dr="H";
+      if(!dr) stranded++; if(dr!=="J") allJump=false;
+      for(const [nm,c] of Object.entries(state.installed)){ const wp=DATA.outfits[nm]?.weapon; if(wp&&wp.reload) dps+=c*(num(wp["shield damage"])+num(wp["hull damage"]))*60/wp.reload; }
+    }); }
+  const bays=figBays+droBays, smallCraft=figCraft+droCraft, lackBay=Math.max(0,figCraft-figBays)+Math.max(0,droCraft-droBays);
+  return {cost,crew,cargo,daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft,figBays,droBays,figCraft,droCraft,stranded,dps,cantMove,cantPower,overheat,lackBay,
     jumpMode: stranded?"strand":(allJump?"jump":"hyper")}; }
 function renderFleetSelect(){ const sel=el("fleetSelect"); if(!sel) return; sel.innerHTML=Object.keys(state.fleets).map(n=>`<option value="${n.replace(/"/g,'&quot;')}"${n===state.fleetName?" selected":""}>${n}</option>`).join(""); }
 function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   renderFleetSelect();
   const t=fleetTotals();
-  el("fleetCount").textContent = t.n ? `${t.n} ship${t.n>1?"s":""} · ${MONEY(t.cost)} to buy` : "";
+  el("fleetCount").innerHTML = t.n ? `<span class="fc-ships">${t.n} ship${t.n>1?"s":""}</span> · <span class="fc-cost">${MONEY(t.cost)} to buy</span>` : "";
   const trow=(l,val,cls)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals"><b class="val mono${cls?' '+cls:''}">${val}</b></span></div>`;
-  const fdOver=t.smallCraft>t.bays, fdMismatch=(t.figCraft>t.figBays)||(t.droCraft>t.droBays);
-  const fdCls=fdOver?"bad":(fdMismatch?"warn":""), fdWarn=(fdOver||fdMismatch)?" ⚠":"";
-  const jumpTxt = !t.n?"—" : t.jumpMode==="strand"?`⚠ ${t.stranded} can’t jump` : t.jumpMode==="jump"?"Jump drive":"Hyperlink";
+  const wrow=(l,count,txt,lvl)=> count>0 ? trow(l, `${lvl==="red"?"✗":"⚠"} ${count} ${txt}`, lvl==="red"?"bad":"warn") : trow(l, "✓", "ok");
+  const jumpTxt = !t.n?"—" : t.jumpMode==="strand"?`✗ ${t.stranded} can't jump` : t.jumpMode==="jump"?"Jump drive":"Hyperlink";
   el("fleetTotals").innerHTML =
     trow("Total ships", FMT(t.n)) + trow("Total cargo", FMT(t.cargo)+" t") + trow("Total crew", FMT(t.crew)) +
     trow("Daily cost", MONEY(t.daily)+"/day") + trow("Firepower", FMT(t.dps)+" dps") +
-    trow("Fighters / drones", `${t.smallCraft} / ${t.bays}${fdWarn}`, fdCls) +
-    trow("Jump", jumpTxt, t.jumpMode==="strand"?"bad":"");
+    trow("Fighters / drones", `${t.smallCraft} / ${t.bays}`) +
+    trow("Jump", jumpTxt, t.jumpMode==="strand"?"bad":(t.n?"ok":"")) +
+    wrow("Moving", t.cantMove, "can't move", "red") +
+    wrow("Drone bays", t.lackBay, "lack bay", "red") +
+    wrow("Power", t.cantPower, "lack power", "yellow") +
+    wrow("Heat", t.overheat, "overheat", "yellow");
   const list=el("fleetList");
   if(!state.fleet.length){ list.innerHTML=`<div class="fleet-empty">No ships yet. Build one and press “+ Add to Fleet”.</div>`; }
   else{ list.innerHTML = state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const base=sh?(sh.displayName||sh.name):e.ship; const nm=e.label||base;

@@ -11,6 +11,14 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.49 — 2026-06-11
+- Fleet panel relayout: the fleet name + New/Rename/Delete moved into the right column above the
+  action buttons, and the stats column now extends to the top of the section for more room.
+- Added fleet-wide health rows beside Jump: Moving (✗ N can't move), Drone bays (✗ N lack bay),
+  Power (⚠ N lack power), Heat (⚠ N overheat) — each shows a green ✓ when the whole fleet is fine.
+  These recompute on every edit (drive type included), so a ship's badge and the totals update live.
+- The fleet count is now styled: ship count in blue, "to buy" price in bold gold.
+
 ### v0.3.48 — 2026-06-11
 - Fixed: editing a ship that's selected in the fleet now writes through to that fleet entry, so
   its icon badges and the fleet totals reflect what you see. (Before, emptying or re-outfitting a
