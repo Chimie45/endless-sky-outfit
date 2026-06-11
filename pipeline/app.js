@@ -101,9 +101,10 @@ function computeStats(){
     max:[maxEnergy, maxHeat]
   };
   // sustainability
-  const energyOK = eh.net[0] >= -0.0001;
-  const totalHeatIn = Math.max(0,eh.idle[1]) + eh.moving[1] + eh.firing[1] + eh.shieldhull[1];
-  const heatOK = totalHeatIn <= maxHeat + 0.0001;
+  const energyOK = eh.idle[0] >= -0.0001;
+  const cruiseHeatIn = Math.max(0,eh.idle[1]) + Math.max(0,eh.moving[1]);
+  const totalHeatIn = cruiseHeatIn + Math.max(0,eh.firing[1]) + Math.max(0,eh.shieldhull[1]);
+  const heatOK = cruiseHeatIn <= maxHeat + 0.0001;
 
   return {emptyMass,cargo,maxSpeed,
     accel:[baseAccel/fM, baseAccel/eM], turn:[baseTurn/fM, baseTurn/eM],
@@ -183,14 +184,8 @@ function renderQuickStats(s){
 }
 function renderAlerts(s){
   const hasThrust=eff("thrust")>0, hasTurn=eff("turn")>0;
-  const ne=s.eh.net[0];                       // net energy /s
-  const over=s.totalHeatIn-s.maxHeat;         // heat over dissipation /s
-  const A=[];
-  A.push(`<span class="pill ${hasThrust?'good':'bad'}">${hasThrust?'Thrusters ✓':'No thrusters'}</span>`);
-  A.push(`<span class="pill ${hasTurn?'good':'bad'}">${hasTurn?'Steering ✓':'No steering'}</span>`);
-  A.push(`<span class="pill ${s.energyOK?'good':'bad'}">Energy ${ne>=0?'+':''}${FMT(ne)}/s</span>`);
-  A.push(`<span class="pill ${s.heatOK?'good':'bad'}">${s.heatOK?'Heat OK ('+FMT(s.totalHeatIn)+'/'+FMT(s.maxHeat)+')':'Overheats +'+FMT(over)+'/s'}</span>`);
-  el("alerts").innerHTML=A.join("");
+  const p=(lab,ok)=>`<span class="pill ${ok?'good':'bad'}">${lab} ${ok?'✓':'✗'}</span>`;
+  el("alerts").innerHTML = p("Thrust",hasThrust)+p("Steering",hasTurn)+p("Energy",s.energyOK)+p("Heat",s.heatOK);
 }
 function renderShipCard(){
   const ship = state.ship;
@@ -496,25 +491,29 @@ function setShip(name){
   else { state.installed = {}; state.loadoutName = "empty"; }
   renderAll(); updateShipPickBtn();
 }
+function _idleEnergy(){ return eff("energy generation")+eff("solar collection")+eff("fuel energy")-eff("energy consumption")-eff("cooling energy"); }
+function _idleHeat(){ const ce=coolingEfficiency(eff("cooling inefficiency")); return eff("heat generation")+eff("solar heat")+eff("fuel heat") - ce*(eff("cooling")+eff("active cooling")); }
+function _eligibleOutfits(){ return Object.values(DATA.outfits).filter(o=>(state.showUnreleased||o.obtainable) && factionTier(o.faction)<=state.tier); }
+function _perSpace(o,k){ const sp=Math.abs(num(o.attributes["outfit space"]))||1; const x=num(o.attributes[k]); return x>0?x/sp:-1; }
+function _addBest(scoreFn){ let best=null,bs=0; for(const o of _eligibleOutfits()){ const sc=scoreFn(o); if(sc>0 && sc>bs && !limitBlocked(o,1)){ bs=sc; best=o; } } if(best){ state.installed[best.name]=(state.installed[best.name]||0)+1; return true; } return false; }
+function _ensure(cond, scoreFn, cap){ let g=cap||80; while(g-->0 && !cond()){ if(!_addBest(scoreFn)) break; } }
 function autoScore(o,kind){
   const a=o.attributes;
-  if(kind==="cargo"){ const c=num(a["cargo space"]); const sp=Math.abs(num(a["outfit space"]))||1; return c>0?c/sp:-1; }
-  if(kind==="crew"){ const b=num(a["bunks"]); const sp=Math.abs(num(a["outfit space"]))||1; return b>0?b/sp:-1; }
+  if(kind==="cargo") return _perSpace(o,"cargo space");
+  if(kind==="crew")  return _perSpace(o,"bunks");
   if(kind==="dps"){ const w=o.weapon; if(w&&w.reload&&(num(a["gun ports"])<0||num(a["turret mounts"])<0)) return (num(w["shield damage"])+num(w["hull damage"]))*60/w.reload; return -1; }
   return -1;
 }
-// greedily fill an empty hull to maximise a metric, respecting all install limits
 function computeAutoFill(kind){
   state.installed={};
-  const pool=Object.values(DATA.outfits)
-    .filter(o=>(state.showUnreleased||o.obtainable) && factionTier(o.faction)<=state.tier && autoScore(o,kind)>0)
-    .sort((a,b)=>autoScore(b,kind)-autoScore(a,kind));
+  _addBest(o=>_perSpace(o,"thrust"));
+  _addBest(o=>_perSpace(o,"turn"));
+  _ensure(()=>_idleEnergy()>=0, o=>_perSpace(o,"energy generation"));
+  _ensure(()=>_idleHeat()<=0,  o=>_perSpace(o,"cooling"));
+  const pool=_eligibleOutfits().filter(o=>autoScore(o,kind)>0).sort((a,b)=>autoScore(b,kind)-autoScore(a,kind));
   let guard=4000;
-  while(guard-->0){
-    let added=false;
-    for(const o of pool){ if(!limitBlocked(o,1)){ state.installed[o.name]=(state.installed[o.name]||0)+1; added=true; break; } }
-    if(!added) break;
-  }
+  while(guard-->0){ let added=false; for(const o of pool){ if(!limitBlocked(o,1)){ state.installed[o.name]=(state.installed[o.name]||0)+1; added=true; break; } } if(!added) break; }
+  if(kind==="dps"){ _ensure(()=>_idleEnergy()>=0, o=>_perSpace(o,"energy generation")); _ensure(()=>_idleHeat()<=0, o=>_perSpace(o,"cooling")); }
 }
 function loadLoadout(token){
   if(token==="empty"){ state.installed={}; }
