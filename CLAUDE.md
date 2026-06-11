@@ -17,16 +17,22 @@ backend, no database — it runs entirely in the browser.
 index.html                      ← the deployed page. GENERATED — do not hand-edit.
 data/endless-sky-data.json      ← parsed game data (ships, outfits, buy locations)
 pipeline/
-  template.html                 ← THE APP SOURCE. Edit this for any app change.
-  build.py                      ← injects data/*.json into template.html → index.html
+  template.html                 ← HTML shell (markers /*__CSS__*/ and /*__JS__*/)
+  app.css                       ← all styles
+  app.js                        ← all logic (holds the /*__DATA__*/{} data placeholder)
+  build.py                      ← stitches shell+css+js and injects data → index.html
   parse_endless_sky.py          ← parses Endless Sky data files → endless-sky-data.json
+images/                         ← bundled ship/outfit thumbnails (CC-BY-SA-4.0)
 .nojekyll
 ```
 
 ## Build rule (important)
-`index.html` is `template.html` with the JSON data injected in place of `/*__DATA__*/{}`.
+`index.html` is GENERATED: `build.py` inlines `app.css` into the `/*__CSS__*/` marker
+and `app.js` into the `/*__JS__*/` marker of `template.html`, then injects
+`data/endless-sky-data.json` into the `/*__DATA__*/{}` placeholder inside the JS.
 **Never edit `index.html` directly.** To change the app:
-1. Edit `pipeline/template.html`.
+1. Edit the relevant source: `pipeline/app.css` (styles), `pipeline/app.js` (logic),
+   or `pipeline/template.html` (page structure).
 2. Run `python pipeline/build.py` (writes `index.html` at repo root).
 3. Commit + push (see workflow below).
 

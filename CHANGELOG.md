@@ -7,6 +7,17 @@ Versioning: **v1.0.0** = first public release. **vX.1.0** = a major update.
 Drydock's app version is shown in the header; the Endless Sky game-data version
 it was built against is shown next to it (currently ES data v0.11.0).
 
+## v0.3.0 — 2026-06-11 (major update)
+- **Split the source.** The app source is now three files — `pipeline/template.html`
+  (HTML shell), `pipeline/app.css`, and `pipeline/app.js` — and `build.py` stitches
+  them together and injects the data into the self-contained `index.html`. Editing a
+  style or behaviour no longer means touching a 700-line file.
+- **Outfit install limits enforced.** You can no longer exceed a ship\'s gun ports,
+  turret mounts, or outfit / weapon / engine capacity by clicking + or dragging — the
+  add is blocked with a short beep and an "Outfit Limit Reached" notice naming the
+  limit hit. Loading a Stock or variant preset is exempt (NPC variants can legitimately
+  exceed player limits), so they still display exactly as defined.
+
 ## v0.2.1 — 2026-06-11 (minor)
 - Ship card now defaults to the **labeled hardpoint wireframe** (each gun/turret
   shows its mounted weapon or `[empty]`, like the in-game outfitter); the real
