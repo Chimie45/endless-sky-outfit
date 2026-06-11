@@ -1,60 +1,52 @@
 # Changelog — Drydock (Endless Sky Outfit Builder)
 
-Versioning: **v1.0.0** = first public release. **vX.1.0** = a major update.
-**vX.X.1** = a minor release/update worth noting for future review.
-(Pre-1.0 we are still in the 0.x line.)
+Versioning: **v1.0.0** = first public release. The **second number** groups one
+update (a batch of related work); the **third number** is an individual change
+within that update. (Pre-1.0 we are still in the 0.x line.)
 
 Drydock's app version is shown in the header; the Endless Sky game-data version
 it was built against is shown next to it (currently ES data v0.11.0).
 
-## v0.3.0 — 2026-06-11 (major update)
-- **Split the source.** The app source is now three files — `pipeline/template.html`
-  (HTML shell), `pipeline/app.css`, and `pipeline/app.js` — and `build.py` stitches
-  them together and injects the data into the self-contained `index.html`. Editing a
-  style or behaviour no longer means touching a 700-line file.
-- **Outfit install limits enforced.** You can no longer exceed a ship\'s gun ports,
-  turret mounts, or outfit / weapon / engine capacity by clicking + or dragging — the
-  add is blocked with a short beep and an "Outfit Limit Reached" notice naming the
-  limit hit. Loading a Stock or variant preset is exempt (NPC variants can legitimately
-  exceed player limits), so they still display exactly as defined.
+---
 
-## v0.2.1 — 2026-06-11 (minor)
-- Ship card now defaults to the **labeled hardpoint wireframe** (each gun/turret
-  shows its mounted weapon or `[empty]`, like the in-game outfitter); the real
-  art is still one click away via the Art toggle.
-- Added a **quick-stat overlay** on the ship image (cost, max speed, shields,
-  hull) and a row of **status pills** at the bottom of the card: crew/bunks,
-  cargo, fuel, bays, plus thruster / steering / energy / heat alerts.
-- **Capacity, Movement & Defense, and Energy & Heat now sit side-by-side in
-  three columns** instead of one long stack; the installed-loadout list moved
-  directly under the ship card.
+## v0.2 — first build-out update
 
-## v0.2.0 — 2026-06-11 (major update)
-- **Real sprite art.** Bundled 996 ship & outfit thumbnails from Endless Sky
-  v0.11.0 under `images/`. Outfit cards, the installed-loadout list, the ship
-  card, and the detail drawer now show the actual in-game art, with a graceful
-  lettered-tile fallback for the handful of animated sprites that have no static
-  thumbnail. (Art is CC-BY-SA-4.0 — see `images/CREDITS.md`.)
-- **Missing ships fixed (display names).** The parser now reads each ship's
-  `display name`, so 29 codenamed hulls show their real names. Notably
-  "Ikfar A'awoj" (internally `Ra'at Ik 621`) is now findable.
-- **Ship variants as loadout presets.** 520 variant definitions are parsed and
-  attached to their base hull. Pick a base model, then click a variant chip
-  (e.g. "Korsmanath A'awoj (Strike)") to load that loadout. Empty / Stock chips
-  included.
-- **UI redesign.** Two-column layout: left = ship art + schematic toggle +
-  variant chips + live stats + installed loadout; right = the outfitter as a
-  3–4 wide art grid, like the in-game shop. Search + category filter retained.
-- **Race → model ship picker.** Choose the race (faction) first, then the model,
-  grouped by category — replaces the single giant ship dropdown.
-- Stat engine unchanged (still validated to the digit against the game).
+### v0.2.5 — 2026-06-11
+- Reworked the version numbering: one update = a second-number group, individual
+  changes = third-number bumps. Renumbered all prior entries to match.
 
-## v0.1.1 — 2026-06-11 (minor)
+### v0.2.4 — 2026-06-11
+- **Split the source** into `pipeline/template.html` (HTML shell) + `app.css` +
+  `app.js`; `build.py` stitches them and injects the data into the self-contained
+  `index.html` (markers `/*__CSS__*/`, `/*__JS__*/`, `/*__DATA__*/{}`).
+- **Outfit install limits enforced** — adds that would exceed gun ports, turret
+  mounts, or outfit/weapon/engine capacity are blocked with a beep and an
+  "Outfit Limit Reached" notice. Stock/variant presets are exempt.
+
+### v0.2.3 — 2026-06-11
+- Ship card defaults to the **labeled hardpoint wireframe** (weapon name or
+  `[empty]` per mount); Art view available via toggle.
+- **Quick-stat overlay** on the ship image and **status pills** (crew, cargo,
+  fuel, bays, thruster/steering/energy/heat alerts).
+- **Capacity / Movement & Defense / Energy & Heat** reflowed into three columns;
+  installed loadout moved directly under the ship card.
+
+### v0.2.2 — 2026-06-11
+- **Real sprite art**: bundled 996 ship & outfit thumbnails from Endless Sky
+  v0.11.0 under `images/` (CC-BY-SA-4.0, see `images/CREDITS.md`).
+- **Display-name fix**: parser reads each ship's `display name`, so codenamed
+  hulls show their real names (e.g. "Ikfar A'awoj").
+- **Ship variants** parsed and attached to their base hull as selectable loadout
+  presets.
+- **UI redesign**: two-column layout (ship + stats + loadout left, outfitter
+  art-grid right) and a race -> model ship picker.
+
+### v0.2.1 — 2026-06-11
 - Repo restructure: moved the project from the nested `Endless_Sky_Outfit/`
   subfolder to the repository root so GitHub Pages (deploy-from-branch `main`,
   `/ (root)`) serves the site correctly. Added `CLAUDE.md`.
 
-## v0.1.0 — initial prototype
+### v0.2.0 — initial prototype (baseline)
 - Client-side outfit builder: validated stat engine (heat/energy/thrust/
   capacity), hardpoint schematic from real coordinates, drag-and-drop outfitter
   with search + category filter, spoiler/tech tier gate, empty/stock presets,

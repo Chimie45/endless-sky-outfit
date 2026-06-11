@@ -76,9 +76,10 @@ download images. To refresh art for a new release, re-pull the thumbnails refere
 Art stays under CC-BY-SA-4.0 — keep `images/CREDITS.md` and attribution.
 
 ## Versioning / changelog
-Keep `CHANGELOG.md` current. Scheme: v1.0.0 = first release; vX.1.0 = major update; vX.X.1 =
-minor update worth noting. The app version is shown in the header; bump it there (in
-`pipeline/template.html`) and add a CHANGELOG entry with the date when you ship a change.
+Keep `CHANGELOG.md` current. Scheme: v1.0.0 = first public release. The SECOND number groups
+one update (a batch of related work); the THIRD number is an individual change within that
+update (e.g. v0.3.1, v0.3.2 ... all belong to the v0.3 update). The app version is shown in the
+header; bump it there (in `pipeline/template.html`) and add a CHANGELOG entry with the date.
 
 ## Git workflow
 This is a public GitHub repo. After a change, from the repo root:
