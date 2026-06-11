@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.3 — UX overhaul update
 
+### v0.3.51 — 2026-06-11
+- Removed all scrollbars from the fleet panel. Audit found three sources (the stats column, the
+  ship list, and the right/buttons column each had overflow-y:auto); the panel now sizes to its
+  content so every column shows in full with no internal scrolling.
+
 ### v0.3.50 — 2026-06-11
 - Fleet panel polish: added a "Fleet Stats" title with the ship count (blue) and total buy price
   (gold) directly under it; removed the now-redundant Total ships stat row. Shrunk the fleet-name
