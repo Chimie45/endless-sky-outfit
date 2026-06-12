@@ -296,7 +296,7 @@ function drawHardpoints(){
   const {guns,turrets}=weaponSlots();
   let gi=0,ti=0;
   const COLORS={gun:'var(--gun)',turret:'var(--turret)',engine:'var(--engine)',reverse:'var(--engine)',bay:'var(--bay)'};
-  const wrap=t=>{ if(t.length<=19) return [t]; const w=t.split(' '); let p='',q=''; for(const x of w){ if(!q && (p?p+' '+x:x).length<=19) p=p?p+' '+x:x; else q=q?q+' '+x:x; } if(!q) return [p]; if(q.length>22) q=q.slice(0,21)+'…'; return [p,q]; };
+  const wrap=t=>{ if(t.length<=13) return [t]; const w=t.split(' '); let p='',q=''; for(const x of w){ if(!q && (p?p+' '+x:x).length<=13) p=p?p+' '+x:x; else q=q?q+' '+x:x; } if(!q){ return [p.length>16?p.slice(0,15)+'…':p]; } if(q.length>16) q=q.slice(0,15)+'…'; return [p,q]; };
   let body="", labels=[];
   for(const p of pts){
     const x=cx+p.x*scale, y=cy+p.y*scale, col=COLORS[p.t];
@@ -328,7 +328,7 @@ function drawHardpoints(){
     lab+=`<line x1="${l.x}" y1="${l.y}" x2="${l.lx}" y2="${l.ly}" stroke="var(--accent)" stroke-width="1" opacity="0.5"/>`;
     lab+=`<circle cx="${l.x}" cy="${l.y}" r="2" fill="var(--accent)" opacity="0.7"/>`;
     {const lines=wrap(l.label); const y0=l.ly+3-(lines.length>1?5:0);
-     lab+=`<text x="${l.lx}" y="${y0}" text-anchor="${l.anchor}" font-size="9.5" fill="${l.lit?'var(--bright)':'var(--dim)'}">`+lines.map((ln,i)=>`<tspan x="${l.lx}" dy="${i?10:0}">${ln}</tspan>`).join('')+`</text>`;}
+     lab+=`<text x="${l.lx}" y="${y0}" text-anchor="${l.anchor}" font-size="9" fill="${l.lit?'var(--bright)':'var(--dim)'}">`+lines.map((ln,i)=>`<tspan x="${l.lx}" dy="${i?10:0}">${ln}</tspan>`).join('')+`</text>`;}
   }
   svg.innerHTML=body+lab;
 }
