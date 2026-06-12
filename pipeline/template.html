@@ -24,7 +24,7 @@
     </div>
   </div>
   <div class="headact">
-    <button class="actbtn" id="shareTop" title="Copy a shareable link to this build">
+    <button class="actbtn" id="shareTop" title="Copy a share message for this build">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
       <span>Share</span>
     </button>
@@ -96,11 +96,15 @@
             <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">E · H /s</span></div><div class="statpills" id="ehPills"></div></div>
           </div>
           <div class="presetgrid" id="presetGrid">
-            <button class="pbtn" data-load="empty">Empty hull</button>
+            <button class="pbtn" data-load="empty">Empty Hull</button>
             <button class="pbtn" data-load="stock">Stock</button>
-            <button class="pbtn" data-load="auto:cargo">Max cargo</button>
-            <button class="pbtn" data-load="auto:crew">Max crew</button>
+            <button class="pbtn" data-load="auto:cargo">Max Cargo</button>
+            <button class="pbtn" data-load="auto:crew">Max Crew</button>
+          </div>
+          <div class="buildactions">
             <button class="pbtn act" id="fleetAddBtn">+ Add to Fleet</button>
+            <button class="pbtn" id="shareBuildBtn">Share Build</button>
+            <button class="pbtn" id="importBuildBtn">Import Build</button>
           </div>
         </div>
       </div>
@@ -282,7 +286,7 @@
     <label>Content</label>
     <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.28 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.29 · ES data v<span id="ver"></span></div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>

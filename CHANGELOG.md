@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.29 — 2026-06-13
+- Build actions are now a 3-button row: Add to Fleet, Share Build (copies the link), and a new
+  Import Build (paste a build link/code to load it).
+- Header Share button now copies a ready-to-post message: "Check out my Endless Sky <Ship> build
+  on Drydock: <url>".
+- Title-cased preset buttons (Empty Hull, Max Cargo, Max Crew).
+
 ### v0.5.28 — 2026-06-13
 - Outfit DPS tag rounded to whole numbers, and always shown (0 DPS for non-weapons).
 

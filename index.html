@@ -836,6 +836,10 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 
 /* v0.5.27: ship-card title - even spacing (no space-between gaps), reliable name fit */
 .sc-statL .shiphead .shiptitle{justify-content:center;gap:3px}
+
+/* v0.5.29: 3-button build-actions row (Add to Fleet / Share Build / Import Build) */
+.buildactions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px}
+#fleetAddBtn{grid-column:auto}
 </style>
 <div id="app">
 
@@ -859,7 +863,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     </div>
   </div>
   <div class="headact">
-    <button class="actbtn" id="shareTop" title="Copy a shareable link to this build">
+    <button class="actbtn" id="shareTop" title="Copy a share message for this build">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
       <span>Share</span>
     </button>
@@ -931,11 +935,15 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
             <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">E · H /s</span></div><div class="statpills" id="ehPills"></div></div>
           </div>
           <div class="presetgrid" id="presetGrid">
-            <button class="pbtn" data-load="empty">Empty hull</button>
+            <button class="pbtn" data-load="empty">Empty Hull</button>
             <button class="pbtn" data-load="stock">Stock</button>
-            <button class="pbtn" data-load="auto:cargo">Max cargo</button>
-            <button class="pbtn" data-load="auto:crew">Max crew</button>
+            <button class="pbtn" data-load="auto:cargo">Max Cargo</button>
+            <button class="pbtn" data-load="auto:crew">Max Crew</button>
+          </div>
+          <div class="buildactions">
             <button class="pbtn act" id="fleetAddBtn">+ Add to Fleet</button>
+            <button class="pbtn" id="shareBuildBtn">Share Build</button>
+            <button class="pbtn" id="importBuildBtn">Import Build</button>
           </div>
         </div>
       </div>
@@ -1117,7 +1125,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <label>Content</label>
     <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.28 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.29 · ES data v<span id="ver"></span></div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>
@@ -1931,6 +1939,18 @@ function shareBuild(){ const h=buildToHash(); if(!h) return; const url=location.
   try{ history.replaceState(null,"",h); }catch(e){}
   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(()=>showToast("Build link copied"),()=>prompt("Copy this build link:",url)); }
   else prompt("Copy this build link:",url); }
+function shareBuildText(){ const h=buildToHash(); if(!h||!state.ship) return; const url=location.origin+location.pathname+h;
+  try{ history.replaceState(null,"",h); }catch(e){}
+  const nm=state.ship.displayName||state.ship.name;
+  const msg="Check out my Endless Sky "+nm+" build on Drydock: "+url;
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(msg).then(()=>showToast("Share message copied"),()=>prompt("Copy this:",msg)); }
+  else prompt("Copy this:",msg); }
+function importBuild(){ const str=prompt("Paste a build link or code:"); if(str==null) return;
+  let p=null; try{ const m=String(str).match(/b=([^&\s]+)/); const code=m?m[1]:String(str).trim(); p=JSON.parse(decodeURIComponent(escape(atob(code)))); }catch(e){}
+  if(!(p&&p.s&&DATA.ships[p.s])){ showToast("Couldn’t read that build link"); return; }
+  if(typeof p.t==="number"){ state.tier=p.t; document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",+x.dataset.tier===p.t)); }
+  state.ship=DATA.ships[p.s]; state.installed={}; for(const k in (p.o||{})){ if(DATA.outfits[k]) state.installed[k]=p.o[k]; }
+  state.loadoutName="shared"; renderAll(); updateShipPickBtn(); showToast("Build imported"); }
 function loadFromHash(){ const hash=location.hash||"";
   const fm=hash.match(/f=([^&]+)/);
   if(fm){ const f=parseFleetCode("f="+fm[1]); if(f&&f.ships.length){ const name=uniqueFleetName(f.name||"Imported fleet"); state.fleets[name]=f.ships; state.fleetName=name; state.fleet=state.fleets[name]; state.fleetSel=-1; saveFleet(); renderFleet(); } }
@@ -2075,7 +2095,9 @@ function init(){
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("fleetAddBtn").addEventListener("click",addToFleet);
-  el("shareTop").addEventListener("click",shareBuild);
+  el("shareTop").addEventListener("click",shareBuildText);
+  el("shareBuildBtn").addEventListener("click",shareBuild);
+  el("importBuildBtn").addEventListener("click",importBuild);
   el("fleetList").addEventListener("click",e=>{const b=e.target.closest("[data-fleet]");if(b)selectFleet(+b.dataset.fleet);});
   el("fleetList").addEventListener("dblclick",e=>{const b=e.target.closest("[data-fleet]");if(b){state.fleetSel=+b.dataset.fleet;renameSelected();}});
   el("fleetDetail").addEventListener("click",e=>{ if(e.target.closest("[data-rename-ship]")) renameSelected(); });
