@@ -960,6 +960,7 @@ function closePanels(){ delete document.body.dataset.panel; try{ localStorage.se
 function setInfo(v){ state.info=v||""; const sec=el("viewInfoSec"); if(sec) sec.dataset.info=state.info;
   if(state.info==="shop"){ renderShop(); const s=el("shopSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
   else if(state.info==="yard"){ renderYard(); const s=el("yardSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
+  else if(state.info==="map"){ renderGalaxyMap(); }
   try{ localStorage.setItem("drydock-info",state.info); }catch(e){} }
 function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
 function openShipPicker(){ togglePanel("ship"); }
@@ -1032,6 +1033,7 @@ function init(){
   el("dockFleetTab").addEventListener("click",()=>setDock("fleet"));
   el("openOutfitters").addEventListener("click",()=>setInfo("shop"));
   el("openShipyards").addEventListener("click",()=>setInfo("yard"));
+  el("openMap").addEventListener("click",()=>setInfo("map"));
   el("viewInfoSec").addEventListener("click",e=>{ if(e.target.closest("[data-info-back]")) setInfo(""); });
   el("shopRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.shopPage+=pg.dataset.pg==="next"?1:-1;renderShop();return;}const b=e.target.closest("[data-station]");if(b){state.shopStation=b.dataset.station;renderShop();}});
   el("yardRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.yardPage+=pg.dataset.pg==="next"?1:-1;renderYard();return;}const b=e.target.closest("[data-station]");if(b){state.yardStation=b.dataset.station;renderYard();}});
@@ -1076,3 +1078,57 @@ function init(){
 let _rz=null;
 window.addEventListener("resize",()=>{ clearTimeout(_rz); _rz=setTimeout(()=>{ if(!state.ship)return; renderShipCard(); renderLoadout(); if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else{renderCatbar();renderCatalog();} },160); });
 init();
+
+/* ---------- galaxy map ---------- */
+const GOV_COLORS={"Republic":"#3b82f6","Free Worlds":"#22c55e","Syndicate":"#f59e0b","Pirate":"#ef4444","Hai":"#a855f7","Coalition":"#2dd4bf","Quarg":"#cbd5e1","Wanderer":"#84cc16","Korath":"#fb923c","Remnant":"#22d3ee","Pug":"#ec4899","Drak":"#9aa7b8","Bunrodea":"#eab308","Successor":"#8b5cf6","Heliarch":"#f43f5e","Gegno":"#10b981","Kor Sestor":"#fb923c","Kor Mereti":"#fbbf24","Indigenous":"#64748b","Uninhabited":"#3a4453"};
+function govColor(g){ if(GOV_COLORS[g]) return GOV_COLORS[g]; if(!g) return "#3a4453"; let h=0; for(let i=0;i<g.length;i++) h=(h*31+g.charCodeAt(i))>>>0; return "hsl("+(h%360)+",42%,60%)"; }
+function _mapScale(){ const cv=el("mapCanvas"), vb=state.mapVB; if(!cv||!vb||!cv.clientWidth) return 1; return Math.min(cv.clientWidth/vb[2], cv.clientHeight/vb[3]); }
+function mapSetVB(){ const svg=el("mapSvg"); if(!svg||!state.mapVB) return; svg.setAttribute("viewBox",state.mapVB.map(x=>x.toFixed(1)).join(" ")); const b=state._mapBounds; if(b) svg.classList.toggle("zoom", state.mapVB[2] < b[2]/2.6); }
+function mapFit(){ if(state._mapBounds){ state.mapVB=state._mapBounds.slice(); mapSetVB(); } }
+function mapZoom(f,cx,cy){ const vb=state.mapVB, b=state._mapBounds; if(!vb||!b) return; if(cx==null){ cx=vb[0]+vb[2]/2; cy=vb[1]+vb[3]/2; }
+  let nw=vb[2]*f; nw=Math.max(b[2]/80, Math.min(b[2], nw)); const nh=nw*(vb[3]/vb[2]);
+  vb[0]=cx-(cx-vb[0])*(nw/vb[2]); vb[1]=cy-(cy-vb[1])*(nh/vb[3]); vb[2]=nw; vb[3]=nh; mapSetVB(); }
+function renderGalaxyMap(){
+  const cv=el("mapCanvas"); if(!cv) return;
+  const SYS=DATA.systems||{}; const names=Object.keys(SYS).filter(n=>Array.isArray(SYS[n].pos));
+  if(!names.length){ cv.innerHTML='<div class="map-empty">No system data available.</div>'; return; }
+  // fit to the bulk (2nd-98th percentile) so a few far-flung systems don't shrink the whole galaxy
+  const xs=names.map(n=>SYS[n].pos[0]).sort((a,b)=>a-b), ys=names.map(n=>SYS[n].pos[1]).sort((a,b)=>a-b);
+  const q=(a,p)=>a[Math.min(a.length-1,Math.max(0,Math.round(a.length*p)))];
+  let minX=q(xs,0.02),maxX=q(xs,0.98),minY=q(ys,0.02),maxY=q(ys,0.98);
+  const pad=Math.max(40,(maxX-minX)*0.05); minX-=pad;maxX+=pad;minY-=pad;maxY+=pad;
+  const bw=Math.max(1,maxX-minX), bh=Math.max(1,maxY-minY); state._mapBounds=[minX,minY,bw,bh];
+  const r=Math.max(bw,bh)/320;
+  const seen=new Set(); let lines="";
+  for(const n of names){ const a=SYS[n]; for(const ln of (a.links||[])){ const b=SYS[ln]; if(!b||!Array.isArray(b.pos))continue; const k=n<ln?n+"|"+ln:ln+"|"+n; if(seen.has(k))continue; seen.add(k); lines+='<line x1="'+a.pos[0]+'" y1="'+a.pos[1]+'" x2="'+b.pos[0]+'" y2="'+b.pos[1]+'"/>'; } }
+  let nodes="";
+  for(const n of names){ const s=SYS[n]; const nm=esc(n); const dn=n.replace(/"/g,'&quot;');
+    nodes+='<g class="sysnode" data-sys="'+dn+'"><circle cx="'+s.pos[0]+'" cy="'+s.pos[1]+'" r="'+r.toFixed(2)+'" fill="'+govColor(s.government)+'"/><text class="syslabel" x="'+(s.pos[0]+r*1.5).toFixed(1)+'" y="'+(s.pos[1]+r*0.7).toFixed(1)+'" font-size="'+(r*2.4).toFixed(2)+'">'+nm+'</text></g>'; }
+  cv.innerHTML='<svg id="mapSvg" class="map-svg" preserveAspectRatio="xMidYMid meet"><g class="map-lines" style="stroke-width:'+(r/3.5).toFixed(2)+'">'+lines+'</g>'+nodes+'</svg>';
+  mapFit(); _wireMap();
+  if(state.mapSel && SYS[state.mapSel]) mapSelect(state.mapSel);
+}
+function mapSelect(name){ const SYS=DATA.systems||{}; if(!SYS[name]) return; state.mapSel=name;
+  document.querySelectorAll('#mapSvg .sysnode.sel').forEach(g=>g.classList.remove('sel'));
+  const g=document.querySelector('#mapSvg .sysnode[data-sys="'+name.replace(/"/g,'&quot;')+'"]'); if(g) g.classList.add('sel');
+  renderSystemDetail(name); }
+function renderSystemDetail(name){ const box=el("mapDetail"); if(!box) return; const s=(DATA.systems||{})[name]; if(!s){ box.innerHTML=""; return; }
+  const inSys=l=>l&&l.system===name;
+  const ofs=Object.values(DATA.outfits).filter(o=>(o.soldAt||[]).some(inSys)).map(o=>o.name).sort();
+  const shps=Object.values(DATA.ships).filter(sh=>(sh.soldAt||[]).some(inSys)).map(sh=>sh.displayName||sh.name).sort();
+  const links=(s.links||[]).filter(l=>(DATA.systems||{})[l]);
+  const chip=t=>'<span class="md-chip">'+esc(t)+'</span>';
+  const lchip=t=>'<button class="md-chip md-link" data-sys-link="'+t.replace(/"/g,'&quot;')+'">'+esc(t)+'</button>';
+  const sect=(title,arr,fn)=> arr.length?'<div class="md-sect"><div class="md-h">'+title+' <b>'+arr.length+'</b></div><div class="md-list">'+arr.map(fn||chip).join("")+'</div></div>':"";
+  box.innerHTML='<div class="md-head"><div class="md-nm">'+esc(name)+'</div><div class="md-gov" style="color:'+govColor(s.government)+'">'+esc(s.government||"Uninhabited")+'</div></div>'+
+    sect("Hyperlanes",links,lchip)+sect("Planets",s.planets||[])+sect("Ships sold",shps)+sect("Outfits sold",ofs); }
+let _mapWired=false;
+function _wireMap(){ if(_mapWired) return; _mapWired=true; const cv=el("mapCanvas"); let drag=null;
+  cv.addEventListener("mousedown",e=>{ drag={x:e.clientX,y:e.clientY,moved:false}; });
+  window.addEventListener("mousemove",e=>{ if(!drag||!state.mapVB) return; const sc=_mapScale(); if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>3) drag.moved=true; state.mapVB[0]-=(e.clientX-drag.x)/sc; state.mapVB[1]-=(e.clientY-drag.y)/sc; drag.x=e.clientX; drag.y=e.clientY; mapSetVB(); });
+  window.addEventListener("mouseup",e=>{ if(drag&&!drag.moved){ const g=e.target.closest&&e.target.closest('.sysnode'); if(g) mapSelect(g.dataset.sys); } drag=null; });
+  cv.addEventListener("wheel",e=>{ if(!state.mapVB) return; e.preventDefault(); mapZoom(e.deltaY<0?0.82:1.22); },{passive:false});
+  const det=el("mapDetail"); if(det) det.addEventListener("click",e=>{ const b=e.target.closest("[data-sys-link]"); if(b) mapSelect(b.dataset.sysLink); });
+  const ctr=document.querySelector('#infoMap .map-ctrls'); if(ctr) ctr.addEventListener("click",e=>{ const b=e.target.closest("[data-mapzoom]"); if(!b) return; const a=b.dataset.mapzoom; if(a==="in")mapZoom(0.8); else if(a==="out")mapZoom(1.25); else mapFit(); });
+  const ms=el("mapSearch"); if(ms) ms.addEventListener("input",e=>{ const q=e.target.value.trim().toLowerCase(); if(!q)return; const SYS=DATA.systems||{}; const hit=Object.keys(SYS).find(n=>n.toLowerCase()===q)||Object.keys(SYS).find(n=>n.toLowerCase().includes(q)); if(hit&&Array.isArray(SYS[hit].pos)){ const p=SYS[hit].pos, b=state._mapBounds; const w=b[2]/12, h=w*(b[3]/b[2]); state.mapVB=[p[0]-w/2,p[1]-h/2,w,h]; mapSetVB(); mapSelect(hit); } });
+}

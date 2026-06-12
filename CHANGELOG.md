@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.38 — 2026-06-13
+- Galaxy Map added to the Information Deck: 708 systems plotted by position, hyperlane links,
+  colored by government, with pan/zoom, search, and a detail panel (planets, links, and which
+  ships/outfits are sold in each system). System data parsed from the local game install.
+
 ### v0.5.37 — 2026-06-13
 - Removed the tonnage shown next to the Capacity heading.
 - Energy & Heat heading now shows E and H aligned above their value columns.

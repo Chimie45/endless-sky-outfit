@@ -40,6 +40,7 @@ for dirpath, dirnames, filenames in os.walk(DATA):
 files.sort()
 ships, outfits = {}, {}
 outfitter_groups, shipyard_groups, planets, planet_to_system = {}, {}, {}, {}
+systems = {}
 def num(tokens, i, default=0.0):
     try: return float(tokens[i])
     except (IndexError, ValueError): return default
@@ -148,10 +149,20 @@ def parse_shipyard(node):
 def parse_system(node):
     name = node.tokens[1] if len(node.tokens) > 1 else None
     if not name: return
+    rec = systems.setdefault(name, {"name": name, "pos": [0.0, 0.0], "government": None, "links": [], "planets": []})
     for c in node.children:
-        if c.key == "object":
+        k = c.key
+        if k == "pos": rec["pos"] = [num(c.tokens, 1), num(c.tokens, 2)]
+        elif k == "government": rec["government"] = c.tokens[1] if len(c.tokens) > 1 else None
+        elif k == "link" and len(c.tokens) > 1:
+            if c.tokens[1] not in rec["links"]: rec["links"].append(c.tokens[1])
+        elif k == "remove" and len(c.tokens) > 2 and c.tokens[1] == "link":
+            if c.tokens[2] in rec["links"]: rec["links"].remove(c.tokens[2])
+        elif k == "object":
             def walk(o):
-                if len(o.tokens) > 1 and o.tokens[0] == "object": planet_to_system[o.tokens[1]] = name
+                if len(o.tokens) > 1 and o.tokens[0] == "object":
+                    planet_to_system[o.tokens[1]] = name
+                    if o.tokens[1] not in rec["planets"]: rec["planets"].append(o.tokens[1])
                 for cc in o.children: walk(cc)
             walk(c)
 base_ship_nodes, variant_ship_nodes = [], []
@@ -203,7 +214,7 @@ for _nm, _s in ships.items():   _s["obtainable"] = _ref[_nm] > 1
 for _nm, _o in outfits.items(): _o["obtainable"] = _ref[_nm] > 1
 
 OUTFIT_ORDER = ["Guns","Turrets","Secondary Weapons","Ammunition","Systems","Power","Engines","Hand to Hand","Unique","Minerals","Special","Licenses"]
-out = {"version":VERSION,"generated":"endless-sky stable data pipeline (phase 0)","categoryOrder":OUTFIT_ORDER,"ships":ships,"outfits":outfits}
+out = {"version":VERSION,"generated":"endless-sky stable data pipeline (phase 0)","categoryOrder":OUTFIT_ORDER,"ships":ships,"outfits":outfits,"systems":systems}
 dst = sys.argv[2] if len(sys.argv) > 2 else "endless-sky-data.json"
 os.makedirs(os.path.dirname(os.path.abspath(dst)), exist_ok=True)
 with open(dst, "w", encoding="utf-8") as fh: json.dump(out, fh, separators=(",", ":"), ensure_ascii=False)
@@ -211,4 +222,5 @@ nvar = sum(len(s["variants"]) for s in ships.values())
 ndisp = sum(1 for s in ships.values() if s["displayName"] != s["name"])
 nso = sum(1 for s in ships.values() if not s["obtainable"])
 noo = sum(1 for o in outfits.values() if not o["obtainable"])
-print(f"version {VERSION} | ships {len(ships)} (display-named {ndisp}, unreleased {nso}) | variants {nvar} | outfits {len(outfits)} (unreleased {noo}) | bytes {os.path.getsize(dst):,}")
+nsys = sum(1 for s in systems.values() if s["pos"] != [0.0, 0.0] or s["links"])
+print(f"version {VERSION} | ships {len(ships)} (display-named {ndisp}, unreleased {nso}) | variants {nvar} | outfits {len(outfits)} (unreleased {noo}) | systems {len(systems)} ({nsys} mapped) | bytes {os.path.getsize(dst):,}")

@@ -226,12 +226,30 @@
         </div>
       </div>
       <div class="info-section">
+        <div class="eyebrow">Galaxy</div>
+        <div class="info-cards">
+          <button class="infocard" id="openMap"><h3>Galaxy Map</h3><p>Explore systems, hyperlanes &amp; where things are sold.</p></button>
+        </div>
+      </div>
+      <div class="info-section">
         <div class="eyebrow">Coming soon</div>
         <div class="info-cards">
-          <div class="infocard soon"><h3>Galaxy Map</h3><p>Systems, hyperlanes &amp; where things are sold.</p></div>
           <div class="infocard soon"><h3>Ship &amp; Outfit Wiki</h3><p>Searchable reference for every hull and outfit.</p></div>
           <div class="infocard soon"><h3>Quest Tracker</h3><p>Needs mission data to be parsed first.</p></div>
         </div>
+      </div>
+    </div>
+
+    <div class="info-tool" id="infoMap">
+      <div class="info-toolhead">
+        <button class="backbtn" data-info-back>← Information Deck</button>
+        <span class="sp-title">Galaxy Map</span>
+        <input type="search" id="mapSearch" placeholder="Find system…" autocomplete="off">
+        <div class="map-ctrls"><button data-mapzoom="in" title="Zoom in">+</button><button data-mapzoom="out" title="Zoom out">−</button><button data-mapzoom="fit" title="Fit galaxy">Fit</button></div>
+      </div>
+      <div class="map-wrap">
+        <div class="map-canvas" id="mapCanvas"></div>
+        <div class="map-detail" id="mapDetail"><div class="map-hint">Click a system to see its planets and what's sold there. Drag to pan, scroll to zoom.</div></div>
       </div>
     </div>
 
@@ -284,7 +302,7 @@
     <label>Content</label>
     <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.37 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.38 · ES data v<span id="ver"></span></div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>
