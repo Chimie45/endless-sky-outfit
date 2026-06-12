@@ -850,3 +850,14 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 .info-toolhead input[type=search]{flex:1;min-width:0;height:34px}
 .backbtn{flex:none;height:34px;padding:0 14px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);font-size:12px;font-weight:600;cursor:pointer}
 .backbtn:hover{border-color:var(--accent);color:var(--bright)}
+
+/* v0.5.37: align E / H headers over the energy & heat value columns */
+.eh-hdr{display:inline-flex;gap:6px}
+.eh-hdr span{width:66px;box-sizing:border-box;padding:0 6px;text-align:right;font-size:9px;font-weight:700;letter-spacing:.12em}
+.eh-hdr .en{color:var(--energy)} .eh-hdr .ht{color:var(--heat)}
+
+/* v0.5.37 fix: E/H header row uses the same .val columns as the data (perfect alignment) */
+#ehPills .eh-head{min-height:0;margin-bottom:1px}
+#ehPills .eh-head .val{background:none;border-color:transparent;padding:0 6px;font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--dim)}
+#ehPills .eh-head .val.en{color:var(--energy)} #ehPills .eh-head .val.ht{color:var(--heat)}
+.eyebrow .dim{color:var(--dim)}

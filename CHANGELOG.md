@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.37 — 2026-06-13
+- Removed the tonnage shown next to the Capacity heading.
+- Energy & Heat heading now shows E and H aligned above their value columns.
+- Max Cargo / Max Crew auto-fill now uses only real, buyable outfits (no Unique/quest items like
+  Blood of Surtr) and picks a basic engine from the Engines category, so the presets are usable
+  by new players.
+
 ### v0.5.36 — 2026-06-13
 - Outfitters and Shipyards are no longer modal popups - they open as full-window views inside the
   Information Deck (like the Ship/Fleet editors), with a back button to the deck.

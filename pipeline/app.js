@@ -163,7 +163,6 @@ function renderMeters(){
     row("Gun ports",v(`${guns}/${hp.guns}`,'',guns>hp.guns))+
     row("Turrets",v(`${turrets}/${hp.turrets}`,'',turrets>hp.turrets))+
     row("Bays",v(String(totalBays)));
-  el("massReadout").textContent = FMT(s.emptyMass)+" t";
 
   el("movePills").innerHTML =
     row("Max speed",v(FMT(s.maxSpeed)))+
@@ -173,6 +172,7 @@ function renderMeters(){
     row("Hull",v(`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair):""}`));
 
   el("ehPills").innerHTML =
+    `<div class="strow eh-head"><span class="lbl"></span><span class="vals"><b class="val mono en">E</b><b class="val mono ht">H</b></span></div>`+
     row("Idle",v(FMT(s.eh.idle[0]),"en"),v(FMT(s.eh.idle[1]),"ht"))+
     row("Moving",v(FMT(s.eh.moving[0]),"en"),v(FMT(s.eh.moving[1]),"ht"))+
     row("Firing",v(FMT(s.eh.firing[0]),"en"),v(FMT(s.eh.firing[1]),"ht"))+
@@ -584,7 +584,7 @@ function setShip(name){
 }
 function _idleEnergy(){ return eff("energy generation")+eff("solar collection")+eff("fuel energy")-eff("energy consumption")-eff("cooling energy"); }
 function _idleHeat(){ const ce=coolingEfficiency(eff("cooling inefficiency")); return eff("heat generation")+eff("solar heat")+eff("fuel heat") - ce*(eff("cooling")+eff("active cooling")); }
-function _eligibleOutfits(){ return Object.values(DATA.outfits).filter(o=>(state.showUnreleased||o.obtainable) && factionTier(o.faction)<=state.tier); }
+function _eligibleOutfits(){ const SKIP=new Set(["Unique","Minerals","Special","Licenses"]); return Object.values(DATA.outfits).filter(o=>o.obtainable && !SKIP.has(o.category) && o.thumbnail && o.thumbnail!=="outfit/unknown" && factionTier(o.faction)<=state.tier); }
 function _perSpace(o,k){ const sp=Math.abs(num(o.attributes["outfit space"]))||1; const x=num(o.attributes[k]); return x>0?x/sp:-1; }
 function _addBest(scoreFn){ let best=null,bs=0; for(const o of _eligibleOutfits()){ const sc=scoreFn(o); if(sc>0 && sc>bs && !limitBlocked(o,1)){ bs=sc; best=o; } } if(best){ state.installed[best.name]=(state.installed[best.name]||0)+1; return true; } return false; }
 function _ensure(cond, scoreFn, cap){ let g=cap||80; while(g-->0 && !cond()){ if(!_addBest(scoreFn)) break; } }
@@ -605,9 +605,9 @@ function _expansionOutfit(){   // an outfit that trades cargo space for outfit s
     if(os>0 && cs<0){ const r=os/(-cs); if(r>bs){ bs=r; best=o; } } }
   return best;
 }
-function _addSmallest(attr){   // smallest-footprint outfit that provides attr>0 (so essentials always fit)
+function _addSmallest(attr, cat){   // smallest real outfit providing attr>0 (optionally restricted to a category)
   let best=null, bsp=1e9;
-  for(const o of _eligibleOutfits()){ if(num(o.attributes[attr])>0){ const sp=Math.abs(num(o.attributes["outfit space"]))||1; if(sp<bsp && !limitBlocked(o,1)){ bsp=sp; best=o; } } }
+  for(const o of _eligibleOutfits()){ if(cat && o.category!==cat) continue; if(num(o.attributes[attr])>0){ const sp=Math.abs(num(o.attributes["outfit space"]))||1; if(sp<bsp && !limitBlocked(o,1)){ bsp=sp; best=o; } } }
   if(best){ state.installed[best.name]=(state.installed[best.name]||0)+1; return true; }
   return false;
 }
@@ -623,8 +623,8 @@ function _balancePowerHeat(){   // add a reactor / passive cooling until the hul
 function computeAutoFill(kind){
   state.installed={};
   // 1) smallest thruster + steering so the hull can move (and both always fit, leaving room for the rest)
-  _addSmallest("thrust");
-  _addSmallest("turn");
+  _addSmallest("thrust","Engines");
+  _addSmallest("turn","Engines");
   // 2) reactor + cooling so it has power and doesn't overheat (reserve this space first)
   _balancePowerHeat();
   // 3) fill the remaining outfit space maximising the chosen stat
