@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.44 — 2026-06-13
+- Planet page: landscape image cropped to 16:9, with two squares beside it - the planet's actual
+  map sprite (orbiting body) and a faction square in the owning government's colour. (Endless Sky
+  has no faction emblem art, so the faction square uses the government's map colour + initials.)
+
 ### v0.5.43 — 2026-06-13
 - Outfit cards gained a magnifying-glass button (under the +) that opens the item's info card.
 - Item info card: fixed the hero image sizing/resolution; the Sold-at list now shows every location

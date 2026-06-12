@@ -1152,9 +1152,9 @@ function planetIndex(){ if(_planetIdx) return _planetIdx;
   const ofs={}, shp={};
   for(const o of Object.values(DATA.outfits)) for(const l of (o.soldAt||[])){ if(l.planet){ (ofs[l.planet]=ofs[l.planet]||[]).push(o.name); if(!(l.planet in sysOf)) sysOf[l.planet]=l.system; } }
   for(const s of Object.values(DATA.ships)) for(const l of (s.soldAt||[])){ if(l.planet){ (shp[l.planet]=shp[l.planet]||[]).push(s.displayName||s.name); if(!(l.planet in sysOf)) sysOf[l.planet]=l.system; } }
-  const land=DATA.planetLand||{};
+  const land=DATA.planetLand||{}, sprite=DATA.planetSprite||{};
   const list=Object.keys(sysOf).sort((a,b)=>a.localeCompare(b));
-  _planetIdx={sysOf,gov,ofs,shp,land,list}; return _planetIdx; }
+  _planetIdx={sysOf,gov,ofs,shp,land,sprite,list}; return _planetIdx; }
 function renderPlanets(){ const idx=planetIndex(); const rail=el("planetRail"); if(!rail) return;
   const q=(state.planetQ||"").toLowerCase();
   const list=idx.list.filter(p=>!q||p.toLowerCase().includes(q)||(idx.sysOf[p]||"").toLowerCase().includes(q));
@@ -1171,9 +1171,13 @@ function renderPlanetDetail(p){ const idx=planetIndex(); const box=el("planetDet
   const chip=t=>'<span class="md-chip">'+esc(t)+'</span>';
   const sect=(title,arr)=> arr.length?'<div class="md-sect"><div class="md-h">'+title+' <b>'+arr.length+'</b></div><div class="md-list">'+arr.map(chip).join("")+'</div></div>':"";
   const goSys=sys?'<button class="md-chip md-link" data-go-sys="'+sys.replace(/"/g,'&quot;')+'">'+esc(sys)+' ↗ map</button>':"";
-  const land=idx.land[p];
-  const shot=land?'<div class="pd-shot"><img src="images/'+land+'.jpg" alt="" loading="lazy" onerror="var w=this.closest(\'.pd-shot\'); if(w) w.style.display=\'none\'"></div>':"";
-  box.innerHTML=shot+'<div class="md-head"><div class="md-nm">'+esc(p)+'</div><div class="md-gov" style="color:'+govColor(g)+'">'+esc(g||"Uninhabited")+'</div>'+(goSys?'<div class="md-golink">'+goSys+'</div>':'')+'</div>'+
+  const land=idx.land[p], spr=idx.sprite[p];
+  const shot=land?'<div class="pd-shot"><img src="images/'+land+'.jpg" alt="" loading="lazy" onerror="this.style.display=\'none\'"></div>':'<div class="pd-shot"></div>';
+  const sprSq=spr?'<div class="pd-sq pd-planet"><img src="images/'+spr+'.png" alt="" loading="lazy" onerror="this.style.display=\'none\'"></div>':'';
+  const ini=(g||"Uninhabited").split(/[^A-Za-z]+/).filter(Boolean).map(w=>w[0]).join("").slice(0,3).toUpperCase();
+  const facSq='<div class="pd-sq pd-fac" style="background:'+govColor(g)+'" title="'+esc(g||"Uninhabited")+'">'+esc(ini)+'</div>';
+  const media='<div class="pd-media">'+shot+'<div class="pd-side">'+sprSq+facSq+'</div></div>';
+  box.innerHTML=media+'<div class="md-head"><div class="md-nm">'+esc(p)+'</div><div class="md-gov" style="color:'+govColor(g)+'">'+esc(g||"Uninhabited")+'</div>'+(goSys?'<div class="md-golink">'+goSys+'</div>':'')+'</div>'+
     sect("Ships sold",shp)+sect("Outfits sold",ofs); }
 function _wirePlanets(){ if(_planetsWired) return; _planetsWired=true;
   el("planetRail").addEventListener("click",e=>{ const b=e.target.closest("[data-planet]"); if(b) renderPlanetDetail(b.dataset.planet); });
