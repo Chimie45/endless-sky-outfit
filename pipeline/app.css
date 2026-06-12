@@ -900,3 +900,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 #viewInfoSec[data-info="planets"] #infoPlanets{display:flex}
 #infoPlanets .sp-body>.map-detail{flex:1;min-width:0}
 .md-golink{margin-top:6px}
+
+/* v0.5.41: keep galaxy-map dots & labels a constant screen size when zooming */
+.map-svg .sysnode circle{r:var(--dotr,4px);vector-effect:non-scaling-stroke}
+.map-svg .syslabel{font-size:var(--lblsize,8px);transform:translate(var(--lbldx,5px),var(--lbldy,3px))}

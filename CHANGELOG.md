@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.41 — 2026-06-13
+- Galaxy map: system dots and names now stay a constant on-screen size when zooming (zoom reveals more
+  area instead of inflating the labels), so names are readable at any zoom.
+
 ### v0.5.40 — 2026-06-13
 - Added a coffee-cup icon in the header (next to the gear) linking to the Buy Me a Coffee page.
 

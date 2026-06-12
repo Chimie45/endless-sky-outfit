@@ -1086,7 +1086,12 @@ init();
 const GOV_COLORS={"Republic":"#3b82f6","Free Worlds":"#22c55e","Syndicate":"#f59e0b","Pirate":"#ef4444","Hai":"#a855f7","Coalition":"#2dd4bf","Quarg":"#cbd5e1","Wanderer":"#84cc16","Korath":"#fb923c","Remnant":"#22d3ee","Pug":"#ec4899","Drak":"#9aa7b8","Bunrodea":"#eab308","Successor":"#8b5cf6","Heliarch":"#f43f5e","Gegno":"#10b981","Kor Sestor":"#fb923c","Kor Mereti":"#fbbf24","Indigenous":"#64748b","Uninhabited":"#3a4453"};
 function govColor(g){ if(GOV_COLORS[g]) return GOV_COLORS[g]; if(!g) return "#3a4453"; let h=0; for(let i=0;i<g.length;i++) h=(h*31+g.charCodeAt(i))>>>0; return "hsl("+(h%360)+",42%,60%)"; }
 function _mapScale(){ const cv=el("mapCanvas"), vb=state.mapVB; if(!cv||!vb||!cv.clientWidth) return 1; return Math.min(cv.clientWidth/vb[2], cv.clientHeight/vb[3]); }
-function mapSetVB(){ const svg=el("mapSvg"); if(!svg||!state.mapVB) return; svg.setAttribute("viewBox",state.mapVB.map(x=>x.toFixed(1)).join(" ")); const b=state._mapBounds; if(b) svg.classList.toggle("zoom", state.mapVB[2] < b[2]/2.6); }
+function mapSetVB(){ const svg=el("mapSvg"); if(!svg||!state.mapVB) return; const vb=state.mapVB; svg.setAttribute("viewBox",vb.map(x=>x.toFixed(1)).join(" ")); const b=state._mapBounds; if(b) svg.classList.toggle("zoom", vb[2] < b[2]/2.6);
+  const cv=el("mapCanvas"); if(cv&&cv.clientWidth){ const sc=Math.min(cv.clientWidth/vb[2], cv.clientHeight/vb[3]);   // keep dots/labels a constant screen size regardless of zoom
+    svg.style.setProperty("--dotr",(3.6/sc).toFixed(3)+"px");
+    svg.style.setProperty("--lblsize",(10/sc).toFixed(3)+"px");
+    svg.style.setProperty("--lbldx",(6/sc).toFixed(3)+"px");
+    svg.style.setProperty("--lbldy",(3.4/sc).toFixed(3)+"px"); } }
 function mapFit(){ if(state._mapBounds){ state.mapVB=state._mapBounds.slice(); mapSetVB(); } }
 function mapZoom(f,cx,cy){ const vb=state.mapVB, b=state._mapBounds; if(!vb||!b) return; if(cx==null){ cx=vb[0]+vb[2]/2; cy=vb[1]+vb[3]/2; }
   let nw=vb[2]*f; nw=Math.max(b[2]/80, Math.min(b[2], nw)); const nh=nw*(vb[3]/vb[2]);
@@ -1106,7 +1111,7 @@ function renderGalaxyMap(){
   for(const n of names){ const a=SYS[n]; for(const ln of (a.links||[])){ const b=SYS[ln]; if(!b||!Array.isArray(b.pos))continue; const k=n<ln?n+"|"+ln:ln+"|"+n; if(seen.has(k))continue; seen.add(k); lines+='<line x1="'+a.pos[0]+'" y1="'+a.pos[1]+'" x2="'+b.pos[0]+'" y2="'+b.pos[1]+'"/>'; } }
   let nodes="";
   for(const n of names){ const s=SYS[n]; const nm=esc(n); const dn=n.replace(/"/g,'&quot;');
-    nodes+='<g class="sysnode" data-sys="'+dn+'"><circle cx="'+s.pos[0]+'" cy="'+s.pos[1]+'" r="'+r.toFixed(2)+'" fill="'+govColor(s.government)+'"/><text class="syslabel" x="'+(s.pos[0]+r*1.5).toFixed(1)+'" y="'+(s.pos[1]+r*0.7).toFixed(1)+'" font-size="'+(r*2.4).toFixed(2)+'">'+nm+'</text></g>'; }
+    nodes+='<g class="sysnode" data-sys="'+dn+'"><circle cx="'+s.pos[0]+'" cy="'+s.pos[1]+'" r="'+r.toFixed(2)+'" fill="'+govColor(s.government)+'"/><text class="syslabel" x="'+s.pos[0]+'" y="'+s.pos[1]+'">'+nm+'</text></g>'; }
   cv.innerHTML='<svg id="mapSvg" class="map-svg" preserveAspectRatio="xMidYMid meet"><g class="map-lines" style="stroke-width:'+(r/3.5).toFixed(2)+'">'+lines+'</g>'+nodes+'</svg>';
   mapFit(); _wireMap();
   if(state.mapSel && SYS[state.mapSel]) mapSelect(state.mapSel);
