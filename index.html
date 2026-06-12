@@ -1128,7 +1128,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <label>Content</label>
     <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.32 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.33 · ES data v<span id="ver"></span></div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>
@@ -1433,8 +1433,9 @@ function drawHardpoints(){
   const {guns,turrets}=weaponSlots();
   let gi=0,ti=0;
   const COLORS={gun:'var(--gun)',turret:'var(--turret)',engine:'var(--engine)',reverse:'var(--engine)',bay:'var(--bay)'};
-  const wrap=t=>{ if(t.length<=13) return [t]; const w=t.split(' '); let p='',q=''; for(const x of w){ if(!q && (p?p+' '+x:x).length<=13) p=p?p+' '+x:x; else q=q?q+' '+x:x; } if(!q){ return [p.length>16?p.slice(0,15)+'…':p]; } if(q.length>16) q=q.slice(0,15)+'…'; return [p,q]; };
-  let body="", labels=[];
+  const wrap=t=>{ if(t.length<=18) return [t]; const w=t.split(' '); let p='',q=''; for(const x of w){ if(!q && (p?p+' '+x:x).length<=18) p=p?p+' '+x:x; else q=q?q+' '+x:x; } if(!q){ return [p.length>20?p.slice(0,19)+'…':p]; } if(q.length>20) q=q.slice(0,19)+'…'; return [p,q]; };
+  let body="";
+  const lmap=new Map();
   for(const p of pts){
     const x=cx+p.x*scale, y=cy+p.y*scale, col=COLORS[p.t];
     let label=null, lit=true;
@@ -1450,19 +1451,26 @@ function drawHardpoints(){
       body+=`<circle cx="${x}" cy="${y}" r="5" fill="none" stroke="${col}" stroke-width="2" opacity="${op}"/>`;
     else
       body+=`<rect x="${x-2.5}" y="${y-3}" width="5" height="8" rx="1.5" fill="${col}" opacity="${op}"/>`;
-    if(label!==null){
-      const left=p.x<0, halfW=dispW/2, pad=16;
-      const lx = left ? Math.max(4, cx-halfW-pad) : Math.min(SW-4, cx+halfW+pad);
-      labels.push({x,y,left,label,lit,lx,anchor:left?'end':'start'});
+    if(label!==null){          // group identical weapons sharing a hardpoint position
+      const k=label+'|'+Math.round(x)+'|'+Math.round(y);
+      const g=lmap.get(k); if(g){ g.count++; g.lit=g.lit||lit; } else lmap.set(k,{x,y,label,lit,count:1});
     }
   }
-  for(const side of [true,false]){
-    const arr=labels.filter(l=>l.left===side).sort((a,b)=>a.y-b.y);
-    let prev=-1e9; for(const l of arr){ const h=wrap(l.label).length>1?20:12; l.ly=Math.max(l.y, prev+h); prev=l.ly; }
+  // labels anchored to the stage edges (text grows inward, so it can't run off-screen), balanced across both sides
+  let labels=[...lmap.values()].map(g=>({x:g.x,y:g.y,lit:g.lit,label:g.count>1?g.label+' ×'+g.count:g.label}));
+  const TH=6;
+  labels.forEach(l=>l.side = l.x<cx-TH?'L' : (l.x>cx+TH?'R':null));
+  let L=labels.filter(l=>l.side==='L').length, R=labels.filter(l=>l.side==='R').length;
+  labels.filter(l=>!l.side).sort((a,b)=>a.y-b.y).forEach(l=>{ if(L<=R){l.side='L';L++;}else{l.side='R';R++;} });
+  labels.forEach(l=>{ l.left=l.side==='L'; l.lx=l.left?4:SW-4; l.anchor=l.left?'start':'end'; });
+  for(const side of ['L','R']){
+    const arr=labels.filter(l=>l.side===side).sort((a,b)=>a.y-b.y);
+    let prev=8; for(const l of arr){ const h=wrap(l.label).length>1?19:11; l.ly=Math.max(l.y, prev); prev=l.ly+h; }
+    const over=prev-(SH-4); if(over>0){ for(const l of arr) l.ly=Math.max(8, l.ly-over); }
   }
   let lab="";
   for(const l of labels){
-    lab+=`<line x1="${l.x}" y1="${l.y}" x2="${l.lx}" y2="${l.ly}" stroke="var(--accent)" stroke-width="1" opacity="0.5"/>`;
+    lab+=`<line x1="${l.x}" y1="${l.y}" x2="${l.lx}" y2="${l.ly}" stroke="var(--accent)" stroke-width="1" opacity="0.4"/>`;
     lab+=`<circle cx="${l.x}" cy="${l.y}" r="2" fill="var(--accent)" opacity="0.7"/>`;
     {const lines=wrap(l.label); const y0=l.ly+3-(lines.length>1?5:0);
      lab+=`<text x="${l.lx}" y="${y0}" text-anchor="${l.anchor}" font-size="9" fill="${l.lit?'var(--bright)':'var(--dim)'}">`+lines.map((ln,i)=>`<tspan x="${l.lx}" dy="${i?10:0}">${ln}</tspan>`).join('')+`</text>`;}

@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.33 — 2026-06-13
+- Hardpoint labels reworked: anchored to the overlay edges (text grows inward so it never runs off-
+  screen), balanced across both sides (fixes radial ships like the Archon piling all labels on one
+  side), and identical weapons sharing a hardpoint are grouped (e.g. Drak Turret x6).
+
 ### v0.5.32 — 2026-06-13
 - Fixed outfit/weapon/engine capacity bars: the total was inflated by the consumed amount (e.g. a
   265t weapon hull showed /515). Total now reflects hull capacity (plus any capacity-adding outfits),
