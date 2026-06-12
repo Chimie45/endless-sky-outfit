@@ -31,14 +31,18 @@ body[data-theme="light"]{
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{
-  height:100vh;overflow:hidden;display:flex;flex-direction:column;
+  height:100vh;overflow:hidden;display:grid;place-items:center;
+  background:#05070b;
+  color:var(--txt);
+  font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+#app{
+  width:100vw;height:100vh;overflow:hidden;display:flex;flex-direction:column;
   background:
     radial-gradient(1200px 600px at 78% -10%, var(--glow1) 0%, transparent 55%),
     radial-gradient(900px 500px at 8% 110%, var(--glow2) 0%, transparent 50%),
     var(--bg);
-  color:var(--txt);
-  font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  -webkit-font-smoothing:antialiased;
 }
 .mono{font-family:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace}
 .eyebrow{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--dim)}
@@ -51,14 +55,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 /* ---- top bar ---- */
 header{
-  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
-  padding:12px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:9px 22px;border-bottom:1px solid var(--line);
   background:var(--headbg);
-  flex:none;z-index:30;backdrop-filter:blur(6px)
+  flex:none;z-index:30;backdrop-filter:blur(8px);
+  box-shadow:0 1px 0 rgba(57,182,246,.14),0 10px 28px -16px rgba(0,0,0,.7)
 }
-.brand{display:flex;flex-direction:column;gap:2px;min-width:140px}
-.brand .name{font-size:19px;letter-spacing:.22em;text-transform:uppercase;color:var(--bright);font-weight:700}
-.brand .name b{color:var(--accent);font-weight:700}
+.brand{display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0;flex:none}
+.brand .logo{height:56px;width:auto;display:block}
 .ctrl{display:flex;flex-direction:column;gap:4px}
 .ctrl label{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
 select,input[type=search]{
@@ -73,19 +77,31 @@ select{
 select:hover{border-color:var(--accent2)}
 select:focus,input:focus{border-color:var(--accent)}
 .spoiler{display:flex;align-items:center;gap:8px}
-.tierbtns{display:flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden}
-.tierbtns button{background:var(--panel2);border:0;padding:0 12px;height:34px;display:flex;align-items:center;color:var(--dim);border-right:1px solid var(--line);font-size:12px}
+.tierbtns{display:flex;align-self:flex-start;border:1px solid var(--line2);border-radius:7px;overflow:hidden}
+.tierbtns button{background:var(--panel2);border:0;padding:0 12px;height:34px;display:flex;align-items:center;justify-content:center;white-space:nowrap;color:var(--dim);border-right:1px solid var(--line);font-size:12px}
 .tierbtns button:last-child{border-right:0}
 .tierbtns button[aria-pressed=true]{background:var(--accent);color:#04121f;font-weight:700}
 .spacer{flex:1}
-.costchip{text-align:right}
-.costchip .v{font-size:16px;color:var(--accent);font-weight:700}
-.linkbtn{background:transparent;border:1px solid var(--line2);border-radius:8px;height:36px;display:inline-flex;align-items:center;padding:0 14px;color:var(--dim)}
+.headact{display:flex;align-items:center;gap:5px}
+.actbtn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--dim);font-size:10.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:color .15s,background .15s,border-color .15s}
+.actbtn:hover{color:var(--bright);background:var(--panel2);border-color:var(--line2)}
+.actbtn:active{transform:translateY(1px)}
+.actbtn svg{width:16px;height:16px;display:block;flex:none}
+.actbtn.icon{width:36px;padding:0;justify-content:center}
+.bmc-wrap{display:inline-block;width:149px;height:33px;overflow:hidden;line-height:0;margin-top:4px}
+.bmc-wrap .bmc-btn-container{transform:scale(.55);transform-origin:top left;margin:0 !important}
+.bmc-wrap .bmc-btn-container .bmc-btn{margin:0 !important}
+/* settings dropdown popover */
+.headmenu{position:fixed;top:76px;right:18px;width:380px;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:16px;box-shadow:0 18px 46px rgba(0,0,0,.55);z-index:60;display:none}
+.headmenu.open{display:block}
+.headmenu .hm-title{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:14px}
+.headmenu .setrow:last-child{margin-bottom:0}
+.headmenu .hm-ver{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.linkbtn{background:transparent;border:1px solid var(--line2);border-radius:8px;height:38px;display:inline-flex;align-items:center;padding:0 14px;color:var(--dim)}
 .linkbtn:hover{border-color:var(--bad);color:var(--bad)}
 .toggle{background:var(--panel2);border:1px solid var(--line2);color:var(--dim);border-radius:8px;padding:7px 11px;font-size:12px}
 .toggle:hover{border-color:var(--accent)}
 .toggle[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
-.gear{width:36px;padding:0;justify-content:center;font-size:15px}
 .modal{position:fixed;inset:0;background:rgba(4,7,12,.62);display:none;z-index:60;align-items:center;justify-content:center}
 .modal.open{display:flex}
 .sheet{width:min(420px,92vw);background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:22px;position:relative}
@@ -112,7 +128,7 @@ select:focus,input:focus{border-color:var(--accent)}
 .fchip{font-size:11.5px;padding:7px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--dim);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fchip:hover{border-color:var(--accent)}
 .fchip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
-.shipgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:10px;overflow-y:auto;padding-right:4px;align-content:start}
+.shipgrid{display:grid;grid-template-columns:repeat(auto-fill,120px);justify-content:center;gap:12px;overflow-y:auto;padding-right:4px;align-content:start}
 .shipcell{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:8px;cursor:pointer;text-align:center}
 .shipcell:hover{border-color:var(--accent2)}
 .shipcell.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
@@ -123,7 +139,26 @@ select:focus,input:focus{border-color:var(--accent)}
 .shipcell .sc-cat{color:var(--dim);font-size:10px;letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
 
 /* ---- 2-column layout: loadout (left) | outfitter (right) ---- */
-main{display:grid;grid-template-columns:1fr;gap:0;flex:1;min-height:0;transition:margin-right .22s ease}
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+.view{flex:1;min-height:0;display:none;overflow:hidden}
+body[data-view="ship"] .view-ship,body[data-view="fleet"] .view-fleet,body[data-view="info"] .view-info{display:flex;flex-direction:column}
+.view-ship{padding:14px 12px;gap:12px}
+.view-fleet{padding:14px 16px}
+.view-info{overflow-y:auto;padding:22px}
+.editbar{flex:none;display:flex;gap:8px}
+.ebtn{height:36px;padding:0 16px;border-radius:9px;border:1px solid var(--line2);background:var(--panel2);color:var(--accent2);font-weight:700;font-size:12px;letter-spacing:.03em;cursor:pointer}
+.ebtn:hover{border-color:var(--accent);color:var(--bright)}
+.view-fleet .fleetpanel{flex:1;min-height:0}
+.info-deck{display:flex;flex-direction:column;gap:24px;max-width:1080px;width:100%;margin:0 auto}
+.info-section>.eyebrow{display:block;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.info-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.infocard{text-align:left;border:1px solid var(--line2);border-radius:12px;background:var(--panel);padding:18px;cursor:pointer;color:var(--txt)}
+.infocard:hover{border-color:var(--accent)}
+.infocard h3{color:var(--bright);font-size:15px;margin:0 0 6px}
+.infocard p{color:var(--dim);font-size:12.5px;line-height:1.5;margin:0}
+.infocard.soon{opacity:.5;cursor:default}
+.infocard.soon:hover{border-color:var(--line2)}
+.infocard.soon h3::after{content:" · soon";color:var(--accent2);font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
 .col{overflow-y:auto;padding:18px 12px}
 .col.left{overflow:hidden;display:flex;flex-direction:column;gap:12px}
 .leftbody{flex:1;min-height:0;display:grid;grid-template-columns:2fr 1fr;gap:12px}
@@ -136,26 +171,36 @@ main{display:grid;grid-template-columns:1fr;gap:0;flex:1;min-height:0;transition
 .alerts{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;align-content:flex-start}
 .alerts .pill{width:86px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;padding:5px 4px;font-weight:600}
 .headright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.sidepanel{position:fixed;top:60px;right:0;bottom:0;width:min(560px,90vw);transform:translateX(101%);transition:transform .22s ease;z-index:40;display:flex;flex-direction:column;border-left:1px solid var(--line2);background:linear-gradient(180deg,var(--bg2),var(--bg));box-shadow:-14px 0 36px rgba(0,0,0,.5);padding:14px}
-body[data-panel="parts"] #outfitter{transform:none}
-body[data-panel="ship"] #shipPicker{transform:none}
-body[data-panel="shop"] #outfitters{transform:none}
-body[data-panel="yard"] #shipyards{transform:none}
+.sidepanel{position:fixed;top:50%;left:50%;width:min(1040px,95vw);height:min(86vh,840px);transform:translate(-50%,-48%);opacity:0;visibility:hidden;transition:opacity .18s ease,transform .18s ease,visibility .18s;z-index:41;display:flex;flex-direction:column;border:1px solid var(--line2);border-radius:14px;background:linear-gradient(180deg,var(--bg2),var(--bg));box-shadow:0 24px 60px rgba(0,0,0,.6);padding:16px}
+.panelscrim{position:fixed;inset:0;background:rgba(4,7,12,.62);backdrop-filter:blur(2px);display:none;z-index:25}
+body[data-panel] .panelscrim{display:block}
+body[data-panel="parts"] #outfitter,body[data-panel="ship"] #shipPicker,body[data-panel="shop"] #outfitters,body[data-panel="yard"] #shipyards{opacity:1;visibility:visible;transform:translate(-50%,-50%)}
+
 .sp-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex:none}
 .sp-title{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent2);font-weight:700;white-space:nowrap}
 .sp-head input[type=search]{flex:1;min-width:0;height:32px}
 .sp-head .modalx{position:static;flex:none;width:32px;height:32px}
 .sp-body{flex:1;min-height:0;display:flex;gap:10px}
-.sp-rail{width:132px;flex:none;overflow-y:auto;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--line);padding-right:8px}
-.sp-rail button{font-size:11px;font-weight:600;line-height:1.15;padding:4px 9px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--dim);text-align:left;white-space:normal;cursor:pointer}
+.sp-rail{width:240px;flex:none;overflow-y:auto;display:flex;flex-direction:column;gap:4px;border-right:1px solid var(--line);padding-right:8px}
+.sp-rail button{flex:none;font-size:12.5px;font-weight:600;height:36px;line-height:36px;padding:0 12px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .sp-rail button:hover{border-color:var(--accent)}
 .sp-rail button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f}
+.sp-rail .st-pl{font-weight:700}
+.sp-rail .st-sy{opacity:.6;font-weight:400}
+.sp-pager{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:2px 0 6px;margin-bottom:2px;background:var(--bg2);flex:none}
+.sp-pager button{font-size:11px;font-weight:600;padding:5px 9px;border-radius:6px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);cursor:pointer}
+.sp-pager button:hover:not(:disabled){border-color:var(--accent)}
+.sp-pager button:disabled{opacity:.35;cursor:default}
+.sp-pager span{font-size:11px;color:var(--dim);white-space:nowrap}
 .sp-fac{flex:none;height:32px;width:auto;min-width:0;max-width:120px;font-size:11px;padding:0 22px 0 8px}
 .sp-grid{flex:1;min-width:0;overflow-y:auto;padding-right:2px;align-content:start}
-.headtabs{display:flex;gap:3px;align-self:flex-end;margin-bottom:-13px}
-.toptab{height:34px;display:inline-flex;align-items:center;padding:0 18px;font-size:12.5px;font-weight:600;letter-spacing:.02em;border:1px solid var(--line2);border-bottom:none;border-radius:9px 9px 0 0;background:var(--panel2);color:var(--dim);cursor:pointer}
-.toptab:hover{color:var(--bright);border-color:var(--accent2)}
-body[data-panel="ship"] #shipTab,body[data-panel="parts"] #outfitterTab,body[data-panel="shop"] #shopTab,body[data-panel="yard"] #yardTab{background:var(--accent);border-color:var(--accent);color:#04121f}
+.headnav{display:flex;gap:2px;align-self:stretch}
+.navtab{position:relative;display:inline-flex;align-items:center;padding:0 17px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;border:0;background:none;color:var(--dim);cursor:pointer;white-space:nowrap;transition:color .15s}
+.navtab:hover{color:var(--bright)}
+.navtab::after{content:"";position:absolute;left:14px;right:14px;bottom:-9px;height:2px;border-radius:2px;background:var(--accent);transform:scaleX(0);opacity:0;transition:transform .2s ease,opacity .2s ease}
+.navtab:hover::after{transform:scaleX(.6);opacity:.45}
+body[data-view="ship"] #viewShip,body[data-view="fleet"] #viewFleet,body[data-view="info"] #viewInfo{color:var(--bright)}
+body[data-view="ship"] #viewShip::after,body[data-view="fleet"] #viewFleet::after,body[data-view="info"] #viewInfo::after{transform:scaleX(1);opacity:1}
 .sect{margin-bottom:20px}
 .sect>.eyebrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
 .leftgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
@@ -201,11 +246,6 @@ svg.schem{width:100%;height:340px;display:block}
 .legend{position:absolute;left:0;right:0;bottom:8px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:10.5px;color:var(--dim);pointer-events:none}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
-.dropmsg{position:absolute;inset:10px;border:2px dashed var(--accent);border-radius:12px;
-  display:none;align-items:center;justify-content:center;color:var(--accent);font-weight:700;
-  letter-spacing:.1em;text-transform:uppercase;background:rgba(57,182,246,.08);pointer-events:none}
-.shipcard.dragover .dropmsg{display:flex}
-.loadpanel.dragover{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 
 /* variant chips */
 .variants{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px;margin-top:0}
@@ -222,6 +262,7 @@ svg.schem{width:100%;height:340px;display:block}
 .pbtn[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
 .pbtn.act{color:var(--accent2)}
 .pbtn.act:hover{color:var(--bright)}
+#fleetAddBtn{grid-column:1/-1}
 .novar{font-size:10.5px;color:var(--dim)}
 .fleetpanel{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px 12px}
 .fleet-stats{flex:none;width:210px;display:flex;flex-direction:column;gap:6px}
@@ -229,16 +270,16 @@ svg.schem{width:100%;height:340px;display:block}
 .fleet-count{font-size:11px;color:var(--dim);line-height:1.4;border-top:1px solid var(--line);padding-top:6px;margin-top:2px}
 .fleet-count .fc-ships{color:#4aa6ff;font-weight:600}
 .fleet-count .fc-cost{color:#ffcf4d;font-weight:700}
-.fleet-right{flex:none;width:180px;display:flex;flex-direction:column;gap:6px}
+.fleet-right{flex:none;width:300px;display:flex;flex-direction:column;gap:8px}
 .fleet-main-title{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--bright);font-weight:800}
 .fleet-sect-title{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-top:2px}
-.fleet-sect-title.divtop{border-top:1px solid var(--line);padding-top:9px;margin-top:5px}
-.fleet-issues{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.fleet-sect-title.divtop{border-top:1px solid var(--line);padding-top:6px;margin-top:3px}
+.fleet-issues{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
 .fstat{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2)}
 .fstat span{color:var(--dim);text-transform:uppercase;letter-spacing:.04em;font-size:9px}
 .fstat b{font-weight:700;font-size:11px;color:var(--bright);font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap;flex:none}
 .fstat span{min-width:0;overflow:hidden;text-overflow:ellipsis}
-.issue{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2)}
+.issue{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:5px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2)}
 .issue span{color:var(--dim);text-transform:uppercase;letter-spacing:.04em;font-size:9px}
 .issue b{font-weight:700;font-size:11px;font-family:ui-monospace,Menlo,Consolas,monospace}
 .issue.ok b{color:#36ff7a}
@@ -254,7 +295,7 @@ svg.schem{width:100%;height:340px;display:block}
 .fleet-stats .fleet-totals{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .fleet-totals .strow{min-height:22px}
 .val.ok{color:#36ff7a}
-.fleet-list{flex:1;min-width:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;align-content:start;grid-auto-rows:min-content;overflow-y:auto}
+.fleet-list{flex:1;min-width:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px;align-content:start;grid-auto-rows:min-content;overflow-y:auto}
 .fleet-empty{grid-column:1/-1;font-size:11px;color:var(--dim);padding:10px 2px}
 .fleet-ship{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 3px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2);color:var(--txt);cursor:pointer}
 .fleet-ship:hover{border-color:var(--accent)}
@@ -275,8 +316,8 @@ svg.schem{width:100%;height:340px;display:block}
 .fleet-hover .fh-row b{color:var(--txt);font-weight:600}
 .fleet-ship .fs-art .tile{width:100%;height:100%;border-radius:6px}
 .fleet-ship .fs-nm{font-size:9.5px;line-height:1.1;text-align:center;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.fleet-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.fbtn{font-size:10px;font-weight:600;padding:5px 4px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);cursor:pointer;text-align:center;white-space:nowrap}
+.fleet-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.fbtn{font-size:10px;font-weight:600;padding:6px 4px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);cursor:pointer;text-align:center;white-space:nowrap}
 .fbtn:hover{border-color:var(--accent)}
 .fbtn:disabled{opacity:.4;cursor:default}
 .fbtn:disabled:hover{border-color:var(--line2)}
@@ -336,10 +377,9 @@ table.eh tr.max td{color:var(--bright)}
 .catbar{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
 .catbar button{font-size:10.5px;letter-spacing:.05em;padding:5px 9px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--dim)}
 .catbar button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
-.ogrid{display:grid;grid-template-columns:repeat(auto-fill,110px);justify-content:center;gap:12px}
-.ocard{position:relative;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:11px;background:var(--panel);cursor:grab;overflow:hidden;height:182px}
+.ogrid{display:grid;grid-template-columns:repeat(auto-fill,120px);justify-content:center;gap:12px}
+.ocard{position:relative;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:11px;background:var(--panel);overflow:hidden;height:182px}
 .ocard:hover{border-color:var(--accent2)}
-.ocard:active{cursor:grabbing}
 .ocard .art{height:92px;display:grid;place-items:center;border-bottom:1px solid var(--line)}
 .ocard .art .tile{width:100%;height:100%;border-radius:0}
 .ocard .art .tile img{width:90px;height:90px;object-fit:contain}
@@ -415,7 +455,7 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
 /* ---- Below ~1024: stack ship-area over loadout so each gets the full width ---- */
 @media(max-width:1024px){
   .leftbody{grid-template-columns:1fr;flex:none;min-height:auto}
-  .col.left{overflow-y:auto}
+  .view-ship{overflow-y:auto}
   .maincol>.fleetpanel{flex:none}
   .fleet-list{overflow:visible}
   .loadpanel{min-height:auto}
@@ -439,10 +479,351 @@ svg.schem line.lead{stroke:var(--line2);stroke-width:1;opacity:.6}
   .stagewrap{min-height:200px}
   .shippick{min-width:0;flex:1 1 200px}
   .fleet-select{min-width:0}
-  .sidepanel{top:0;width:100vw}
+  .sidepanel{width:100vw;height:100vh;max-height:100vh;border-radius:0}
+  .sp-body{flex-direction:column;gap:8px}
+  .sp-rail{width:auto;max-height:38vh;border-right:none;border-bottom:1px solid var(--line);padding-right:0}
+  .navtab{padding:0 11px;font-size:10px;letter-spacing:.1em}
+  .brand .logo{height:40px;width:auto}
+  header{gap:8px;padding:8px 10px}
+  .actbtn span{display:none}
+  .actbtn{width:36px;padding:0;justify-content:center}
+  .headmenu{right:8px;left:8px;width:auto}
+  .headnav{order:3;flex-basis:100%}
+  .spacer{display:none}
 }
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);
   background:rgba(255,107,107,.16);border:1px solid var(--bad);color:#ffd0d0;
   font-weight:700;letter-spacing:.03em;padding:11px 18px;border-radius:10px;z-index:80;
   opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;backdrop-filter:blur(6px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---- Ship Editor: 3-column workspace ---- */
+.se-grid{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1.2fr);gap:12px}
+.se-col{min-width:0;min-height:0;display:flex;flex-direction:column}
+.se-ship{overflow-y:auto;padding-right:2px}
+.se-ship .shipcard{margin-bottom:0}
+.se-ship .stagewrap{flex:none;height:300px;min-height:0;margin-bottom:12px}
+.shiphead{align-items:center;gap:12px}
+.se-ship .shipid{flex:1;min-width:0}
+.shiphead .hed-art{width:46px;height:46px;flex:none;border-radius:8px;overflow:hidden;background:radial-gradient(circle at 50% 38%,var(--tile1),var(--tile2));display:grid;place-items:center}
+.shiphead .hed-art img{width:100%;height:100%;object-fit:contain;padding:4px}
+.statcols2{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-bottom:12px}
+.se-load .loadpanel{flex:1;min-height:0}
+.se-dock{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px;gap:8px}
+.dock-tabs{display:flex;gap:5px;flex:none}
+.dock-tab{flex:1;height:34px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--dim);font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.dock-tab:hover{color:var(--bright);border-color:var(--accent2)}
+.dock-tab[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04121f}
+.dock-pane{flex:1;min-height:0;display:none;flex-direction:column;gap:8px}
+.dock-pane.show{display:flex}
+.dock-head{display:flex;gap:6px;flex:none}
+.dock-head input[type=search]{flex:1;min-width:0;height:34px}
+.se-dock .sp-body{flex:1;min-height:0}
+.se-dock .sp-rail{width:118px}
+.se-dock .sp-grid{padding-right:2px}
+
+
+/* ---- no-scroll pagination (Ship Editor) ---- */
+.se-grid{grid-template-columns:minmax(0,1.4fr) minmax(0,0.8fr) minmax(0,1.55fr)}
+.se-ship{overflow:hidden}
+.railwrap{flex:none;width:120px;min-height:0;display:flex;flex-direction:column;border-right:1px solid var(--line);padding-right:8px}
+.railwrap .sp-rail{flex:1;min-height:0;overflow:hidden;width:auto;border-right:0;padding-right:0}
+.sp-gridwrap{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+.sp-gridwrap .sp-grid{flex:1;min-height:0;overflow:hidden}
+.loadpanel #loadout{flex:1;min-height:0;overflow:hidden}
+.grid-pager,.rail-pager{flex:none;display:flex;align-items:center;justify-content:center;gap:8px;padding-top:7px;margin-top:6px;border-top:1px solid var(--line)}
+.grid-pager:empty,.rail-pager:empty{display:none;margin:0;border:0}
+.grid-pager button,.rail-pager button{font-size:12px;font-weight:700;line-height:1;padding:4px 11px;border-radius:6px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);cursor:pointer}
+.grid-pager button:disabled,.rail-pager button:disabled{opacity:.35;cursor:default}
+.grid-pager span,.rail-pager span{font-size:11px;color:var(--dim);min-width:34px;text-align:center}
+.loadcat{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin:10px 0 6px}
+.loadpanel #loadout>.loadcat:first-child{margin-top:0}
+
+/* ---- Ship card: old-form (stats beside overlay), v0.4.3 ---- */
+.sc-top{display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px;align-items:stretch;margin-bottom:12px}
+.sc-statL{display:flex;flex-direction:column;gap:12px;min-width:0}
+.sc-top .stagewrap{flex:none;height:auto;min-height:300px;margin:0}
+.sc-bot{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-bottom:12px}
+.variants{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.vchip.empty{border:1px dashed var(--line);background:transparent;opacity:.45;cursor:default;pointer-events:none;min-height:30px}
+.loadpanel #loadout{flex:1;min-height:0;overflow-y:auto}
+.railwrap{width:152px}
+.se-dock .ogrid,.se-dock .shipgrid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));justify-content:stretch}
+body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(--accent);outline-offset:-3px;border-radius:12px}
+
+/* ---- compact installed loadout (v0.4.4) ---- */
+.loadpanel .litem{padding:4px 8px;margin-bottom:4px;gap:8px}
+.loadpanel .litem .tile{width:28px;height:28px}
+.loadpanel .litem .nm b{font-size:12px}
+.loadpanel .litem .nm small{font-size:10px}
+.loadpanel .stepper button{width:22px;height:22px;font-size:13px}
+.loadpanel .stepper .cnt{min-width:18px;font-size:12px}
+.loadpanel .loadgroup{margin-bottom:8px}
+.loadpanel .loadgroup h3{margin-bottom:4px}
+
+/* ---- fill columns top-to-bottom; cap width on big/ultrawide screens (v0.4.5) ---- */
+.se-grid{max-width:2000px;width:100%;margin:0 auto}
+.se-ship .shipcard{flex:1;min-height:0;display:flex;flex-direction:column}
+.sc-top{flex:1;min-height:0}
+.sc-top .stagewrap{min-height:0;height:auto}
+
+/* ---- small screens (<=1100): stacked, scrolling Ship Editor [must stay last] ---- */
+@media(max-width:1100px){
+  .view-ship{overflow-y:auto;overflow-x:hidden}
+  .se-grid{grid-template-columns:1fr !important;flex:none !important;max-width:none}
+  .se-ship .shipcard{flex:none !important}
+  .sc-top{flex:none !important}
+  .sc-top .stagewrap{height:auto;min-height:280px}
+  .se-load .loadpanel{flex:none !important}
+  .loadpanel #loadout{overflow:visible !important}
+  .se-dock{min-height:560px}
+}
+
+/* ---- parts accordion rail + catalog fill (v0.5.1) ---- */
+.railwrap .sp-rail{gap:3px}
+.sp-rail .catrow{display:flex;align-items:center;gap:3px;height:27px;flex:none;padding:0 8px;font-size:11.5px;font-weight:600;border-radius:6px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);text-align:left;white-space:nowrap;overflow:hidden;cursor:pointer}
+.sp-rail .catrow .caret{width:11px;flex:none;color:var(--accent2);font-size:9px;text-align:center}
+.sp-rail .catrow .ctxt{overflow:hidden;text-overflow:ellipsis}
+.sp-rail .catrow:hover{border-color:var(--accent);color:var(--bright)}
+.sp-rail .catrow.active{background:var(--accent);border-color:var(--accent);color:#04121f}
+.sp-rail .catrow.active .caret{color:#04121f}
+.sp-rail .subrow{display:block;height:24px;flex:none;padding:0 8px 0 22px;font-size:11px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--dim);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.sp-rail .subrow:hover{color:var(--bright)}
+.sp-rail .subrow.active{color:var(--accent);font-weight:700}
+.se-dock .ogrid,.se-dock .shipgrid{align-content:space-between}
+
+/* ---- ship-card header: name + bigger icon; alerts on the overlay (v0.5.2) ---- */
+.shiphead{align-items:center;gap:13px;margin-bottom:12px}
+.shiphead .hed-art{width:64px;height:64px}
+.shiptitle{display:flex;flex-direction:column;gap:3px;min-width:0}
+.shiptitle .nm{font-size:19px;font-weight:700;color:var(--bright);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shiptitle .shipsub{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shiptitle .shipsub .fac{color:var(--accent2)}
+.shiptitle .shipsub .sep{color:var(--line2);margin:0 5px}
+.stagewrap .alerts{position:absolute;top:8px;left:8px;right:8px;z-index:3;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;pointer-events:none}
+.stagewrap .alerts .pill{pointer-events:auto;width:auto;padding:4px 9px;font-size:10px;background:rgba(6,10,18,.62);backdrop-filter:blur(3px)}
+
+/* ---- dock: 3x4 catalog, grid-search, roomier accordion, header tech (v0.5.3) ---- */
+.headtier{display:flex;align-items:center;gap:8px}
+.headtier .ht-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.headtier .tierbtns{align-self:center}
+.sp-gridwrap .grid-search{flex:none;width:100%;height:34px;margin-bottom:8px}
+.se-dock .ogrid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}
+.se-dock .ocard{height:150px}
+.se-dock .ocard .art{height:78px}
+.se-dock .ocard .art .tile img{width:72px;height:72px}
+.sp-rail .catrow{height:30px}
+.sp-rail .subrow{height:27px}
+
+/* ---- ship-card header: large icon, race/class above it, big name across the top (v0.5.4) ---- */
+.shiphead{align-items:flex-start;gap:16px}
+.shiphead .hed-art{width:124px;height:124px;border-radius:12px}
+.hed-left{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
+.hed-left .shipsub{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.hed-left .shipsub .fac{color:var(--accent2)}
+.hed-left .shipsub .sep{color:var(--line2);margin:0 5px}
+.shiphead .nm{flex:1;min-width:0;font-size:24px;font-weight:700;color:var(--bright);line-height:1.1;align-self:flex-start;white-space:normal;word-break:break-word}
+
+/* ---- header tweak + weapon-family accordion fit (v0.5.5) ---- */
+.shiphead{align-items:center;gap:14px}
+.shiphead .hed-art{width:80px;height:80px}
+.shiptitle{display:flex;flex-direction:column;gap:4px;min-width:0}
+.shiptitle .shipsub{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shiptitle .shipsub .fac{color:var(--accent2)}
+.shiptitle .shipsub .sep{color:var(--line2);margin:0 5px}
+.shiptitle .nm{flex:none;font-size:30px;font-weight:700;color:var(--bright);line-height:1.02;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.railwrap .sp-rail{overflow-y:auto}
+.sp-rail .catrow{height:28px}
+.sp-rail .subrow{height:25px}
+
+/* ---- v0.5.6: top-align grids, uniform control heights, restructured ship card ---- */
+.se-dock .ogrid,.se-dock .shipgrid{align-content:start}
+.pbtn{height:34px;display:flex;align-items:center;justify-content:center;padding:0 10px}
+.variants .vchip{height:34px;display:flex;align-items:center;justify-content:center;padding:0 8px}
+.dock-tab{height:34px}
+.sp-gridwrap .grid-search{height:34px}
+.sp-rail .catrow{height:34px}
+.sp-rail .subrow{height:30px}
+.sc-top{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}
+.sc-statL .shiphead{margin-bottom:8px}
+.sc-disp{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0}
+.sc-disp .stagewrap{flex:1;min-height:220px;height:auto;margin:0}
+.ship-alerts>.eyebrow{display:flex;border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:7px}
+.ship-alerts .alerts{position:static;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ship-alerts .alerts .pill{width:auto;justify-content:center;background:var(--panel2);backdrop-filter:none}
+
+/* constrain ship name to its column so auto-shrink can engage (v0.5.7 fix) */
+.shiptitle{flex:1;min-width:0}
+.shiptitle .nm{min-width:0;max-width:100%;display:block}
+
+/* v0.5.8: ship picker 3x4 + compact race rail */
+.se-dock .shipgrid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}
+.se-dock .shipcell .sc-art{aspect-ratio:auto;height:88px}
+.sp-rail .fchip{height:34px;display:flex;align-items:center;justify-content:flex-start}
+
+/* v0.5.9: Fleet as a dock tab (compact, stacked) */
+#dockFleetPane{display:none;flex:1;min-height:0}
+#dockFleetPane.show{display:flex;flex-direction:column}
+#dockFleetPane .fleetpanel{flex:1;min-height:0;border:0;background:transparent;padding:0}
+
+/* v0.5.10: faction / name / type stacked */
+.shiptitle{gap:2px}
+.shiptitle .fac{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shiptitle .cat{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shiptitle .nm{margin:1px 0}
+
+/* v0.5.11: title fills icon height, wider overlay */
+.shiptitle{align-self:stretch;justify-content:space-between}
+.sc-top{grid-template-columns:minmax(0,0.92fr) minmax(0,1.32fr)}
+
+/* v0.5.12: vertical fleet sections + flagship square */
+.fleetpanel{display:flex;flex-direction:column;gap:14px;min-height:0}
+.fl-sect{flex:none;display:flex;flex-direction:column;gap:6px}
+.fl-icons{flex:1;min-height:0}
+.fl-icons .fleet-list{flex:1;min-height:0;overflow-y:auto;width:auto}
+.view-fleet .fleetpanel{max-width:780px;width:100%;margin:0 auto}
+.flagship-box{display:flex;flex-direction:column;align-items:center;gap:7px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);padding:10px;margin-top:2px}
+.flagship-box .fs-label{align-self:flex-start;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:700}
+.flagship-box .fs-art{width:104px;height:104px}
+.flagship-box .fs-art .tile{width:100%;height:100%;border-radius:8px}
+.flagship-box .fs-name{font-size:12.5px;color:var(--bright);font-weight:600;text-align:center}
+.flagship-box .fs-none{font-size:11px;color:var(--dim);padding:22px 0}
+
+/* v0.5.13: compact fleet layout */
+.fleet-allbtns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.fl-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:start;flex:none}
+.fl-stats{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fl-stats .fleet-totals{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.fl-row .flagship-box{margin-top:0}
+.flagship-box .fs-art{width:84px;height:84px}
+
+/* v0.5.14: skinnier fleet buttons + saved-fleets list */
+.fl-managerow{display:grid;grid-template-columns:minmax(0,1fr) 168px;gap:12px;align-items:start}
+.fleet-allbtns .fbtn{height:26px;padding:0 4px;font-size:9.5px}
+.fl-saved{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fl-savedlist{display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto}
+.fl-saveditem{height:26px;flex:none;padding:0 8px;border-radius:6px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);font-size:11px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.fl-saveditem:hover{border-color:var(--accent)}
+.fl-saveditem.active{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+
+/* v0.5.15: fix ship-name descender clip + full-screen 2-column Fleet Editor */
+.shiptitle .nm{line-height:1.22}
+.sc-statL .shiphead .shiptitle .nm{line-height:1.22}
+
+.view-fleet .fleetpanel{max-width:none;width:100%;margin:0;flex:1;min-height:0}
+.fleet-body{display:flex;flex-direction:column;gap:14px;flex:1;min-height:0}
+.view-fleet .fleet-body{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;height:100%}
+.fleet-col-left{display:flex;flex-direction:column;gap:14px;min-height:0;min-width:0}
+.view-fleet .fleet-col-left{overflow-y:auto;padding-right:4px}
+.fleet-col-right{display:flex;flex-direction:column;gap:8px;min-height:0;min-width:0}
+.view-fleet .fleet-col-right .fleet-list{flex:1;min-height:0;overflow-y:auto;align-content:start}
+.fl-detailsect{flex:1;min-height:0}
+#dockFleetPane .fleet-body{display:flex}
+#dockFleetPane .fl-detailsect{display:none}
+#dockFleetPane .fleet-col-right{flex:1;min-height:0}
+#dockFleetPane .fleet-col-right .fleet-list{flex:1;min-height:0;overflow-y:auto;align-content:start}
+.fleet-detail{border:1px solid var(--line2);border-radius:10px;background:var(--panel2);padding:12px;display:flex;flex-direction:column;gap:12px}
+.fd-empty{color:var(--dim);font-size:12px;padding:8px 2px}
+.fd-head{display:flex;align-items:center;gap:14px}
+.fd-art{width:72px;height:72px;flex:none}
+.fd-art .tile{width:100%;height:100%;border-radius:8px}
+.fd-id{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fd-fac{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent2)}
+.fd-nm{font-size:20px;font-weight:700;color:var(--bright);line-height:1.18}
+.fd-cat{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.fd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.fd-stat{display:flex;flex-direction:column;gap:1px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 8px;min-width:0}
+.fd-stat span{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.fd-stat b{font-size:13px;color:var(--bright);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fd-stat b.bad{color:var(--bad)}
+.fd-loadtitle{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent2);font-weight:700}
+.fd-load{display:flex;flex-direction:column;gap:3px;max-height:220px;overflow-y:auto}
+.fd-out{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--txt);padding:3px 7px;border-radius:5px;background:var(--panel)}
+.fd-out b{color:var(--bright);font-weight:600}
+.fd-out-none{color:var(--dim);background:transparent}
+
+/* v0.5.16: manifest titles on one row, white saved-fleets list, restore flagship row, dock spacing */
+.fl-manifesthead{display:grid;grid-template-columns:minmax(0,1fr) 168px;gap:12px;align-items:baseline;margin-bottom:7px}
+.fl-manifesthead .fleet-main-title,.fl-manifesthead .fleet-sect-title{margin:0}
+.fl-managerow{grid-template-columns:minmax(0,1fr) 168px;align-items:start}
+.fl-savedlist{height:88px;max-height:88px;background:#fff;border:3px solid #c4ccd6;border-radius:10px;padding:4px;gap:2px;overflow-y:auto}
+.fl-saveditem{height:auto;flex:none;background:transparent;border:0;border-radius:6px;color:#141a22;font-size:11px;font-weight:600;text-align:left;padding:5px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.fl-saveditem:hover{background:rgba(0,0,0,.08)}
+.fl-saveditem.active{background:var(--accent);color:#04121f;font-weight:700}
+.view-fleet .fl-manifest{max-width:620px}
+/* dock fleet tab: keep the upper sections compact and hand the roster the leftover height */
+#dockFleetPane .fleet-col-left{flex:none}
+#dockFleetPane .fl-row .flagship-box{padding:8px}
+#dockFleetPane .flagship-box .fs-art{width:72px;height:72px}
+
+/* v0.5.17: light-grey saved list (4 rows), titled flagship matching stat-box height, tighter spacing */
+.fl-savedlist{height:102px;max-height:102px;background:#e2e6ec;border-color:#aeb7c4}
+.fl-saveditem{padding:4px 9px;line-height:1.25}
+.fl-manifesthead{margin-bottom:2px}
+.fleet-col-left{gap:10px}
+/* flagship column: title above a box that fills the stats' height */
+.fl-row{align-items:stretch}
+.fl-flag{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fl-flag .flagship-box{flex:1;margin-top:0;justify-content:center}
+/* no divider line under Fleet Stats; drop the empty-count phantom line/space */
+.fleet-count{border-top:0;padding-top:2px;margin-top:0}
+.fleet-count:empty{display:none}
+/* divider under the Fleet Roster heading */
+.fleet-col-right>.fleet-sect-title{border-bottom:1px solid var(--line);padding-bottom:6px}
+
+/* v0.5.17 fix: flagship art small enough that the box matches the stat-box stack height */
+.fl-flag .flagship-box{padding:8px;gap:5px}
+.fl-flag .flagship-box .fs-art{width:50px;height:50px}
+#dockFleetPane .fl-flag .flagship-box .fs-art{width:50px;height:50px}
+.fl-flag .flagship-box .fs-none{padding:8px 0}
+
+/* v0.5.17 fix2: pin flagship box to the stat-box stack height (exclude the count caption) */
+.fl-row{align-items:start}
+.fl-flag .flagship-box{flex:none;height:88px}
+
+/* v0.5.18: saved-fleets list matches the button stack height (88px) and fits 4 fleets */
+.fl-savedlist{box-sizing:border-box;height:88px;max-height:88px;gap:2px}
+.fl-saveditem{padding:2px 9px;font-size:10px;line-height:1.2}
+
+/* v0.5.20: outfit card meta - faction beside price, stat chips on their own single line (no clipped 3rd chip) */
+.ocard .meta{display:flex;flex-direction:column;gap:3px}
+.ocard .metarow{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
+.ocard .metarow .price{flex:none}
+.ocard .metarow .chip.fac{flex:none}
+.ocard .chips{margin-top:1px;flex-wrap:nowrap;overflow:hidden}
+
+/* v0.5.21: full-screen Fleet Editor - 50/50 split, roster (left) and Ship Details (right) swapped */
+.view-fleet .fleet-body{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.view-fleet .fleet-col-left{overflow:visible}
+.fl-rostersect{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.fl-rostersect .fleet-list{flex:1;min-height:0;overflow-y:auto;align-content:start}
+.view-fleet .fleet-col-right{min-height:0}
+.view-fleet .fl-detailsect{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.view-fleet .fl-detailsect .fleet-detail{flex:1;min-height:0;overflow-y:auto}
+/* dock fleet tab: roster now in the left column; hide the (detail-only) right column and let left fill */
+#dockFleetPane .fleet-col-left{flex:1;min-height:0}
+#dockFleetPane .fleet-col-right{display:none}
+
+/* v0.5.23: price chip + 2-col chip grid; taller dock cards using the vertical slack */
+.se-dock .ogrid{gap:8px}
+.se-dock .ocard{height:157px}
+.se-dock .ocard .art{height:70px}
+.se-dock .ocard .art .tile img{width:62px;height:62px}
+.ocard .meta{display:flex;flex-direction:column;gap:6px;padding:8px 9px 9px}
+.ocard .chips{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:0;overflow:visible}
+.ocard .chips .chip{display:flex;align-items:center;justify-content:center;padding:3px 6px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* v0.5.24: fix card name clip (overflow:hidden made it shrink below its line) */
+.ocard .meta b{flex:none}
+.ocard .chips{flex:none}
+/* fleet editor full ship-details layout */
+.fd-head{position:relative}
+.fd-rename{margin-left:auto;flex:none;height:26px;padding:0 12px;border-radius:6px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-size:11px;cursor:pointer}
+.fd-rename:hover{border-color:var(--accent);color:var(--bright)}
+.fd-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+.fd-sect{min-width:0}
+.fleet-detail .eyebrow{margin-bottom:4px}
+.fleet-detail .eyebrow.eb2{margin-top:10px}
+.fleet-detail .strow{min-height:0}
+.fd-alerts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:5px}
+.fd-alerts .pill{position:static;width:auto;justify-content:center;backdrop-filter:none}

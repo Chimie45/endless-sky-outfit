@@ -27,7 +27,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"" };
+let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0 };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -141,6 +141,11 @@ function installedOf(predicate){
 
 /* ---------- rendering ---------- */
 const el = id => document.getElementById(id);
+function _fitCount(id,cw,ch,gap){ const b=el(id); if(!b||!b.clientWidth||!b.clientHeight) return 18; const cols=Math.max(1,Math.floor((b.clientWidth+gap)/(cw+gap))); const rows=Math.max(1,Math.floor((b.clientHeight+gap)/(ch+gap))); return cols*rows; }
+function _fitRows(id,rh){ const b=el(id); if(!b||!b.clientHeight) return 10; return Math.max(1,Math.floor(b.clientHeight/rh)); }
+function _clampPage(p,pages){ p=p|0; if(p>=pages)p=pages-1; if(p<0)p=0; return p; }
+function _pg(page,pages){ return pages>1? `<button data-pg="prev"${page<=0?" disabled":""}>‹</button><span>${page+1}/${pages}</span><button data-pg="next"${page>=pages-1?" disabled":""}>›</button>` : ""; }
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function renderMeters(){
   const s = computeStats();
@@ -157,7 +162,7 @@ function renderMeters(){
     capRow("Outfit","outfit space"," t")+capRow("Weapon","weapon capacity"," t")+capRow("Engine","engine capacity"," t")+
     row("Gun ports",v(`${guns}/${hp.guns}`,'',guns>hp.guns))+
     row("Turrets",v(`${turrets}/${hp.turrets}`,'',turrets>hp.turrets))+
-    (totalBays?row("Bays",v(String(totalBays))):"");
+    row("Bays",v(String(totalBays)));
   el("massReadout").textContent = FMT(s.emptyMass)+" t";
 
   el("movePills").innerHTML =
@@ -174,7 +179,6 @@ function renderMeters(){
     row("Net",v(FMT(s.eh.net[0]),"en"),v(FMT(s.eh.net[1]),"ht"))+
     row("Max",v(FMT(s.eh.max[0]),"en"),v(FMT(s.eh.max[1]),"ht"));
 
-  el("totalCost").textContent = MONEY(s.cost);
   renderQuickStats(s); renderAlerts(s);
 }
 function meter(label, used, total, unit, infoOnly){
@@ -190,9 +194,9 @@ function flag(ok, goodText, badText){
 }
 
 function renderQuickStats(s){
-  const crew=requiredCrew(), bunks=eff("bunks");
+  const crew=requiredCrew(), bunks=eff("bunks"), mass=eff("mass");
   const row=(l,val)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals"><b class="val mono">${val}</b></span></div>`;
-  el("quickStats").innerHTML = row("Cost",MONEY(s.cost))+row("Crew",`${FMT(crew)} / ${FMT(bunks)}`)+row("Cargo",FMT(s.cargo)+" t")+row("Fuel",FMT(s.fuel));
+  el("quickStats").innerHTML = row("Cost",MONEY(s.cost))+row("Crew",FMT(crew))+row("Bunks",FMT(bunks))+row("Cargo",FMT(s.cargo)+" t")+row("Fuel",FMT(s.fuel))+row("Mass",FMT(mass)+" t");
 }
 function renderAlerts(s){
   const hasThrust=eff("thrust")>0, hasTurn=eff("turn")>0;
@@ -203,9 +207,16 @@ function renderAlerts(s){
     p("Energy",s.energyOK,s.energyOK?"Generates enough power to run":"Will run out of power")+
     p("Heat",s.heatOK,s.heatOK?"Stays cool enough":"Will overheat");
 }
+function fitShipName(){
+  const e=el("hullName"); if(!e) return;
+  let size=30; e.style.fontSize=size+"px";
+  let g=48;
+  while(e.scrollWidth>e.clientWidth+1 && size>10 && g-->0){ size-=0.5; e.style.fontSize=size+"px"; }
+}
 function renderShipCard(){
   const ship = state.ship;
   el("hullName").textContent = ship.displayName || ship.name;
+  fitShipName(); requestAnimationFrame(fitShipName);
   el("hullCat").textContent = ship.category;
   el("hullFaction").textContent = FACLABEL(ship.faction);
   renderArtbox();
@@ -228,9 +239,13 @@ function shortVariant(v){
 function renderVariants(){
   const ship = state.ship;
   const vnames = Object.keys(ship.variants||{});
-  if(!vnames.length){ el("variants").innerHTML = `<span class="novar">No factory variants</span>`; return; }
-  el("variants").innerHTML = vnames.map(v=>
-    `<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${shortVariant(v)}</button>`).join("");
+  const n = Math.max(6, vnames.length);
+  let html="";
+  for(let i=0;i<n;i++){
+    if(i<vnames.length){ const v=vnames[i]; html+=`<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${shortVariant(v)}</button>`; }
+    else html+=`<div class="vchip empty"></div>`;
+  }
+  el("variants").innerHTML=html;
 }
 function setPresetPressed(){
   document.querySelectorAll('#presetGrid [data-load]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.load===state.loadoutName));
@@ -272,7 +287,7 @@ function drawHardpoints(){
   const {guns,turrets}=weaponSlots();
   let gi=0,ti=0;
   const COLORS={gun:'var(--gun)',turret:'var(--turret)',engine:'var(--engine)',reverse:'var(--engine)',bay:'var(--bay)'};
-  const wrap=t=>{ if(t.length<=15) return [t]; const w=t.split(' '); let p='',q=''; for(const x of w){ if(!q && (p?p+' '+x:x).length<=15) p=p?p+' '+x:x; else q=q?q+' '+x:x; } if(!q) return [p]; if(q.length>16) q=q.slice(0,15)+'…'; return [p,q]; };
+  const wrap=t=>{ if(t.length<=19) return [t]; const w=t.split(' '); let p='',q=''; for(const x of w){ if(!q && (p?p+' '+x:x).length<=19) p=p?p+' '+x:x; else q=q?q+' '+x:x; } if(!q) return [p]; if(q.length>22) q=q.slice(0,21)+'…'; return [p,q]; };
   let body="", labels=[];
   for(const p of pts){
     const x=cx+p.x*scale, y=cy+p.y*scale, col=COLORS[p.t];
@@ -352,35 +367,33 @@ function drawEllipse(){
 
 function renderLoadout(){
   const groups={};
-  for(const [nm,c] of Object.entries(state.installed)){
-    const o=DATA.outfits[nm]; if(!o) continue;
-    (groups[o.category] ||= []).push([nm,c,o]);
-  }
+  for(const [nm,c] of Object.entries(state.installed)){ const o=DATA.outfits[nm]; if(!o) continue; (groups[o.category] ||= []).push([nm,c,o]); }
   const order = DATA.categoryOrder.filter(k=>groups[k]);
   const box = el("loadout");
-  let count = Object.values(state.installed).reduce((a,b)=>a+b,0);
+  const count = Object.values(state.installed).reduce((a,b)=>a+b,0);
   el("installCount").textContent = count?`${count} item${count>1?'s':''}`:"";
-  if(!order.length){ box.innerHTML=`<div class="empty">Empty hull. Pick a loadout above, drag outfits onto the ship, or use the + buttons →</div>`; return; }
+  if(!order.length){ box.innerHTML=`<div class="empty">Empty hull. Pick a loadout, or drag parts from the picker →</div>`; return; }
   box.innerHTML = order.map(cat=>{
-    const rows = groups[cat].sort((a,b)=>a[0].localeCompare(b[0])).map(([nm,c,o])=>`
-      <div class="litem">
-        ${artTile(o.thumbnail, mono2(nm), CAT_COLOR[cat]||'var(--dim)')}
-        <div class="nm"><b data-detail="${nm.replace(/"/g,'&quot;')}" title="${nm}">${nm}</b><small>${FMT(o.mass)} t · ${MONEY(o.cost)}</small></div>
-        <div class="stepper">
-          <button data-dec="${nm.replace(/"/g,'&quot;')}">−</button><span class="cnt mono">${c}</span><button data-inc="${nm.replace(/"/g,'&quot;')}">+</button>
-        </div>
-      </div>`).join("");
+    const rows = groups[cat].sort((a,b)=>a[0].localeCompare(b[0])).map(([nm,c,o])=>`<div class="litem">${artTile(o.thumbnail, mono2(nm), CAT_COLOR[cat]||'var(--dim)')}<div class="nm"><b data-detail="${nm.replace(/"/g,'&quot;')}" title="${nm}">${nm}</b><small>${FMT(o.mass)} t · ${MONEY(o.cost)}</small></div><div class="stepper"><button data-dec="${nm.replace(/"/g,'&quot;')}">−</button><span class="cnt mono">${c}</span><button data-inc="${nm.replace(/"/g,'&quot;')}">+</button></div></div>`).join("");
     return `<div class="loadgroup"><h3>${cat}<span class="catcount">${groups[cat].reduce((a,x)=>a+x[1],0)}</span></h3>${rows}</div>`;
   }).join("");
 }
 
+function outfitEligible(o){
+  if(o.category==="Minerals"||o.category==="Unique") return false;
+  const isLicense=o.category==="Licenses";
+  if(o.thumbnail==="outfit/unknown" && !isLicense) return false;  // hide "?" placeholder outfits (licenses keep, shown with an initials tile)
+  if(!o.thumbnail && !isLicense) return false;              // need art, except licenses
+  if(!state.showUnreleased && !o.obtainable && !isLicense) return false; // licenses always shown
+  if(factionTier(o.faction)>state.tier) return false;
+  return true;
+}
 function visibleOutfits(){
   const q=state.q.toLowerCase();
   return Object.values(DATA.outfits).filter(o=>{
-    if(!o.thumbnail) return false;            // hide outfits with no bundled art
-    if(!state.showUnreleased && !o.obtainable) return false;  // hide unreleased/unused
-    if(factionTier(o.faction)>state.tier) return false;
-    if((state.series||"All")!=="All" && (o.series||"")!==state.series) return false;
+    if(!outfitEligible(o)) return false;
+    if(state.cat && o.category!==state.cat) return false;
+    if((state.series||"All")!=="All" && subKey(o)!==state.series) return false;
     if(state.faction && o.faction!==state.faction) return false;
     if(q && !o.name.toLowerCase().includes(q)) return false;
     return true;
@@ -388,42 +401,52 @@ function visibleOutfits(){
 }
 const SERIES_ORDER=["Guns","Turrets","Secondary Weapons","Ammunition","Anti-Missile","H2H","Generators","Batteries","Solar","Shields","Cooling","Repair","Ramscoops","Fuel","Scanners","Jammers","Drives","Special Systems","Fortifications","Tractor Beams","Passenger","Expansions","Engines","Afterburners","Licenses"];
 const SERIES_LABEL={"H2H":"Hand to Hand","Cooling":"Coolers"};
+const WEAPON_CATS=new Set(["Guns","Turrets","Secondary Weapons","Ammunition"]);
+const WFAM=[["anti-missile","Anti-Missile"],["tractor","Tractor Beam"],["mining","Mining"],["flamethrower","Flamethrower"],["beam","Beam"],["laser","Laser"],["blaster","Blaster"],["plasma","Plasma"],["photon","Photon"],["particle","Particle"],["electron","Electron"],["proton","Proton"],["ion","Ion"],["pulse","Pulse"],["meteor","Meteor"],["sidewinder","Missile"],["javelin","Javelin"],["typhoon","Typhoon"],["missile","Missile"],["torpedo","Torpedo"],["rocket","Rocket"],["nuke","Nuclear"],["nuclear","Nuclear"],["gatling","Gatling"],["bullet","Gatling"],["repeater","Repeater"],["cannon","Cannon"],["gun","Gun"]];
+function weaponFamily(o){ const n=(o.name||"").toLowerCase(); for(const kf of WFAM){ if(n.includes(kf[0])) return kf[1]; } return "Other"; }
+function subKey(o){ return WEAPON_CATS.has(o.category) ? weaponFamily(o) : (o.series||""); }
 function renderCatbar(){
-  const present=new Set();
-  for(const o of Object.values(DATA.outfits)){ if(o.thumbnail && o.series) present.add(o.series); }
-  const order=["All",...SERIES_ORDER.filter(s=>present.has(s))];
-  const cur=state.series||"All";
-  el("catbar").innerHTML = order.map(s=>`<button data-series="${s.replace(/"/g,'&quot;')}" aria-pressed="${cur===s}">${SERIES_LABEL[s]||s}</button>`).join("");
+  const catMap={};
+  for(const o of Object.values(DATA.outfits)){ if(!outfitEligible(o)) continue; (catMap[o.category]=catMap[o.category]||new Set()).add(subKey(o)); }
+  const cats=DATA.categoryOrder.filter(c=>catMap[c]);
+  const allActive = !state.cat && (!state.series||state.series==="All");
+  let html=`<button class="catrow${allActive?' active':''}" data-cat="" data-series="All"><span class="caret"></span><span class="ctxt">All</span></button>`;
+  for(const c of cats){
+    const series=[...catMap[c]].filter(Boolean).sort((a,b)=>{ if(a==="Other")return 1; if(b==="Other")return -1; const ai=SERIES_ORDER.indexOf(a),bi=SERIES_ORDER.indexOf(b); if(ai>=0&&bi>=0)return ai-bi; if(ai>=0)return -1; if(bi>=0)return 1; return a.localeCompare(b); });
+    const multi=series.length>1, open=state.openCat===c, active=state.cat===c;
+    html+=`<button class="catrow${active?' active':''}${multi?' has-sub':''}" data-cat="${c}" aria-expanded="${open}"><span class="caret">${multi?(open?'▾':'▸'):''}</span><span class="ctxt">${c}</span></button>`;
+    if(multi&&open){ for(const s of series) html+=`<button class="subrow${active&&state.series===s?' active':''}" data-cat="${c}" data-series="${s.replace(/"/g,'&quot;')}">${SERIES_LABEL[s]||s}</button>`; }
+  }
+  el("catbar").innerHTML=html;
+  if(el("catbarPager")) el("catbarPager").innerHTML="";
 }
 function renderPartsFac(){
   const sel=el("partsFac"); if(!sel) return;
   const facs=new Set();
   for(const o of Object.values(DATA.outfits)){
-    if(!o.thumbnail) continue;
-    if(!state.showUnreleased && !o.obtainable) continue;
-    if(factionTier(o.faction)>state.tier) continue;
+    if(!outfitEligible(o)) continue;
     facs.add(o.faction);
   }
   if(state.faction && !facs.has(state.faction)) state.faction="";
   const list=[...facs].sort();
   sel.innerHTML=`<option value="">All races</option>`+list.map(f=>`<option value="${f}"${f===state.faction?" selected":""}>${FACLABEL(f)}</option>`).join("");
 }
-function chipFor(o){
-  const a=o.attributes, w=o.weapon, chips=[];
-  if(w&&w.reload){ const dps=(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload;
-    chips.push(`<span class="chip">${FMT(dps)} dps</span>`); }
-  if(a["outfit space"]<0) chips.push(`<span class="chip">space ${FMT(Math.abs(a["outfit space"]))}</span>`);
-  return `<div class="chips"><span class="chip fac">${o.faction}</span>${chips.slice(0,3).join("")}</div>`;
+function statChips(o){
+  const a=o.attributes, w=o.weapon;
+  const kmb=n=> n>=1e6?(n/1e6).toFixed(n>=1e7?0:1).replace(/\.0$/,"")+"M":n>=1e3?Math.round(n/1e3)+"K":String(Math.round(n));
+  const chips=[`<span class="chip fac">${FACLABEL(o.faction)}</span>`,`<span class="chip">Price ${kmb(o.cost)}</span>`];
+  if(w&&w.reload){ const dps=(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload; chips.push(`<span class="chip">${FMT(dps)} DPS</span>`); }
+  if(a["outfit space"]<0) chips.push(`<span class="chip">Outfit ${FMT(Math.abs(a["outfit space"]))}</span>`);
+  return chips.join("");
 }
 function ocardHTML(o){
   const n=o.name.replace(/"/g,'&quot;');
   return `<div class="ocard" draggable="true" data-name="${n}">
-      <div class="art">${artTile(o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
+      <div class="art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
       <button class="addbtn" data-inc="${n}">+</button>
       <div class="meta">
         <b data-detail="${n}" title="${o.name}">${o.name}</b>
-        <span class="price mono">${MONEY(o.cost)}</span>
-        ${chipFor(o)}
+        <div class="chips">${statChips(o)}</div>
       </div>
     </div>`;
 }
@@ -432,8 +455,12 @@ function renderCatalog(){
     const ai=DATA.categoryOrder.indexOf(a.category), bi=DATA.categoryOrder.indexOf(b.category);
     return ai-bi || a.cost-b.cost || a.name.localeCompare(b.name);
   });
-  el("catalog").innerHTML = list.length? list.slice(0,500).map(ocardHTML).join("")
+  const per=_fitCount("catalog",128,157,8), pages=Math.max(1,Math.ceil(list.length/per));
+  state.catPage=_clampPage(state.catPage,pages);
+  const pgi=list.slice(state.catPage*per,(state.catPage+1)*per);
+  el("catalog").innerHTML = pgi.length? pgi.map(o=>ocardHTML(o)).join("")
     : `<div class="empty">No outfits match. Raise the tech access or clear the search.</div>`;
+  el("catalogPager").innerHTML=_pg(state.catPage,pages);
 }
 
 /* ---------- detail drawer ---------- */
@@ -479,18 +506,18 @@ function limitBlocked(o, delta){
   const hp=state.ship.hardpoints;
   // mount limits come from hardpoint COUNTS (not ship attributes)
   const gunUse=-num(o.attributes["gun ports"]);
-  if(gunUse>0 && (hp.guns - installedOf(x=>x&&num(x.attributes["gun ports"])<0)) < delta*gunUse) return "gun ports";
+  if(gunUse>0 && (hp.guns - installedOf(x=>x&&num(x.attributes["gun ports"])<0)) < delta*gunUse) return "No free Gun Ports";
   const turUse=-num(o.attributes["turret mounts"]);
-  if(turUse>0 && (hp.turrets - installedOf(x=>x&&num(x.attributes["turret mounts"])<0)) < delta*turUse) return "turret mounts";
+  if(turUse>0 && (hp.turrets - installedOf(x=>x&&num(x.attributes["turret mounts"])<0)) < delta*turUse) return "No free Turret Mounts";
   // space / capacity limits are ship attributes -> use eff()
-  const CAP={"outfit space":"outfit space","weapon capacity":"weapon capacity","engine capacity":"engine capacity","cargo space":"cargo space","fuel capacity":"fuel capacity"};
+  const CAP={"outfit space":"Not enough Outfit Space","weapon capacity":"Not enough Weapon Capacity","engine capacity":"Not enough Engine Capacity","cargo space":"Not enough Cargo Space","fuel capacity":"Not enough Fuel Capacity"};
   const keys=new Set(Object.keys(CAP));
   // guard every capacity-like resource (ammo "* capacity", plus outfit/cargo space) from going negative
   for(const k in o.attributes){ if(o.attributes[k]<0 && /(capacity|space)$/.test(k)) keys.add(k); }
   for(const k of keys){
     const consume=num(o.attributes[k]);            // negative => consumes that resource
     if(consume>=0) continue;
-    if(eff(k) + delta*consume < -1e-9) return CAP[k] || k;
+    if(eff(k) + delta*consume < -1e-9) return CAP[k] || ("Not enough "+k.replace(/\b\w/g,c=>c.toUpperCase()));
   }
   return null;
 }
@@ -516,7 +543,7 @@ function showToast(msg){
 function add(nm,d=1){
   if(d>0){
     const blocked=limitBlocked(DATA.outfits[nm], d);
-    if(blocked){ beep(); showToast("Outfit Limit Reached \u2014 no free "+blocked); return; }
+    if(blocked){ beep(); showToast("Outfit Limit Reached \u2014 "+blocked); return; }
   }
   state.installed[nm]=(state.installed[nm]||0)+d;
   if(state.installed[nm]<=0) delete state.installed[nm];
@@ -650,9 +677,56 @@ function fleetTotals(){ let cost=0,crew=0,cargo=0,bunks=0,fuel=0,shields=0,hull=
   const bays=figBays+droBays, smallCraft=figCraft+droCraft, lackBay=Math.max(0,figCraft-figBays)+Math.max(0,droCraft-droBays);
   return {cost,crew,cargo,bunks,fuel,shields,hull,jumps:(isFinite(jumpsMin)?jumpsMin:0),daily:CREW_SALARY*Math.max(0,crew-1),n:state.fleet.length,bays,smallCraft,figBays,droBays,figCraft,droCraft,stranded,dps,cantThrust,cantSteer,cantPower,overheat,missingWeapons,noShields,lackBay,
     jumpMode: stranded?"strand":(allJump?"jump":"hyper")}; }
-function renderFleetSelect(){ const sel=el("fleetSelect"); if(!sel) return; sel.innerHTML=Object.keys(state.fleets).map(n=>`<option value="${n.replace(/"/g,'&quot;')}"${n===state.fleetName?" selected":""}>${n}</option>`).join(""); }
+function renderFleetSelect(){ const box=el("fleetSavedList"); if(!box) return; box.innerHTML=Object.keys(state.fleets).map(n=>`<button class="fl-saveditem${n===state.fleetName?' active':''}" data-fleet-name="${n.replace(/"/g,'&quot;')}">${esc(n)}</button>`).join(""); }
+function renderFleetDetail(){ const box=el("fleetDetail"); if(!box) return;
+  const i=state.fleetSel;
+  if(i<0||i>=state.fleet.length){ box.innerHTML=`<div class="fd-empty">Select a ship in the roster to see its details.</div>`; return; }
+  const e=state.fleet[i]; const sh=DATA.ships[e.ship];
+  if(!sh){ box.innerHTML=`<div class="fd-empty">Unknown ship: ${esc(e.ship)}</div>`; return; }
+  const base=sh.displayName||sh.name; const X=String.fromCharCode(215), DS=String.fromCharCode(8211);
+  let html="";
+  _withBuild(e,()=>{
+    const s=computeStats(); const hp=sh.hardpoints;
+    const crew=requiredCrew(), bunks=eff("bunks"), mass=eff("mass");
+    const guns=installedOf(o=>num(o.attributes["gun ports"])<0);
+    const turrets=installedOf(o=>num(o.attributes["turret mounts"])<0);
+    const totalBays=Object.values(hp.bays||{}).reduce((a,b)=>a+b,0);
+    const C=n=>Math.round(n).toLocaleString();
+    const row=(l,val,bad)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals"><b class="val mono${bad?' bad':''}">${val}</b></span></div>`;
+    const row2=(l,a,b)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals"><b class="val mono en">${a}</b><b class="val mono ht">${b}</b></span></div>`;
+    const cap=(l,key,unit)=>{ const c=capacity(key); return row(l, `${C(c.used)}/${C(c.total)}${unit||''}`, c.used>c.total+1e-6); };
+    const hasThrust=eff("thrust")>0, hasTurn=eff("turn")>0;
+    const pill=(lab,ok)=>`<span class="pill ${ok?'good':'bad'}">${lab} ${ok?String.fromCharCode(10003):String.fromCharCode(10007)}</span>`;
+    const outs=Object.entries(state.installed).filter(([n,c])=>c>0).sort((a,b)=>b[1]-a[1]);
+    const loadHTML = outs.length ? outs.map(([n,c])=>`<div class="fd-out"><span>${esc(DATA.outfits[n]?.displayName||n)}</span><b>${X}${c}</b></div>`).join("") : `<div class="fd-out fd-out-none">No outfits installed</div>`;
+    html =
+      `<div class="fd-head"><div class="fd-art">${artTile(sh.thumbnail||sh.sprite, mono2(base), "var(--accent)")}</div>`+
+        `<div class="fd-id"><div class="fd-fac">${esc(FACLABEL(sh.faction))}</div><div class="fd-nm">${esc(e.label||base)}</div><div class="fd-cat">${esc(sh.category)}</div></div>`+
+        `<button class="fd-rename" data-rename-ship title="Rename this ship in the fleet">Rename</button></div>`+
+      `<div class="fd-cols"><div class="fd-sect">`+
+        `<div class="eyebrow">Overview</div>`+
+        row("Cost",MONEY(s.cost))+row("Crew",FMT(crew))+row("Bunks",FMT(bunks))+row("Cargo",FMT(s.cargo)+" t")+row("Fuel",FMT(s.fuel))+row("Mass",FMT(mass)+" t")+
+        `<div class="eyebrow eb2">Capacity</div>`+
+        cap("Outfit","outfit space"," t")+cap("Weapon","weapon capacity"," t")+cap("Engine","engine capacity"," t")+
+        row("Gun ports",`${guns}/${hp.guns}`,guns>hp.guns)+row("Turrets",`${turrets}/${hp.turrets}`,turrets>hp.turrets)+row("Bays",String(totalBays))+
+      `</div><div class="fd-sect">`+
+        `<div class="eyebrow">Movement &amp; Defense</div>`+
+        row("Max speed",FMT(s.maxSpeed))+row("Acceleration",`${FMT(s.accel[0])}${DS}${FMT(s.accel[1])}`)+row("Turning",`${FMT(s.turn[0])}${DS}${FMT(s.turn[1])}`)+
+        row("Shields",`${FMT(s.shields)}${s.hasSR?" +"+FMT(s.shieldRegen):""}`)+row("Hull",`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair):""}`)+
+        `<div class="eyebrow eb2">Energy &amp; Heat</div>`+
+        row2("Idle",FMT(s.eh.idle[0]),FMT(s.eh.idle[1]))+row2("Moving",FMT(s.eh.moving[0]),FMT(s.eh.moving[1]))+row2("Firing",FMT(s.eh.firing[0]),FMT(s.eh.firing[1]))+row2("Net",FMT(s.eh.net[0]),FMT(s.eh.net[1]))+row2("Max",FMT(s.eh.max[0]),FMT(s.eh.max[1]))+
+      `</div></div>`+
+      `<div class="eyebrow eb2">Ship Alerts</div><div class="fd-alerts">`+pill("Thrust",hasThrust)+pill("Steering",hasTurn)+pill("Energy",s.energyOK)+pill("Heat",s.heatOK)+`</div>`+
+      `<div class="fd-loadtitle eb2">Loadout</div><div class="fd-load">${loadHTML}</div>`;
+  });
+  box.innerHTML=html;
+}
 function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
   renderFleetSelect();
+  { const flag=state.fleet.find(e=>e.flag); const fb=el("flagshipBox");
+    if(fb){ if(flag){ const sh=DATA.ships[flag.ship]; const base=sh?(sh.displayName||sh.name):flag.ship;
+      fb.innerHTML=`<div class="fs-art">${artTile(sh?(sh.thumbnail||sh.sprite):null, mono2(base), "var(--accent)")}</div><div class="fs-name">${esc(flag.label||base)}</div>`; }
+      else fb.innerHTML=`<div class="fs-none">No flagship set</div>`; } }
   const t=fleetTotals();
   el("fleetCount").innerHTML = t.n ? `<span class="fc-ships">${t.n} ship${t.n>1?"s":""}</span> · <span class="fc-cost">${MONEY(t.cost)} to buy</span>` : "";
   const fstat=(l,v)=>`<div class="fstat"><span>${l}</span><b>${v}</b></div>`;
@@ -663,7 +737,7 @@ function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
     fstat("Crew", cnum(t.crew)) +
     fstat("Bunks", cnum(t.bunks)) +
     fstat("Jumps", FMT(t.jumps)) +
-    fstat("Cost", dailyTxt) +
+    fstat("Upkeep", dailyTxt) +
     fstat("Craft", `${t.smallCraft} / ${t.bays}`);
   const issue=(label,count,lvl,desc)=>`<div class="issue ${count>0?(lvl||"bad"):"ok"}" title="${desc}"><span>${label}</span><b>${count>0?count:"\u2713"}</b></div>`;
   el("fleetIssues").innerHTML =
@@ -677,16 +751,16 @@ function renderFleet(){ const panel=el("fleetPanel"); if(!panel) return;
     issue("Shields", t.noShields, "warn", "Ships with no shields");
   const list=el("fleetList");
   if(!state.fleet.length){ list.innerHTML=`<div class="fleet-empty">No ships yet. Build one and press “+ Add to Fleet”.</div>`; }
-  else{ list.innerHTML = state.fleet.map((e,i)=>{ const sh=DATA.ships[e.ship]; const base=sh?(sh.displayName||sh.name):e.ship; const nm=e.label||base;
+  else{ const _ord=state.fleet.map((e,i)=>i).sort((a,b)=>(state.fleet[b].flag?1:0)-(state.fleet[a].flag?1:0)); list.innerHTML = _ord.map(i=>{ const e=state.fleet[i]; const sh=DATA.ships[e.ship]; const base=sh?(sh.displayName||sh.name):e.ship; const nm=e.label||base;
       const dr=buildDrive(e), iss=buildIssue(e);
       const drB=dr?`<span class="fs-drive ${dr==="J"?"dj":"dg"}" title="${dr==="J"?"Jump drive":dr==="S"?"Scram drive":"Hyperdrive"}">${dr}</span>`:"";
       const wB=iss?`<span class="fs-warn ${iss.lvl}" title="${iss.msg}">⚠︎</span>`:"";
-      return `<button class="fleet-ship${i===state.fleetSel?' sel':''}${e.flag?' flag':''}" data-fleet="${i}" title="${base}">`+
+      return `<button class="fleet-ship${i===state.fleetSel?' sel':''}${e.flag?' flag':''}" data-fleet="${i}" title="${esc(base)}">`+
         `<span class="fs-art">${artTile(sh?(sh.thumbnail||sh.sprite):null, mono2(base), "var(--accent)")}${drB}${wB}</span>`+
-        `<span class="fs-nm">${nm}</span></button>`; }).join(""); }
+        `<span class="fs-nm">${esc(nm)}</span></button>`; }).join(""); }
   const hasSel = state.fleetSel>=0 && state.fleetSel<state.fleet.length;
   el("fleetRemove").disabled=!hasSel; el("fleetCopy").disabled=!hasSel; el("fleetFlag").disabled=!hasSel;
-  el("fleetClearBtn").disabled=!state.fleet.length; el("fleetShare").disabled=!state.fleet.length; }
+  el("fleetClearBtn").disabled=!state.fleet.length; el("fleetShare").disabled=!state.fleet.length; renderFleetDetail(); }
 /* ---- hover card ---- */
 function fleetHoverShow(ev){ const b=ev.target.closest("[data-fleet]"); const box=el("fleetHover"); if(!box) return;
   if(!b){ box.classList.remove("show"); return; }
@@ -695,7 +769,7 @@ function fleetHoverShow(ev){ const b=ev.target.closest("[data-fleet]"); const bo
   let cost=0,crew=0,cargo=0; _withBuild(e,()=>{ cost=shipCost(); crew=requiredCrew(); cargo=eff("cargo space"); });
   const dps=buildDPS(e), dr=buildDrive(e), drT=dr==="J"?"Jump drive":dr==="S"?"Scram drive":dr==="H"?"Hyperdrive":"No drive";
   const row=(l,v)=>`<div class="fh-row"><span>${l}</span><b>${v}</b></div>`;
-  box.innerHTML=`<div class="fh-nm">${base}${e.label?` <span style="color:var(--dim)">(${e.label})</span>`:""}${e.flag?" ★":""}</div>`+
+  box.innerHTML=`<div class="fh-nm">${esc(base)}${e.label?` <span style="color:var(--dim)">(${esc(e.label)})</span>`:""}${e.flag?" ★":""}</div>`+
     row("Cost",MONEY(cost))+row("Crew",FMT(crew))+row("Cargo",FMT(cargo)+" t")+row("Firepower",FMT(dps)+" dps")+row("Drive",drT);
   box.classList.add("show"); fleetHoverMove(ev); }
 function fleetHoverMove(ev){ const box=el("fleetHover"); if(!box||!box.classList.contains("show")) return; const pad=14; let x=ev.clientX+pad,y=ev.clientY+pad; const w=box.offsetWidth,h=box.offsetHeight; if(x+w>window.innerWidth)x=ev.clientX-w-pad; if(y+h>window.innerHeight)y=ev.clientY-h-pad; box.style.left=x+"px"; box.style.top=y+"px"; }
@@ -755,9 +829,9 @@ function renderPickerFac(){
   const byFac=shipsByFaction();
   const facOrder=Object.keys(byFac).sort((a,b)=>factionTier(a)-factionTier(b)||a.localeCompare(b));
   const total=Object.values(byFac).reduce((a,b)=>a+b.length,0);
-  let html=`<button class="fchip" data-fac="all" aria-pressed="${state.pickerFac==='all'}">All (${total})</button>`;
-  for(const fobj of facOrder) html+=`<button class="fchip" data-fac="${fobj}" aria-pressed="${state.pickerFac===fobj}">${FACLABEL(fobj)} (${byFac[fobj].length})</button>`;
-  el("pickerFac").innerHTML=html;
+  const items=[{f:"all",label:`All (${total})`}].concat(facOrder.map(f=>({f,label:`${FACLABEL(f)} (${byFac[f].length})`})));
+  el("pickerFac").innerHTML=items.map(it=>`<button class="fchip" data-fac="${it.f}" aria-pressed="${state.pickerFac===it.f}">${it.label}</button>`).join("");
+  if(el("pickerFacPager")) el("pickerFacPager").innerHTML="";
 }
 function renderPickerGrid(){
   const byFac=shipsByFaction();
@@ -766,10 +840,14 @@ function renderPickerGrid(){
   const q=(state.pickerQ||"").toLowerCase();
   if(q) list=list.filter(s=>(s.displayName||s.name).toLowerCase().includes(q)||s.name.toLowerCase().includes(q));
   list.sort((a,b)=> a.category.localeCompare(b.category) || (a.displayName||a.name).localeCompare(b.displayName||b.name));
-  el("pickerGrid").innerHTML = list.length ? list.map(shipcellHTML).join("") : `<div class="empty">No ships match.</div>`;
+  const per=_fitCount("pickerGrid",128,140,12), pages=Math.max(1,Math.ceil(list.length/per));
+  state.pickPage=_clampPage(state.pickPage,pages);
+  const pgi=list.slice(state.pickPage*per,(state.pickPage+1)*per);
+  el("pickerGrid").innerHTML = pgi.length ? pgi.map(shipcellHTML).join("") : `<div class="empty">No ships match.</div>`;
+  el("pickerGridPager").innerHTML=_pg(state.pickPage,pages);
 }
 function shipcellHTML(s){
-  return `<button class="shipcell ${state.ship&&state.ship.name===s.name?'sel':''}" data-ship="${s.name.replace(/"/g,'&quot;')}" title="${s.displayName||s.name}">
+  return `<button class="shipcell ${state.ship&&state.ship.name===s.name?'sel':''}" draggable="true" data-ship="${s.name.replace(/"/g,'&quot;')}" title="${s.displayName||s.name}">
       <div class="sc-art">${artTile(s.thumbnail||s.sprite, mono2(s.displayName||s.name), "var(--accent)")}</div>
       <div class="sc-nm">${s.displayName||s.name}</div>
       <div class="sc-cat">${s.category}</div>
@@ -778,6 +856,8 @@ function shipcellHTML(s){
 /* ---------- Outfitters / Shipyards (browse by station) ---------- */
 let _shopMap=null,_yardMap=null;
 function _stKey(loc){ return (loc.planet||"?")+"  \u00b7  "+(loc.system||"?"); }
+function stLabel(k){ const m=k.split(/\s+·\s+/); if(m.length<2) return k;
+  return `<b class="st-pl">${m[0]}</b><span class="st-sy"> · ${m.slice(1).join(" · ")}</span>`; }
 function buildShopMap(){ if(_shopMap) return _shopMap; _shopMap={};
   for(const o of Object.values(DATA.outfits)){ if(!o.thumbnail) continue; for(const loc of (o.soldAt||[])){ const k=_stKey(loc); (_shopMap[k]=_shopMap[k]||[]).push(o); } } return _shopMap; }
 function buildYardMap(){ if(_yardMap) return _yardMap; _yardMap={};
@@ -785,18 +865,26 @@ function buildYardMap(){ if(_yardMap) return _yardMap; _yardMap={};
 function renderShop(){
   const map=buildShopMap(), elig=o=>(state.showUnreleased||o.obtainable)&&factionTier(o.faction)<=state.tier;
   const q=(state.shopQ||"").toLowerCase();
-  let st=Object.keys(map).filter(k=>map[k].some(elig)); if(q) st=st.filter(k=>k.toLowerCase().includes(q)); st.sort();
+  let st=Object.keys(map).filter(k=>map[k].some(elig)); if(q) st=st.filter(k=>k.toLowerCase().includes(q)); st.sort((a,b)=>a.localeCompare(b,undefined,{sensitivity:"base"}));
   if(!st.includes(state.shopStation)) state.shopStation=st[0]||"";
-  el("shopRail").innerHTML = st.length? st.map(k=>`<button data-station="${k.replace(/"/g,'&quot;')}" aria-pressed="${k===state.shopStation}">${k}</button>`).join("") : `<div class="empty">No stations match.</div>`;
+  const PER=25, sPages=Math.max(1,Math.ceil(st.length/PER));
+  state.shopPage=Math.min(Math.max(0,state.shopPage|0),sPages-1);
+  const sPager=st.length>PER?`<div class="sp-pager"><button data-pg="prev"${state.shopPage<=0?" disabled":""}>‹ Prev</button><span>${state.shopPage+1} / ${sPages}</span><button data-pg="next"${state.shopPage>=sPages-1?" disabled":""}>Next ›</button></div>`:"";
+  const sPage=st.slice(state.shopPage*PER,(state.shopPage+1)*PER);
+  el("shopRail").innerHTML = st.length? sPager+sPage.map(k=>`<button data-station="${k.replace(/"/g,'&quot;')}" title="${k.replace(/"/g,'&quot;')}" aria-pressed="${k===state.shopStation}">${stLabel(k)}</button>`).join("") : `<div class="empty">No stations match.</div>`;
   const items=(map[state.shopStation]||[]).filter(elig).sort((a,b)=>a.cost-b.cost||a.name.localeCompare(b.name));
-  el("shopGrid").innerHTML = items.length? items.map(ocardHTML).join("") : `<div class="empty">Nothing here at this tech level.</div>`;
+  el("shopGrid").innerHTML = items.length? items.map(o=>ocardHTML(o)).join("") : `<div class="empty">Nothing here at this tech level.</div>`;
 }
 function renderYard(){
   const map=buildYardMap(), elig=s=>(state.showUnreleased||s.obtainable)&&factionTier(s.faction)<=state.tier;
   const q=(state.yardQ||"").toLowerCase();
-  let st=Object.keys(map).filter(k=>map[k].some(elig)); if(q) st=st.filter(k=>k.toLowerCase().includes(q)); st.sort();
+  let st=Object.keys(map).filter(k=>map[k].some(elig)); if(q) st=st.filter(k=>k.toLowerCase().includes(q)); st.sort((a,b)=>a.localeCompare(b,undefined,{sensitivity:"base"}));
   if(!st.includes(state.yardStation)) state.yardStation=st[0]||"";
-  el("yardRail").innerHTML = st.length? st.map(k=>`<button data-station="${k.replace(/"/g,'&quot;')}" aria-pressed="${k===state.yardStation}">${k}</button>`).join("") : `<div class="empty">No stations match.</div>`;
+  const PER=25, yPages=Math.max(1,Math.ceil(st.length/PER));
+  state.yardPage=Math.min(Math.max(0,state.yardPage|0),yPages-1);
+  const yPager=st.length>PER?`<div class="sp-pager"><button data-pg="prev"${state.yardPage<=0?" disabled":""}>‹ Prev</button><span>${state.yardPage+1} / ${yPages}</span><button data-pg="next"${state.yardPage>=yPages-1?" disabled":""}>Next ›</button></div>`:"";
+  const yPage=st.slice(state.yardPage*PER,(state.yardPage+1)*PER);
+  el("yardRail").innerHTML = st.length? yPager+yPage.map(k=>`<button data-station="${k.replace(/"/g,'&quot;')}" title="${k.replace(/"/g,'&quot;')}" aria-pressed="${k===state.yardStation}">${stLabel(k)}</button>`).join("") : `<div class="empty">No stations match.</div>`;
   const ships=(map[state.yardStation]||[]).filter(elig).sort((a,b)=>(a.attributes.cost||0)-(b.attributes.cost||0)||(a.displayName||a.name).localeCompare(b.displayName||b.name));
   el("yardGrid").innerHTML = ships.length? ships.map(shipcellHTML).join("") : `<div class="empty">No ships sold here at this tech level.</div>`;
 }
@@ -817,7 +905,21 @@ function closePanels(){ delete document.body.dataset.panel; try{ localStorage.se
 function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
 function openShipPicker(){ togglePanel("ship"); }
 function closeShipPicker(){ closePanels(); }
+function setView(v){ document.body.dataset.view=v; try{localStorage.setItem("drydock-view",v);}catch(e){} mountFleet(); if(v==="fleet") renderFleet(); if(v==="ship") requestAnimationFrame(()=>{ renderLoadout(); if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else if(state.dock==="fleet"){renderFleet();}else{renderCatbar();renderCatalog();} }); }
+function mountFleet(){ const fp=el("fleetPanel"); if(!fp) return; const target=(document.body.dataset.view==="ship" && state.dock==="fleet") ? el("dockFleetPane") : el("viewFleetSec"); if(target && fp.parentElement!==target) target.appendChild(fp); }
+function setDock(d){ state.dock=d;
+  ["parts","ship","fleet"].forEach(k=>{ const pane=el("dock"+k.charAt(0).toUpperCase()+k.slice(1)+"Pane"); if(pane) pane.classList.toggle("show",k===d); const tab=el("dock"+k.charAt(0).toUpperCase()+k.slice(1)+"Tab"); if(tab) tab.setAttribute("aria-pressed",k===d); });
+  mountFleet();
+  requestAnimationFrame(()=>{ if(d==="parts"){ renderPartsFac(); renderCatbar(); renderCatalog(); } else if(d==="ship"){ renderPickerFac(); renderPickerGrid(); } else { renderFleet(); } });
+  try{localStorage.setItem("drydock-dock",d);}catch(e){} }
+function fitApp(){ const a=el("app"); if(!a) return; const vw=window.innerWidth, vh=window.innerHeight;
+  if(vw>=1101){ a.style.width="1600px"; a.style.height="900px"; a.style.zoom=Math.min(vw/1600, vh/900); }
+  else { a.style.width=""; a.style.height=""; a.style.zoom=""; }
+}
+window.addEventListener("resize",fitApp);
+try{ if(window.ResizeObserver){ const _ro=new ResizeObserver(()=>{ if(state.ship) fitShipName(); }); const _st=document.querySelector(".shiptitle"); if(_st) _ro.observe(_st); } }catch(e){}
 function init(){
+  fitApp();
   el("ver").textContent=DATA.version;
   let su=null; try{ su=localStorage.getItem("drydock-unreleased"); }catch(e){}
   state.showUnreleased = su==="1";
@@ -830,17 +932,17 @@ function init(){
   let savedTheme=null; try{ savedTheme=localStorage.getItem("drydock-theme"); }catch(e){}
   setTheme(savedTheme||"blue");
 
-  el("pickerX").addEventListener("click",closePanels);
-  el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; renderPickerGrid(); });
-  el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;renderPickerFac();renderPickerGrid();});
+  el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; state.pickPage=0; renderPickerGrid(); });
+  el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;state.pickPage=0;renderPickerFac();renderPickerGrid();});
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);});
   document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); } });
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("fleetAddBtn").addEventListener("click",addToFleet);
-  el("shareBtn").addEventListener("click",shareBuild);
+  el("shareTop").addEventListener("click",shareBuild);
   el("fleetList").addEventListener("click",e=>{const b=e.target.closest("[data-fleet]");if(b)selectFleet(+b.dataset.fleet);});
   el("fleetList").addEventListener("dblclick",e=>{const b=e.target.closest("[data-fleet]");if(b){state.fleetSel=+b.dataset.fleet;renameSelected();}});
+  el("fleetDetail").addEventListener("click",e=>{ if(e.target.closest("[data-rename-ship]")) renameSelected(); });
   el("fleetList").addEventListener("mouseover",fleetHoverShow);
   el("fleetList").addEventListener("mousemove",fleetHoverMove);
   el("fleetList").addEventListener("mouseout",fleetHoverHide);
@@ -850,7 +952,7 @@ function init(){
   el("fleetClearBtn").addEventListener("click",clearFleet);
   el("fleetShare").addEventListener("click",shareFleet);
   el("fleetImport").addEventListener("click",importFleet);
-  el("fleetSelect").addEventListener("change",e=>switchFleet(e.target.value));
+  el("fleetSavedList").addEventListener("click",e=>{const b=e.target.closest("[data-fleet-name]");if(b)switchFleet(b.dataset.fleetName);});
   el("fleetNew").addEventListener("click",newFleet);
   el("fleetRenameF").addEventListener("click",renameFleet);
   el("fleetDelete").addEventListener("click",deleteFleet);
@@ -859,31 +961,39 @@ function init(){
     state.showUnreleased=!state.showUnreleased;
     try{ localStorage.setItem("drydock-unreleased", state.showUnreleased?"1":"0"); }catch(e){}
     el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
-    if(document.body.dataset.panel==="ship"){ renderPickerFac(); renderPickerGrid(); } renderPartsFac(); renderCatalog(); if(document.body.dataset.panel==="shop")renderShop(); if(document.body.dataset.panel==="yard")renderYard();
+    renderPartsFac(); renderCatbar(); renderCatalog(); renderPickerFac(); renderPickerGrid(); if(document.body.dataset.panel==="shop")renderShop(); if(document.body.dataset.panel==="yard")renderYard();
   });
-  el("resetBtn").addEventListener("click",()=>loadLoadout("empty"));
-  el("outfitterTab").addEventListener("click",()=>togglePanel("parts"));
-  el("outfitterClose").addEventListener("click",closePanels);
-  el("shipTab").addEventListener("click",()=>togglePanel("ship"));
-  el("shopTab").addEventListener("click",()=>togglePanel("shop"));
-  el("yardTab").addEventListener("click",()=>togglePanel("yard"));
+  el("viewShip").addEventListener("click",()=>setView("ship"));
+  el("viewFleet").addEventListener("click",()=>setView("fleet"));
+  el("viewInfo").addEventListener("click",()=>setView("info"));
+  el("dockPartsTab").addEventListener("click",()=>setDock("parts"));
+  el("dockShipTab").addEventListener("click",()=>setDock("ship"));
+  el("dockFleetTab").addEventListener("click",()=>setDock("fleet"));
+  el("openOutfitters").addEventListener("click",()=>openPanel("shop"));
+  el("openShipyards").addEventListener("click",()=>openPanel("yard"));
   el("shopClose").addEventListener("click",closePanels);
   el("yardClose").addEventListener("click",closePanels);
-  el("shopRail").addEventListener("click",e=>{const b=e.target.closest("[data-station]");if(b){state.shopStation=b.dataset.station;renderShop();}});
-  el("yardRail").addEventListener("click",e=>{const b=e.target.closest("[data-station]");if(b){state.yardStation=b.dataset.station;renderYard();}});
+  el("shopRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.shopPage+=pg.dataset.pg==="next"?1:-1;renderShop();return;}const b=e.target.closest("[data-station]");if(b){state.shopStation=b.dataset.station;renderShop();}});
+  el("yardRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.yardPage+=pg.dataset.pg==="next"?1:-1;renderYard();return;}const b=e.target.closest("[data-station]");if(b){state.yardStation=b.dataset.station;renderYard();}});
   el("yardGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(b){setShip(b.dataset.ship);renderYard();}});
-  el("shopSearch").addEventListener("input",e=>{state.shopQ=e.target.value;renderShop();});
-  el("yardSearch").addEventListener("input",e=>{state.yardQ=e.target.value;renderYard();});
-  { let sp=null; try{ sp=localStorage.getItem("drydock-panel"); }catch(e){} if(sp==="ship") openPanel("ship"); else if(sp==="shop") openPanel("shop"); else if(sp==="yard") openPanel("yard"); else if(sp==="parts"||sp==null) openPanel("parts"); }
+  el("shopSearch").addEventListener("input",e=>{state.shopQ=e.target.value;state.shopPage=0;renderShop();});
+  el("yardSearch").addEventListener("input",e=>{state.yardQ=e.target.value;state.yardPage=0;renderYard();});
+  el("catalogPager").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(b){state.catPage+=b.dataset.pg==="next"?1:-1;renderCatalog();}});
+  el("catbarPager").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(b){state.catbarPage+=b.dataset.pg==="next"?1:-1;renderCatbar();}});
+  el("pickerGridPager").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(b){state.pickPage+=b.dataset.pg==="next"?1:-1;renderPickerGrid();}});
+  el("pickerFacPager").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(b){state.pickFacPage+=b.dataset.pg==="next"?1:-1;renderPickerFac();}});
+  { let sv=null; try{ sv=localStorage.getItem("drydock-view"); }catch(e){} setView(sv==="fleet"||sv==="info"?sv:"ship"); }
+  { let sd=null; try{ sd=localStorage.getItem("drydock-dock"); }catch(e){} setDock(sd==="ship"||sd==="fleet"?sd:"parts"); }
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
     state.tier=+b.dataset.tier;
     document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",x===b));
-    renderPartsFac(); renderCatalog();
+    renderPartsFac(); renderCatbar(); renderCatalog(); renderPickerFac(); renderPickerGrid();
     if(document.body.dataset.panel==="shop")renderShop(); if(document.body.dataset.panel==="yard")renderYard();});
-  el("search").addEventListener("input",e=>{state.q=e.target.value;renderCatalog();});
-  el("catbar").addEventListener("click",e=>{const b=e.target.closest("[data-series]");if(!b)return;
-    state.series=b.dataset.series; renderCatbar(); renderCatalog();});
-  el("partsFac").addEventListener("change",e=>{ state.faction=e.target.value; renderCatalog(); });
+  el("search").addEventListener("input",e=>{state.q=e.target.value;state.catPage=0;renderCatalog();});
+  el("catbar").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; state.catPage=0;
+    if(b.classList.contains("subrow")){ state.cat=b.dataset.cat; state.series=b.dataset.series; renderCatbar(); renderCatalog(); return; }
+    if(b.dataset.cat===""){ state.cat=""; state.series="All"; state.openCat=""; renderCatbar(); renderCatalog(); return; }
+    const c=b.dataset.cat; state.openCat=(state.openCat===c?"":c); state.cat=c; state.series="All"; renderCatbar(); renderCatalog(); });
   document.body.addEventListener("click",e=>{
     const inc=e.target.closest("[data-inc]"), dec=e.target.closest("[data-dec]"), det=e.target.closest("[data-detail]");
     if(inc){ add(inc.dataset.inc, +1); }
@@ -892,22 +1002,17 @@ function init(){
   });
   el("drawerX").addEventListener("click",()=>el("drawer").classList.remove("open"));
   el("drawer").addEventListener("click",e=>{ if(e.target===el("drawer")) el("drawer").classList.remove("open"); });
-  el("gearBtn").addEventListener("click",()=>el("settings").classList.add("open"));
-  el("settingsX").addEventListener("click",()=>el("settings").classList.remove("open"));
-  el("settings").addEventListener("click",e=>{ if(e.target===el("settings")) el("settings").classList.remove("open"); });
+  el("gearBtn").addEventListener("click",e=>{ e.stopPropagation(); el("settings").classList.toggle("open"); });
+  document.addEventListener("click",e=>{ if(el("settings").classList.contains("open") && !e.target.closest("#settings") && !e.target.closest("#gearBtn")) el("settings").classList.remove("open"); });
 
-  document.body.addEventListener("dragstart",e=>{const c=e.target.closest(".ocard");if(c)e.dataTransfer.setData("text/plain",c.dataset.name);});
-  function dropTarget(elm){
-    if(!elm) return;
-    elm.addEventListener("dragover",e=>{e.preventDefault();elm.classList.add("dragover");});
-    elm.addEventListener("dragleave",e=>{ if(!elm.contains(e.relatedTarget)) elm.classList.remove("dragover");});
-    elm.addEventListener("drop",e=>{e.preventDefault();elm.classList.remove("dragover");
-      const nm=e.dataTransfer.getData("text/plain"); if(DATA.outfits[nm]) add(nm,1);});
-  }
-  dropTarget(el("shipcard"));
-  dropTarget(document.querySelector(".loadpanel"));
+  el("panelScrim").addEventListener("click",closePanels);
+  document.body.addEventListener("dragstart",e=>{ const oc=e.target.closest('.ocard'), sc=e.target.closest('.shipcell'); if(oc){ e.dataTransfer.setData("text/plain","o:"+oc.dataset.name); document.body.classList.add("dnd"); } else if(sc){ e.dataTransfer.setData("text/plain","s:"+sc.dataset.ship); document.body.classList.add("dnd"); } });
+  document.body.addEventListener("dragend",()=>document.body.classList.remove("dnd"));
+  document.addEventListener("dragover",e=>{ if(document.body.classList.contains("dnd") && !e.target.closest('.se-dock')) e.preventDefault(); });
+  document.addEventListener("drop",e=>{ if(!document.body.classList.contains("dnd")) return; document.body.classList.remove("dnd"); if(e.target.closest('.se-dock')) return; e.preventDefault(); const d=e.dataTransfer.getData("text/plain"); if(!d) return; if(d[0]==="o"){ const nm=d.slice(2); if(DATA.outfits[nm]) add(nm,1); } else if(d[0]==="s"){ const nm=d.slice(2); if(DATA.ships[nm]) setShip(nm); } });
   loadFromHash();
+  setTimeout(()=>{ if(!state.ship)return; if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else{renderCatbar();renderCatalog();} renderLoadout(); },60);
 }
 let _rz=null;
-window.addEventListener("resize",()=>{ clearTimeout(_rz); _rz=setTimeout(()=>{ if(state.ship) renderShipCard(); },150); });
+window.addEventListener("resize",()=>{ clearTimeout(_rz); _rz=setTimeout(()=>{ if(!state.ship)return; renderShipCard(); renderLoadout(); if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else{renderCatbar();renderCatalog();} },160); });
 init();

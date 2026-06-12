@@ -2,41 +2,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Drydock — Endless Sky Outfit Builder</title>
 <style>/*__CSS__*/</style>
+<div id="app">
 
 <header>
   <div class="brand">
-    <span class="eyebrow">Drydock v0.3.73 · ES data v<span id="ver"></span></span>
-    <span class="name">DRY<b>DOCK</b></span>
+    <img class="logo" src="images/ui/logo-img.png" alt="Drydock">
   </div>
-  <div class="headtabs">
-    <button class="toptab" id="shipTab">Add Ship</button>
-    <button class="toptab" id="outfitterTab">Add Parts</button>
-    <button class="toptab" id="shopTab">Outfitters</button>
-    <button class="toptab" id="yardTab">Shipyards</button>
-  </div>
+  <nav class="headnav">
+    <button class="navtab" id="viewShip">Ship Editor</button>
+    <button class="navtab" id="viewFleet">Fleet Editor</button>
+    <button class="navtab" id="viewInfo">Information Deck</button>
+  </nav>
   <div class="spacer"></div>
-  <div class="costchip">
-    <div class="eyebrow">Total cost</div>
-    <div class="v mono" id="totalCost">0</div>
+  <div class="headtier">
+    <span class="ht-label">Tech</span>
+    <div class="tierbtns" id="tierBtns">
+      <button data-tier="0">Human</button>
+      <button data-tier="1">+First contact</button>
+      <button data-tier="2">+Deep space</button>
+      <button data-tier="3">All</button>
+    </div>
   </div>
-  <button class="linkbtn" id="resetBtn">Reset</button>
-  <button class="linkbtn gear" id="gearBtn" title="Settings" aria-label="Settings">⚙</button>
+  <div class="headact">
+    <button class="actbtn" id="shareTop" title="Copy a shareable link to this build">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+      <span>Share</span>
+    </button>
+    <button class="actbtn icon" id="gearBtn" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    </button>
+  </div>
 </header>
 
 <svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
   <filter id="esShip" color-interpolation-filters="sRGB" x="-15%" y="-15%" width="130%" height="130%">
     <feColorMatrix type="saturate" values="0" result="g"/>
-    <!-- darker grayscale fill -->
     <feComponentTransfer in="g" result="fill">
       <feFuncR type="linear" slope="0.55"/><feFuncG type="linear" slope="0.55"/><feFuncB type="linear" slope="0.55"/>
     </feComponentTransfer>
-    <!-- faint, softened interior structure (muted, low noise) -->
     <feConvolveMatrix in="g" order="3" preserveAlpha="true" kernelMatrix="0 -1 0 -1 4 -1 0 -1 0" result="edge"/>
     <feGaussianBlur in="edge" stdDeviation="0.6" result="edgeS"/>
     <feComponentTransfer in="edgeS" result="edgeB">
       <feFuncR type="linear" slope="0.46"/><feFuncG type="linear" slope="0.46"/><feFuncB type="linear" slope="0.48"/>
     </feComponentTransfer>
-    <!-- soft mid-grey silhouette outline stroke -->
     <feMorphology in="SourceAlpha" operator="dilate" radius="1.4" result="dil"/>
     <feComposite in="dil" in2="SourceAlpha" operator="out" result="ring"/>
     <feFlood flood-color="#7c8696" result="oc"/>
@@ -47,26 +55,27 @@
 </defs></svg>
 
 <main>
-  <!-- LEFT: ship art + schematic + variants + live status + installed loadout -->
-  <section class="col left">
-    <div class="leftbody">
-      <div class="maincol">
+  <!-- ============ SHIP EDITOR ============ -->
+  <section class="view view-ship" id="viewShipSec">
+    <div class="se-grid">
+
+      <!-- COLUMN 1: ship card -->
+      <div class="se-col se-ship">
         <div class="shipcard" id="shipcard">
-          <div class="shiphead">
-            <div class="shipid">
-              <span class="fac" id="hullFaction"></span><span class="sep">/</span>
-              <span class="cat" id="hullCat"></span><span class="sep">/</span>
-              <span class="nm" id="hullName"></span>
-            </div>
-            <div class="alerts" id="alerts"></div>
-          </div>
-          <div class="cardbody">
-            <div class="infocol">
-              <div class="artbox" id="artbox"></div>
-              <div class="quickstats" id="quickStats"></div>
+          <div class="sc-top">
+            <div class="sc-statL">
+              <div class="shiphead">
+                <div class="hed-art" id="artbox"></div>
+                <div class="shiptitle">
+                  <span class="fac" id="hullFaction"></span>
+                  <span class="nm" id="hullName"></span>
+                  <span class="cat" id="hullCat"></span>
+                </div>
+              </div>
+              <div class="statgroup"><div class="eyebrow"><span>Overview</span></div><div class="quickstats" id="quickStats"></div></div>
               <div class="statgroup"><div class="eyebrow"><span>Capacity</span><span id="massReadout" class="mono"></span></div><div class="statpills" id="capPills"></div></div>
             </div>
-            <div class="displaycol">
+            <div class="sc-disp">
               <div class="stagewrap">
                 <div class="stage" id="stage"></div>
                 <div class="legend" id="legend">
@@ -76,40 +85,92 @@
                   <span><i style="background:var(--bay)"></i>Bay</span>
                 </div>
               </div>
-            </div>
-            <div class="rightstats">
-              <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
-              <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">E · H /s</span></div><div class="statpills" id="ehPills"></div></div>
-              <div class="presetgrid" id="presetGrid">
-                <button class="pbtn" data-load="empty">Empty hull</button>
-                <button class="pbtn" data-load="stock">Stock</button>
-                <button class="pbtn" data-load="auto:cargo">Max cargo</button>
-                <button class="pbtn" data-load="auto:crew">Max crew</button>
-                <button class="pbtn act" id="fleetAddBtn">+ Add to Fleet</button>
-                <button class="pbtn act" id="shareBtn">Share</button>
+              <div class="statgroup ship-alerts">
+                <div class="eyebrow"><span>Ship Alerts</span></div>
+                <div class="alerts" id="alerts"></div>
               </div>
             </div>
           </div>
-          <div class="dropmsg">Drop to install</div>
+          <div class="sc-bot">
+            <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
+            <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono">E · H /s</span></div><div class="statpills" id="ehPills"></div></div>
+          </div>
+          <div class="presetgrid" id="presetGrid">
+            <button class="pbtn" data-load="empty">Empty hull</button>
+            <button class="pbtn" data-load="stock">Stock</button>
+            <button class="pbtn" data-load="auto:cargo">Max cargo</button>
+            <button class="pbtn" data-load="auto:crew">Max crew</button>
+            <button class="pbtn act" id="fleetAddBtn">+ Add to Fleet</button>
+          </div>
         </div>
-        <div class="fleetpanel" id="fleetPanel">
-          <div class="fleet-body">
-            <div class="fleet-stats">
-              <div class="fleet-main-title">Fleet Manifest</div>
-              <select class="fleet-select" id="fleetSelect"></select>
-              <div class="fleet-minirow">
-                <button class="fleet-mini" id="fleetNew" title="New fleet">+ New</button>
-                <button class="fleet-mini" id="fleetRenameF" title="Rename this fleet">Rename</button>
-                <button class="fleet-mini" id="fleetDelete" title="Delete this fleet">Delete</button>
-              </div>
-              <div class="fleet-sect-title divtop">Fleet Stats</div>
-              <div class="fleet-totals statpills" id="fleetTotals"></div>
-              <div class="fleet-count" id="fleetCount"></div>
+      </div>
+
+      <!-- COLUMN 2: variants + installed loadout -->
+      <div class="se-col se-load">
+        <div class="loadpanel">
+          <div class="presetbar">
+            <div class="eyebrow">Variants</div>
+            <div class="variants" id="variants"></div>
+          </div>
+          <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
+          <div id="loadout"></div>
+        </div>
+      </div>
+
+      <!-- COLUMN 3: docked Add Parts / New Ship picker -->
+      <div class="se-col se-dock">
+        <div class="dock-tabs">
+          <button class="dock-tab" id="dockPartsTab">Add Parts</button>
+          <button class="dock-tab" id="dockShipTab">New Ship</button>
+          <button class="dock-tab" id="dockFleetTab">Fleet</button>
+        </div>
+        <div class="dock-pane" id="dockPartsPane">
+          <div class="sp-body">
+            <div class="railwrap">
+              <div class="sp-rail" id="catbar"></div>
+              <div class="rail-pager" id="catbarPager"></div>
             </div>
-            <div class="fleet-list" id="fleetList"></div>
-            <div class="fleet-right">
-              <div class="fleet-sect-title">Manage</div>
-              <div class="fleet-actions">
+            <div class="sp-gridwrap">
+              <input type="search" id="search" class="grid-search" placeholder="Search parts…" autocomplete="off">
+              <div class="ogrid sp-grid" id="catalog"></div>
+              <div class="grid-pager" id="catalogPager"></div>
+            </div>
+          </div>
+        </div>
+        <div class="dock-pane" id="dockShipPane">
+          <div class="sp-body">
+            <div class="railwrap">
+              <div class="sp-rail" id="pickerFac"></div>
+              <div class="rail-pager" id="pickerFacPager"></div>
+            </div>
+            <div class="sp-gridwrap">
+              <input type="search" id="pickerSearch" class="grid-search" placeholder="Search ships…" autocomplete="off">
+              <div class="shipgrid sp-grid" id="pickerGrid"></div>
+              <div class="grid-pager" id="pickerGridPager"></div>
+            </div>
+          </div>
+        </div>
+        <div class="dock-pane" id="dockFleetPane"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ FLEET EDITOR ============ -->
+  <section class="view view-fleet" id="viewFleetSec">
+    <div class="fleetpanel" id="fleetPanel">
+      <div class="fleet-body">
+        <div class="fleet-col-left">
+          <div class="fl-sect fl-manifest">
+            <div class="fl-manifesthead">
+              <div class="fleet-main-title">Fleet Manifest</div>
+              <div class="fleet-sect-title">Saved Fleets</div>
+            </div>
+            <div class="fl-managerow">
+              <div class="fleet-allbtns">
+                <button class="fbtn" id="fleetNew" title="New fleet">+ New</button>
+                <button class="fbtn" id="fleetRenameF" title="Rename this fleet">Rename</button>
+                <button class="fbtn" id="fleetDelete" title="Delete this fleet">Delete</button>
                 <button class="fbtn" id="fleetImport">Import Fleet</button>
                 <button class="fbtn" id="fleetShare">Share Fleet</button>
                 <button class="fbtn" id="fleetClearBtn">Clear Fleet</button>
@@ -117,40 +178,62 @@
                 <button class="fbtn" id="fleetCopy">Copy Ship</button>
                 <button class="fbtn" id="fleetFlag" title="Set as flagship (the ship you pilot)">Set Flagship</button>
               </div>
-              <div class="fleet-sect-title divtop">Issues</div>
-              <div class="fleet-issues" id="fleetIssues"></div>
+              <div class="fl-savedlist" id="fleetSavedList"></div>
             </div>
+          </div>
+          <div class="fl-row">
+            <div class="fl-flag">
+              <div class="fleet-sect-title">Flagship</div>
+              <div class="flagship-box" id="flagshipBox"></div>
+            </div>
+            <div class="fl-stats">
+              <div class="fleet-sect-title">Fleet Stats</div>
+              <div class="fleet-totals statpills" id="fleetTotals"></div>
+              <div class="fleet-count" id="fleetCount"></div>
+            </div>
+          </div>
+          <div class="fl-sect">
+            <div class="fleet-sect-title">Fleet Issues</div>
+            <div class="fleet-issues" id="fleetIssues"></div>
+          </div>
+          <div class="fl-sect fl-rostersect">
+            <div class="fleet-sect-title">Fleet Roster</div>
+            <div class="fleet-list" id="fleetList"></div>
+          </div>
+        </div>
+        <div class="fleet-col-right">
+          <div class="fl-sect fl-detailsect">
+            <div class="fleet-sect-title">Ship Details</div>
+            <div class="fleet-detail" id="fleetDetail"></div>
           </div>
         </div>
       </div>
-
-      <div class="loadpanel">
-        <div class="presetbar">
-          <div class="eyebrow">Variants</div>
-          <div class="variants" id="variants"></div>
-        </div>
-        <div class="eyebrow"><span>Installed loadout</span><span id="installCount" class="mono"></span></div>
-        <div id="loadout"></div>
-      </div>
     </div>
-
   </section>
 
+  <!-- ============ INFORMATION DECK ============ -->
+  <section class="view view-info" id="viewInfoSec">
+    <div class="info-deck">
+      <div class="info-section">
+        <div class="eyebrow">Stations</div>
+        <div class="info-cards">
+          <button class="infocard" id="openOutfitters"><h3>Outfitters</h3><p>Browse every station and the outfits it sells.</p></button>
+          <button class="infocard" id="openShipyards"><h3>Shipyards</h3><p>Browse every shipyard and the hulls it sells.</p></button>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="eyebrow">Coming soon</div>
+        <div class="info-cards">
+          <div class="infocard soon"><h3>Ship &amp; Outfit Wiki</h3><p>Searchable reference for every hull and outfit.</p></div>
+          <div class="infocard soon"><h3>Galaxy Map</h3><p>Needs system coordinates &amp; hyperlanes (parser work).</p></div>
+          <div class="infocard soon"><h3>Quest Tracker</h3><p>Needs mission data to be parsed first.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
-<!-- Add Parts side panel -->
-<section class="sidepanel" id="outfitter" aria-label="Add parts">
-  <div class="sp-head">
-    <span class="sp-title">Add Parts</span>
-    <input type="search" id="search" placeholder="Search…" autocomplete="off">
-    <select id="partsFac" class="sp-fac" title="Filter by race"></select>
-    <button class="modalx" id="outfitterClose" aria-label="Close">×</button>
-  </div>
-  <div class="sp-body">
-    <div class="sp-rail" id="catbar"></div>
-    <div class="ogrid sp-grid" id="catalog"></div>
-  </div>
-</section>
+<div class="panelscrim" id="panelScrim"></div>
 
 <!-- Outfitters: browse stations -> outfits sold there -->
 <section class="sidepanel" id="outfitters" aria-label="Outfitters">
@@ -185,48 +268,25 @@
   </div>
 </div>
 
-<div class="modal" id="settings">
-  <div class="sheet">
-    <button class="modalx" id="settingsX" aria-label="Close">×</button>
-    <h2 style="color:var(--bright);margin:0 0 16px">Settings</h2>
-    <div class="setrow">
-      <label>Spoiler / tech access</label>
-      <div class="tierbtns" id="tierBtns">
-        <button data-tier="0">Human</button>
-        <button data-tier="1">+First contact</button>
-        <button data-tier="2">+Deep space</button>
-        <button data-tier="3">All</button>
-      </div>
-    </div>
-    <div class="setrow">
-      <label>Theme</label>
-      <div class="tierbtns" id="themeBtns">
-        <button data-theme="blue">Blue</button>
-        <button data-theme="dark">Dark</button>
-        <button data-theme="light">Light</button>
-      </div>
-    </div>
-    <div class="setrow">
-      <label>Content</label>
-      <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
+<div class="headmenu" id="settings">
+  <div class="hm-title">Settings</div>
+  <div class="setrow">
+    <label>Theme</label>
+    <div class="tierbtns" id="themeBtns">
+      <button data-theme="blue">Blue</button>
+      <button data-theme="dark">Dark</button>
+      <button data-theme="light">Light</button>
     </div>
   </div>
+  <div class="setrow">
+    <label>Content</label>
+    <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
+  </div>
+  <div class="hm-ver">Drydock v0.5.24 · ES data v<span id="ver"></span></div>
 </div>
-
-<!-- Add Ship side panel -->
-<section class="sidepanel" id="shipPicker" aria-label="Add ship">
-  <div class="sp-head">
-    <span class="sp-title">Add Ship</span>
-    <input type="search" id="pickerSearch" placeholder="Search ships…" autocomplete="off">
-    <button class="modalx" id="pickerX" aria-label="Close">×</button>
-  </div>
-  <div class="sp-body">
-    <div class="sp-rail" id="pickerFac"></div>
-    <div class="shipgrid sp-grid" id="pickerGrid"></div>
-  </div>
-</section>
 
 <div id="fleetHover" class="fleet-hover"></div>
 <div id="toast" class="toast"></div>
 
+</div>
 <script>/*__JS__*/</script>

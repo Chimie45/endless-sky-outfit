@@ -9,7 +9,299 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ---
 
+## v0.5 — Scale-to-fit layout
+
+### v0.5.24 — 2026-06-13
+- Hidden the placeholder "?" outfits (Microbot Grinder, Nano Strike, Suicide Gun, and any other
+  outfit with no real art).
+- Licenses are no longer hidden by the obtainable filter — all in-tier licenses now show.
+- Fixed outfit-card name being clipped at the bottom (flex shrink + overflow:hidden interaction).
+- Fleet Editor: clicking a ship now shows the full ship-info panel (Overview, Capacity, Movement &
+  Defense, Energy & Heat, Ship Alerts, Loadout). Added a Rename button to label fleet ships.
+
+### v0.5.23 — 2026-06-13
+- Outfit price is now its own tag (e.g. Price 16K, Price 2.5M); faction/price/DPS/Outfit tags are
+  laid out in a tidy 2-column grid that lines up across the card.
+- Tags given more vertical breathing room; dock cards made taller and the row gap tightened so the
+  grid uses the previously-wasted space at the bottom.
+- Fixed grid fit math to count only between-row gaps, reclaiming the trailing slack (no scrollbars).
+
+### v0.5.22 — 2026-06-13
+- Outfit card tags now use proper capitalization: faction (e.g. Human), DPS, and a renamed
+  "Outfit" tag (was lowercase "space") for outfit-space cost.
+- Install-limit alerts are now properly capitalized and clearer, e.g. "No free Gun Ports" and
+  "Not enough Outfit Space".
+
+### v0.5.21 — 2026-06-13
+- Ship-card name now re-fits via a ResizeObserver, so names no longer get stuck truncated at a
+  larger size when the title column changes width.
+- Full-screen Fleet Editor: swapped the Fleet Roster (now left) and Ship Details (now right), and
+  split the workspace 50/50.
+
+### v0.5.20 — 2026-06-13
+- Outfit cards: moved the faction tag up beside the price so the dps/space stat chips sit on their
+  own single row - the third chip is no longer clipped at the bottom of the card.
+
+### v0.5.19 — 2026-06-13
+- Capacity panel always shows a Bays row (Bays 0 when the hull has no fighter/drone bays).
+
+### v0.5.18 — 2026-06-13
+- Ship-card name auto-shrink now goes down to 10px in 0.5px steps and re-fits after layout,
+  so long names (e.g. Lampyrid-Class Transport) show in full instead of truncating.
+- Saved Fleets list height now matches the Delete/Clear Fleet/Set Flagship button stack (still fits 4 fleets).
+
+### v0.5.17 — 2026-06-13
+- Saved Fleets list softened to light grey and sized to show 4 fleets at once.
+- Flagship now has its own heading (aligned with Fleet Stats) and its box matches the stat-box height.
+- Tightened spacing: smaller gaps under the section headings and between Fleet Stats and Fleet Issues;
+  removed the divider under Fleet Stats and added one under Fleet Roster.
+
+### v0.5.16 — 2026-06-13
+- Saved Fleets is now a single white, bordered list (3px border, 10px radius) sitting beside the
+  management buttons and matching their height; the "Saved Fleets" heading shares the row with "Fleet Manifest".
+- Restored the Flagship panel; it sits next to Fleet Stats again (stats no longer span full width).
+- Fixed the docked Fleet tab spacing so Fleet Issues sits higher and the roster gets the leftover height.
+
+### v0.5.15 — 2026-06-13
+- Fixed ship-name descenders (g, y, Q) being clipped in the ship-card header.
+- Fleet Editor is now a full-size two-column workspace like the Ship Editor: fleet stats,
+  issues and a clicked-ship detail panel on the left; the ship roster (flagship first) on the right.
+- Clicking a ship in the roster shows its full stats and loadout in the left-hand Ship Details panel.
+
+### v0.5.14 — 2026-06-13
+- Flagship now sorts to the first position in the fleet icon list.
+- Fleet management buttons made skinnier, with a clickable Saved Fleets list beside them
+  (replaces the dropdown selector).
+
+### v0.5.13 — 2026-06-12
+- Fleet layout optimised: all fleet buttons merged into one grid under the title (dropped the
+  'Manage Fleet' heading); Flagship and Fleet Stats now sit side-by-side below the buttons;
+  Fleet Icons takes the bulk of the height (~50%).
+
+### v0.5.12 — 2026-06-12
+- Fleet panel reordered to: Fleet Manifest, Manage Fleet, Fleet Stats, Fleet Issues, Fleet Icons.
+- Added a Flagship square that shows the current flagship's icon and name.
+
+### v0.5.11 — 2026-06-12
+- Ship title block now stretches to the icon's height (faction/name/type spread to fill).
+- Overview gained Bunks and Mass (now 6 rows, matching Capacity).
+- Widened the schematic overlay and raised the hardpoint-label wrap limit so long labels
+  (e.g. 'Heavy Anti-Missile Turret') no longer truncate.
+
+### v0.5.10 — 2026-06-12
+- Ship title now stacks as faction / name / type on three lines (type moved under the name;
+  fixes the truncated ship type).
+
+### v0.5.9 — 2026-06-12
+- Added a 'Fleet' tab to the dock (Add Parts / New Ship / Fleet). The fleet manifest shows in the
+  dock with a compact stacked layout for quick edits while building; the full-screen Fleet Editor
+  tab is unchanged. The single fleet panel is moved between the two locations as needed.
+
+### v0.5.8 — 2026-06-12
+- New Ship picker is now 3x4 (shorter ship cards) so it fills the space.
+- Race rail shows all races on one page (removed the unnecessary pagination); compact rows.
+
+### v0.5.7 — 2026-06-12
+- Ship name now auto-shrinks to fit one line (stays 30px for normal names, scales down to a
+  floor for long ones) instead of wrapping or truncating.
+
+### v0.5.6 — 2026-06-12
+- Catalog/picker grids top-align when not full (no more big gaps spreading a few cards).
+- Standardized control heights to 34px (dock tabs, search, preset buttons, variant chips, rail rows).
+- Ship card restructured: title block (icon + name + race/class) now sits in the left column with
+  Overview/Capacity below it; the schematic sits at the top of the right column with a labelled
+  'Ship Alerts' section (Thrust/Steering/Energy/Heat) beneath it.
+
+### v0.5.5 — 2026-06-12
+- Header: icon back to 80x80 with race/class stacked above the ship name (name 30px), beside the icon.
+- Weapon categories (Guns, Turrets, Secondary Weapons, Ammunition) now expand too: sub-sections are
+  derived from weapon names (Laser, Blaster, Plasma, Beam, Ion, Missile, Torpedo, ...; alien/unnamed
+  types fall under 'Other', sorted last). Families are built from the tier-eligible outfits.
+
+### v0.5.4 — 2026-06-12
+- Ship-card header: icon enlarged to 124x124 with race/class above it, and the ship name set
+  large (24px) across the top to the right of the icon — using the left column's spare space.
+
+### v0.5.3 — 2026-06-12
+- Parts catalog is now a 3x4 grid of shorter cards (fills the column with more items).
+- Dock restructured: the search bar now sits over the grid only and the dead race selector is
+  gone, so the accordion rail runs the full height with roomier rows.
+- Moved the spoiler / tech-access control out of Settings into the header.
+
+### v0.5.2 — 2026-06-12
+- Ship-card header redesigned: bigger ship icon + the ship NAME (which was getting squeezed
+  out) with race/type as a subtitle. Overview/Capacity shift down accordingly.
+- Moved the Thrust/Steering/Energy/Heat warning pills onto the top of the schematic overlay
+  (which has empty space even for the largest ships).
+
+### v0.5.1 — 2026-06-12
+- Parts rail is now an accordion: top-level categories (Guns, Turrets, Systems, Power, Engines,
+  ...) expand to their sub-sections (Systems -> Shields/Cooling/Scanners/...; Power ->
+  Generators/Batteries/Solar; etc.). Fills the rail and organizes browsing.
+- Catalog grid now distributes rows to fill the column height (no empty space at the bottom).
+- Dropped Minerals and Unique from the parts picker (commodities / mission items, not build parts).
+
+### v0.5.0 — 2026-06-12
+- Monitor layout is now designed once at a fixed 1600x900 canvas and uniformly scaled
+  (CSS zoom) to fill any screen >=1101px wide, letterboxed on non-16:9 (ultrawide/16:10).
+  Nothing reflows or stretches across monitor sizes; the layout is identical everywhere,
+  just larger/smaller. Below 1101px the existing stacked layout still applies (tablet/mobile
+  designs to come).
+
+## v0.4 — Tabbed workspace
+
+### v0.4.6 — 2026-06-12
+- Fixed the ≤1024px layout: the Ship Editor now stacks into a single scrolling column
+  (ship card, then loadout, then the picker) instead of a clipped 2-column grid with the
+  dock overflowing. No more cut-off stats/variants or horizontal scrollbar at that size.
+
+### v0.4.5 — 2026-06-12
+- Ship card now fills its column top-to-bottom (the schematic grows into the space instead
+  of leaving a black void below the card).
+- Capped the Ship Editor's 3-column workspace at 2000px and centered it, so wide/ultrawide
+  monitors get balanced side margins instead of over-stretched columns.
+
+### v0.4.4 — 2026-06-12
+- Moved Outfit space back into the Capacity stat group.
+- Variants grid is now 3 across (2 rows of 3 fixed slots).
+- Made the installed-loadout rows more compact.
+
+### v0.4.3 — 2026-06-12
+- Ship card reverted toward the old form: Overview + Capacity to the left of the overlay,
+  a skinnier overlay, and Movement & Defense / Energy & Heat directly below it.
+- Variants now show a fixed 6-slot grid (empty slots stay so the area doesn't resize).
+- Installed loadout scrolls again. Docked picker grids fill the column width (no dead side
+  buffer) and the rail is wider so labels aren't truncated.
+- Restored drag-and-drop: drag a part (or ship) and drop anywhere outside the dock to install.
+
+### v0.4.2 — 2026-06-12
+- Ship Editor is now fully scroll-free: the catalog, ship picker, both rails, and the installed
+  loadout fit the available space and paginate (prev/next) instead of scrolling.
+- Moved Outfit-space into the Overview stat group so the two stat columns balance.
+- Made the loadout/variants column skinnier and widened the docked picker column.
+- Renamed the dock's "Add Ship" tab to "New Ship".
+
+### v0.4.1 — 2026-06-12
+- Removed the Buy Me A Coffee widget for now (to be re-added later).
+- Ship Editor reworked into three columns to use the space: ship card (overlay on top, now
+  smaller, with stats laid out below it) | installed loadout + variants | a docked Add Parts /
+  Add Ship picker (toggle) that replaces the old pop-up modals. Ship thumbnail now sits in the
+  card header.
+
+### v0.4.0 — 2026-06-12
+- Split the app into three top-level tabs: Ship Editor, Fleet Editor, Information Deck.
+- Ship Editor holds the ship card / schematic / stats / loadout, with Add Ship and Add Parts
+  as buttons inside it. Fleet Editor is the fleet manifest on its own full-width tab (no longer
+  crammed under the ship). Information Deck currently hosts the Outfitters & Shipyards station
+  browsers; the wider wiki / galaxy map / quest tracker are deferred (galaxy map needs
+  system+hyperlane data, quests need mission data — neither is parsed yet).
+- Removed Add Ship/Add Parts/Outfitters/Shipyards from the header; they live in their tabs now.
+
 ## v0.3 — UX overhaul update
+
+### v0.3.93 — 2026-06-12
+- Settings: tier/theme segmented boxes now hug their buttons (no empty container space);
+  trimmed the menu width.
+- Fleet panel: removed the scrollbars on Manage/Issues. Widened that column and laid Issues
+  in 4 columns and Manage in 3 so they fit as short rows without scrolling.
+
+### v0.3.92 — 2026-06-12
+- Fixed the fleet panel's Manage/Issues and Fleet-Stats columns running off the bottom of
+  the page on shorter windows (they now scroll within the panel instead of being clipped).
+
+### v0.3.91 — 2026-06-12
+- Widened the Settings dropdown so the tech-access buttons stop wrapping; shrank the
+  Buy Me A Coffee button in the menu.
+
+### v0.3.90 — 2026-06-12
+- New banner-style logo asset is now shown whole (natural aspect) instead of being
+  cropped by object-fit:cover.
+
+### v0.3.89 — 2026-06-12
+- Removed the logo stroke outline and outer glow (kept the larger size).
+
+### v0.3.88 — 2026-06-12
+- Removed the version text under the logo and moved it into the Settings menu (footer line).
+- Enlarged the logo and gave it a thin dark stroke outline plus a subtle accent outer glow.
+
+### v0.3.87 — 2026-06-12
+- Moved the Buy Me A Coffee button out of the header toolbar into the Settings dropdown
+  (under a "Support Drydock" row). Header toolbar is now just Share + Settings.
+
+### v0.3.86 — 2026-06-12
+- Swapped the custom Donate link for the official Buy Me A Coffee button widget in the header.
+
+### v0.3.85 — 2026-06-12
+- Pointed the Donate button at the Buy Me a Coffee page (buymeacoffee.com/drydock). Kept the
+  toolbar's own button styling rather than embedding BMC's external widget/branded button.
+
+### v0.3.84 — 2026-06-12
+- Removed the GitHub link from the header toolbar.
+- On phones the Share/Donate/Settings icons now sit on the same row as the logo instead of
+  wrapping onto their own row; the nav drops to the row below.
+
+### v0.3.83 — 2026-06-12
+- Header gained an action toolbar: Share (copies a link to the current build), Donate, and
+  a GitHub source link. Settings is now an anchored dropdown off the gear (theme / tech
+  access / show-unreleased) instead of a full-screen modal.
+- Removed the duplicate Share button from the ship card; "+ Add to Fleet" spans the preset
+  row. On phones the toolbar collapses to icons.
+- NOTE: the Donate link is a placeholder (https://ko-fi.com/) — swap in your real page.
+
+### v0.3.82 — 2026-06-12
+- Redesigned the header: the DRYDOCK logo image replaces the text wordmark/version line,
+  and the four panels became an underline-indicator nav (no boxed tabs). Removed Total cost
+  (already on the ship card + manifest) and Reset (same as the ship card's "Empty hull").
+
+### v0.3.81 — 2026-06-12
+- Redesigned the header: the DRYDOCK logo image replaces the old text wordmark/version
+  line (the version now shows as a small tag beneath the logo). The four nav tabs are now
+  one clean segmented control, and Total cost / Reset / Settings are grouped into a single
+  tidy cluster on the right instead of floating loose.
+
+### v0.3.80 — 2026-06-12
+- Phone polish: in the pop-ups the rail now sits full-width on top with the card grid
+  below (instead of a wide rail squeezing the grid to one column and truncating station
+  names). Header tab labels stay on one line instead of wrapping.
+
+### v0.3.79 — 2026-06-12
+- Fixed the rail rows: flexbox was shrinking them to fit (instead of scrolling), so they
+  looked scrunched and the text rode high. Each row is now a fixed height with its label
+  vertically centred; the rail scrolls / paginates instead of squishing.
+
+### v0.3.78 — 2026-06-12
+- Made the Outfitters/Shipyards station rail readable: bigger, brighter text, taller rows,
+  a wider rail, and a full-name tooltip on hover (long names truncate with an ellipsis).
+- Added prev/next pagination to the station rail (25 per page) so it's not one giant
+  scroll of hundreds of tiny entries.
+
+### v0.3.77 — 2026-06-12
+- Standardized the four pop-up windows: all open at the same (larger) size, with a
+  consistent left rail and equal-sized item cards (Outfitters/Shipyards are no longer
+  extra-wide). Used the extra room to widen the rail so labels sit on one line.
+- Outfitters & Shipyards: station labels now show the planet name first (bold) with the
+  system dimmed, and the station list is sorted alphabetically.
+
+### v0.3.76 — 2026-06-12
+- Reverted the slide-out side drawers back to centered pop-up windows (like the original
+  ship picker). Add Ship / Add Parts / Outfitters / Shipyards now open as modals over a
+  dimmed backdrop instead of docking on top of the installed-loadout column.
+- Removed drag-to-install (a pop-up can't drop onto the page behind it). Use each card's
+  "+" button, or the detail "Install" button, to add outfits.
+
+### v0.3.75 — 2026-06-12
+- Escaped fleet/ship/label text in the fleet list, hover card and fleet menu so a crafted
+  shared-fleet link can't inject HTML.
+- Renamed the fleet "Cost" mini-stat to "Upkeep" (it shows daily crew salary, not buy price).
+
+### v0.3.74 — 2026-06-12
+- Widened the side panels (660px; Outfitters & Shipyards 900px) so their rail + grid aren't
+  cramped into tiny rows. Phones still go full-width.
+- Disabled drag-and-drop in the Outfitters and Shipyards panels — those are browse-only.
+  Drag-to-install now works only in Add Parts (Add Ship/Shipyards add via click).
+
+### v0.3.73 — 2026-06-12
+- Restyled the header tabs from pills into real attached tabs (top-rounded, accent when active).
 
 ### v0.3.72 — 2026-06-12
 - Put the four tabs (Add Ship / Add Parts / Outfitters / Shipyards) into the existing header
