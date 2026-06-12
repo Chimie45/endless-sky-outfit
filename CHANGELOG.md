@@ -11,6 +11,19 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.27 — 2026-06-13
+- Ship-card title: faction/name/type now grouped with even spacing (was spread out by space-between).
+- Ship name fit is more reliable: skips measuring before layout, re-fits on a short delay, and shrinks
+  to 9px so long names (e.g. Shield Beetle) display in full instead of truncating.
+
+### v0.5.26 — 2026-06-13
+- Variant chip labels now auto-shrink to fit (down to 8px, ellipsis only as a last resort), so long
+  names like "Unfettered Shipyards" and "Tripulse Ionic Turret" no longer overflow.
+
+### v0.5.25 — 2026-06-13
+- Fleet Ship Details: swapped Capacity (now top-right, opposite Overview) and Movement & Defense
+  (now bottom-left), so all four stat sections line up across the two columns.
+
 ### v0.5.24 — 2026-06-13
 - Hidden the placeholder "?" outfits (Microbot Grinder, Nano Strike, Suicide Gun, and any other
   outfit with no real art).

@@ -827,3 +827,9 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 .fleet-detail .strow{min-height:0}
 .fd-alerts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:5px}
 .fd-alerts .pill{position:static;width:auto;justify-content:center;backdrop-filter:none}
+
+/* v0.5.26: variant chip labels auto-shrink to fit */
+.variants .vchip .vtxt{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+
+/* v0.5.27: ship-card title - even spacing (no space-between gaps), reliable name fit */
+.sc-statL .shiphead .shiptitle{justify-content:center;gap:3px}

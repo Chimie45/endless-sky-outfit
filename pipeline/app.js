@@ -208,15 +208,15 @@ function renderAlerts(s){
     p("Heat",s.heatOK,s.heatOK?"Stays cool enough":"Will overheat");
 }
 function fitShipName(){
-  const e=el("hullName"); if(!e) return;
+  const e=el("hullName"); if(!e||!e.clientWidth) return;   // skip until laid out (avoids stale wide measurement)
   let size=30; e.style.fontSize=size+"px";
-  let g=48;
-  while(e.scrollWidth>e.clientWidth+1 && size>10 && g-->0){ size-=0.5; e.style.fontSize=size+"px"; }
+  let g=60;
+  while(e.scrollWidth>e.clientWidth+1 && size>9 && g-->0){ size-=0.5; e.style.fontSize=size+"px"; }
 }
 function renderShipCard(){
   const ship = state.ship;
   el("hullName").textContent = ship.displayName || ship.name;
-  fitShipName(); requestAnimationFrame(fitShipName);
+  fitShipName(); requestAnimationFrame(fitShipName); setTimeout(fitShipName,80);
   el("hullCat").textContent = ship.category;
   el("hullFaction").textContent = FACLABEL(ship.faction);
   renderArtbox();
@@ -242,10 +242,19 @@ function renderVariants(){
   const n = Math.max(6, vnames.length);
   let html="";
   for(let i=0;i<n;i++){
-    if(i<vnames.length){ const v=vnames[i]; html+=`<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}">${shortVariant(v)}</button>`; }
+    if(i<vnames.length){ const v=vnames[i]; html+=`<button class="vchip" data-load="var:${v.replace(/"/g,'&quot;')}" aria-pressed="${state.loadoutName==='var:'+v}" title="${v}"><span class="vtxt">${shortVariant(v)}</span></button>`; }
     else html+=`<div class="vchip empty"></div>`;
   }
   el("variants").innerHTML=html;
+  fitVariants(); requestAnimationFrame(fitVariants);
+}
+function fitVariants(){
+  const box=el("variants"); if(!box) return;
+  box.querySelectorAll(".vchip .vtxt").forEach(t=>{
+    t.style.fontSize="";
+    let size=parseFloat(getComputedStyle(t).fontSize)||11, g=16;
+    while(t.scrollWidth>t.clientWidth+1 && size>8 && g-->0){ size-=0.5; t.style.fontSize=size+"px"; }
+  });
 }
 function setPresetPressed(){
   document.querySelectorAll('#presetGrid [data-load]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.load===state.loadoutName));
@@ -706,13 +715,13 @@ function renderFleetDetail(){ const box=el("fleetDetail"); if(!box) return;
       `<div class="fd-cols"><div class="fd-sect">`+
         `<div class="eyebrow">Overview</div>`+
         row("Cost",MONEY(s.cost))+row("Crew",FMT(crew))+row("Bunks",FMT(bunks))+row("Cargo",FMT(s.cargo)+" t")+row("Fuel",FMT(s.fuel))+row("Mass",FMT(mass)+" t")+
-        `<div class="eyebrow eb2">Capacity</div>`+
-        cap("Outfit","outfit space"," t")+cap("Weapon","weapon capacity"," t")+cap("Engine","engine capacity"," t")+
-        row("Gun ports",`${guns}/${hp.guns}`,guns>hp.guns)+row("Turrets",`${turrets}/${hp.turrets}`,turrets>hp.turrets)+row("Bays",String(totalBays))+
-      `</div><div class="fd-sect">`+
-        `<div class="eyebrow">Movement &amp; Defense</div>`+
+        `<div class="eyebrow eb2">Movement &amp; Defense</div>`+
         row("Max speed",FMT(s.maxSpeed))+row("Acceleration",`${FMT(s.accel[0])}${DS}${FMT(s.accel[1])}`)+row("Turning",`${FMT(s.turn[0])}${DS}${FMT(s.turn[1])}`)+
         row("Shields",`${FMT(s.shields)}${s.hasSR?" +"+FMT(s.shieldRegen):""}`)+row("Hull",`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair):""}`)+
+      `</div><div class="fd-sect">`+
+        `<div class="eyebrow">Capacity</div>`+
+        cap("Outfit","outfit space"," t")+cap("Weapon","weapon capacity"," t")+cap("Engine","engine capacity"," t")+
+        row("Gun ports",`${guns}/${hp.guns}`,guns>hp.guns)+row("Turrets",`${turrets}/${hp.turrets}`,turrets>hp.turrets)+row("Bays",String(totalBays))+
         `<div class="eyebrow eb2">Energy &amp; Heat</div>`+
         row2("Idle",FMT(s.eh.idle[0]),FMT(s.eh.idle[1]))+row2("Moving",FMT(s.eh.moving[0]),FMT(s.eh.moving[1]))+row2("Firing",FMT(s.eh.firing[0]),FMT(s.eh.firing[1]))+row2("Net",FMT(s.eh.net[0]),FMT(s.eh.net[1]))+row2("Max",FMT(s.eh.max[0]),FMT(s.eh.max[1]))+
       `</div></div>`+
