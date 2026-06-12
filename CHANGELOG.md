@@ -11,6 +11,9 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.47 — 2026-06-13
+- Removed the source-repo link from the credits modal.
+
 ### v0.5.46 — 2026-06-13
 - Credits in Settings now opens a full-credits modal (Endless Sky attribution, GPLv3 code,
   CC-BY-SA-4.0 art with links to the upstream copyright/license, plus source & donate links).
