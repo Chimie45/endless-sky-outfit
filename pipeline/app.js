@@ -1125,7 +1125,8 @@ function renderGalaxyMap(){
   let nodes="";
   for(const n of names){ const s=SYS[n]; const nm=esc(n); const dn=n.replace(/"/g,'&quot;');
     nodes+='<g class="sysnode" data-sys="'+dn+'"><circle cx="'+s.pos[0]+'" cy="'+s.pos[1]+'" r="'+r.toFixed(2)+'" fill="'+govColor(s.government)+'"/><text class="syslabel" x="'+s.pos[0]+'" y="'+s.pos[1]+'">'+nm+'</text></g>'; }
-  cv.innerHTML='<svg id="mapSvg" class="map-svg" preserveAspectRatio="xMidYMid meet"><g class="map-lines" style="stroke-width:'+(r/3.5).toFixed(2)+'">'+lines+'</g>'+nodes+'</svg>';
+  const _bg=(DATA.galaxyBg||[]).map(g=>'<image class="map-bg-img" href="images/'+g.sprite+'.jpg" x="'+(g.pos[0]-g.w/2)+'" y="'+(g.pos[1]-g.h/2)+'" width="'+g.w+'" height="'+g.h+'" preserveAspectRatio="none"/>').join("");
+  cv.innerHTML='<svg id="mapSvg" class="map-svg" preserveAspectRatio="xMidYMid meet">'+_bg+'<g class="map-lines" style="stroke-width:'+(r/3.5).toFixed(2)+'">'+lines+'</g>'+nodes+'</svg>';
   mapFit(); _wireMap();
   if(state.mapSel && SYS[state.mapSel]) mapSelect(state.mapSel);
 }

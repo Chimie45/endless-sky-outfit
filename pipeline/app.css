@@ -961,3 +961,6 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 
 /* v0.5.48: ship-card name never truncates (no ellipsis; auto-shrink keeps it one line) */
 .shiptitle .nm{overflow:visible;text-overflow:clip}
+
+/* v0.5.52: galaxy background images behind the map */
+.map-svg .map-bg-img{opacity:.5}

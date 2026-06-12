@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.52 — 2026-06-13
+- Galaxy map now shows the Milky Way (and Patir/Pleiades) background art behind the systems, aligned to
+  the same coordinates so systems sit correctly on the galaxy.
+
 ### v0.5.51 — 2026-06-13
 - Tagged the 65 Rim/South/Dirt Belt systems that revolt in the Free Worlds campaign as Free Worlds
   government, so they show as Free Worlds (green) at Human tier instead of Republic.
