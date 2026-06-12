@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.53 — 2026-06-13
+- Galaxy map now hides uninhabited / Deep Space systems below the All tier (strict government gating),
+  so Human shows only Republic/Free Worlds/Syndicate/Pirate space.
+
 ### v0.5.52 — 2026-06-13
 - Galaxy map now shows the Milky Way (and Patir/Pleiades) background art behind the systems, aligned to
   the same coordinates so systems sit correctly on the galaxy.

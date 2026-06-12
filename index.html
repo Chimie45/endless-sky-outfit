@@ -1292,7 +1292,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
     <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.52 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.53 · ES data v<span id="ver"></span></div>
 </div>
 
 <div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
@@ -2429,7 +2429,7 @@ function mapZoom(f,cx,cy){ const vb=state.mapVB, b=state._mapBounds; if(!vb||!b)
   vb[0]=cx-(cx-vb[0])*(nw/vb[2]); vb[1]=cy-(cy-vb[1])*(nh/vb[3]); vb[2]=nw; vb[3]=nh; mapSetVB(); }
 function renderGalaxyMap(){
   const cv=el("mapCanvas"); if(!cv) return;
-  const SYS=DATA.systems||{}; const names=Object.keys(SYS).filter(n=>Array.isArray(SYS[n].pos) && sysTier(n)<=state.tier);
+  const SYS=DATA.systems||{}; const names=Object.keys(SYS).filter(n=>Array.isArray(SYS[n].pos) && govTier(SYS[n].government)<=state.tier);
   if(!names.length){ cv.innerHTML='<div class="map-empty">No system data available.</div>'; return; }
   // fit to the bulk (2nd-98th percentile) so a few far-flung systems don't shrink the whole galaxy
   const xs=names.map(n=>SYS[n].pos[0]).sort((a,b)=>a-b), ys=names.map(n=>SYS[n].pos[1]).sort((a,b)=>a-b);
@@ -2439,7 +2439,7 @@ function renderGalaxyMap(){
   const bw=Math.max(1,maxX-minX), bh=Math.max(1,maxY-minY); state._mapBounds=[minX,minY,bw,bh];
   const r=Math.max(bw,bh)/320;
   const seen=new Set(); let lines="";
-  for(const n of names){ const a=SYS[n]; for(const ln of (a.links||[])){ const b=SYS[ln]; if(!b||!Array.isArray(b.pos)||sysTier(ln)>state.tier)continue; const k=n<ln?n+"|"+ln:ln+"|"+n; if(seen.has(k))continue; seen.add(k); lines+='<line x1="'+a.pos[0]+'" y1="'+a.pos[1]+'" x2="'+b.pos[0]+'" y2="'+b.pos[1]+'"/>'; } }
+  for(const n of names){ const a=SYS[n]; for(const ln of (a.links||[])){ const b=SYS[ln]; if(!b||!Array.isArray(b.pos)||govTier(b.government)>state.tier)continue; const k=n<ln?n+"|"+ln:ln+"|"+n; if(seen.has(k))continue; seen.add(k); lines+='<line x1="'+a.pos[0]+'" y1="'+a.pos[1]+'" x2="'+b.pos[0]+'" y2="'+b.pos[1]+'"/>'; } }
   let nodes="";
   for(const n of names){ const s=SYS[n]; const nm=esc(n); const dn=n.replace(/"/g,'&quot;');
     nodes+='<g class="sysnode" data-sys="'+dn+'"><circle cx="'+s.pos[0]+'" cy="'+s.pos[1]+'" r="'+r.toFixed(2)+'" fill="'+govColor(s.government)+'"/><text class="syslabel" x="'+s.pos[0]+'" y="'+s.pos[1]+'">'+nm+'</text></g>'; }
@@ -2456,7 +2456,7 @@ function renderSystemDetail(name){ const box=el("mapDetail"); if(!box) return; c
   const inSys=l=>l&&l.system===name;
   const ofs=Object.values(DATA.outfits).filter(o=>factionTier(o.faction)<=state.tier&&(o.soldAt||[]).some(inSys)).map(o=>o.name).sort();
   const shps=Object.values(DATA.ships).filter(sh=>factionTier(sh.faction)<=state.tier&&(sh.soldAt||[]).some(inSys)).map(sh=>sh.displayName||sh.name).sort();
-  const links=(s.links||[]).filter(l=>(DATA.systems||{})[l] && sysTier(l)<=state.tier);
+  const links=(s.links||[]).filter(l=>(DATA.systems||{})[l] && govTier((DATA.systems||{})[l].government)<=state.tier);
   const chip=t=>'<span class="md-chip">'+esc(t)+'</span>';
   const lchip=t=>'<button class="md-chip md-link" data-sys-link="'+t.replace(/"/g,'&quot;')+'">'+esc(t)+'</button>';
   const pchip=t=>'<button class="md-chip md-link" data-go-planet="'+t.replace(/"/g,'&quot;')+'">'+esc(t)+'</button>';
