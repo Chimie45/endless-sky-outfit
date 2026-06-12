@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.54 — 2026-06-13
+- Add multiples at once with modifier keys on + / - / Install / drag, matching the game: Shift x5,
+  Ctrl x20, Ctrl+Shift x100, Alt x500, Alt+Shift x2500, Ctrl+Alt x10000, Ctrl+Shift+Alt x50000.
+  Only adds as many as actually fit (respects gun/turret mounts and all capacities).
+
 ### v0.5.53 — 2026-06-13
 - Galaxy map now hides uninhabited / Deep Space systems below the All tier (strict government gating),
   so Human shows only Republic/Free Worlds/Syndicate/Pirate space.

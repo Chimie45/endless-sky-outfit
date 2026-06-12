@@ -1292,7 +1292,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
     <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.53 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.54 · ES data v<span id="ver"></span></div>
 </div>
 
 <div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
@@ -1891,7 +1891,18 @@ function showToast(msg){
   t.textContent=msg; t.classList.add("show");
   clearTimeout(_toastT); _toastT=setTimeout(()=>t.classList.remove("show"),1700);
 }
+function clickMult(e){ const a=e.altKey, c=e.ctrlKey||e.metaKey, s=e.shiftKey;
+  if(c&&s&&a) return 50000; if(c&&a) return 10000; if(a&&s) return 2500; if(c&&s) return 100;
+  if(a) return 500; if(c) return 20; if(s) return 5; return 1; }
+function maxAddable(o){ if(!o||!state.ship) return 0; const hp=state.ship.hardpoints; let cap=Infinity;
+  const gunUse=-num(o.attributes["gun ports"]); if(gunUse>0) cap=Math.min(cap, Math.floor((hp.guns-installedOf(x=>x&&num(x.attributes["gun ports"])<0))/gunUse));
+  const turUse=-num(o.attributes["turret mounts"]); if(turUse>0) cap=Math.min(cap, Math.floor((hp.turrets-installedOf(x=>x&&num(x.attributes["turret mounts"])<0))/turUse));
+  const ks=new Set(["outfit space","weapon capacity","engine capacity","cargo space","fuel capacity"]);
+  for(const k in o.attributes){ if(o.attributes[k]<0 && /(capacity|space)$/.test(k)) ks.add(k); }
+  for(const k of ks){ const cc=num(o.attributes[k]); if(cc<0) cap=Math.min(cap, Math.floor((eff(k)+1e-9)/(-cc))); }
+  return cap===Infinity?Infinity:Math.max(0,cap); }
 function add(nm,d=1){
+  if(d>1){ const _cap=maxAddable(DATA.outfits[nm]); if(_cap<d){ d=Math.max(0,_cap); if(d===0){ beep(); showToast("Outfit limit reached"); return; } showToast("Added "+d+" (limit reached)"); } else { showToast("Added "+d); } }
   if(d>0){
     const blocked=limitBlocked(DATA.outfits[nm], d);
     if(blocked){ beep(); showToast("Outfit Limit Reached \u2014 "+blocked); return; }
@@ -2392,8 +2403,8 @@ function init(){
     const c=b.dataset.cat; state.openCat=(state.openCat===c?"":c); state.cat=c; state.series="All"; renderCatbar(); renderCatalog(); });
   document.body.addEventListener("click",e=>{
     const inc=e.target.closest("[data-inc]"), dec=e.target.closest("[data-dec]"), det=e.target.closest("[data-detail]");
-    if(inc){ add(inc.dataset.inc, +1); }
-    else if(dec){ add(dec.dataset.dec, -1); }
+    if(inc){ add(inc.dataset.inc, +clickMult(e)); }
+    else if(dec){ add(dec.dataset.dec, -clickMult(e)); }
     else if(det){ openDetail(det.dataset.detail); }
   });
   el("drawerX").addEventListener("click",()=>el("drawer").classList.remove("open"));
@@ -2405,7 +2416,7 @@ function init(){
   document.body.addEventListener("dragstart",e=>{ const oc=e.target.closest('.ocard'), sc=e.target.closest('.shipcell'); if(oc){ e.dataTransfer.setData("text/plain","o:"+oc.dataset.name); document.body.classList.add("dnd"); } else if(sc){ e.dataTransfer.setData("text/plain","s:"+sc.dataset.ship); document.body.classList.add("dnd"); } });
   document.body.addEventListener("dragend",()=>document.body.classList.remove("dnd"));
   document.addEventListener("dragover",e=>{ if(document.body.classList.contains("dnd") && !e.target.closest('.se-dock')) e.preventDefault(); });
-  document.addEventListener("drop",e=>{ if(!document.body.classList.contains("dnd")) return; document.body.classList.remove("dnd"); if(e.target.closest('.se-dock')) return; e.preventDefault(); const d=e.dataTransfer.getData("text/plain"); if(!d) return; if(d[0]==="o"){ const nm=d.slice(2); if(DATA.outfits[nm]) add(nm,1); } else if(d[0]==="s"){ const nm=d.slice(2); if(DATA.ships[nm]) setShip(nm); } });
+  document.addEventListener("drop",e=>{ if(!document.body.classList.contains("dnd")) return; document.body.classList.remove("dnd"); if(e.target.closest('.se-dock')) return; e.preventDefault(); const d=e.dataTransfer.getData("text/plain"); if(!d) return; if(d[0]==="o"){ const nm=d.slice(2); if(DATA.outfits[nm]) add(nm,clickMult(e)); } else if(d[0]==="s"){ const nm=d.slice(2); if(DATA.ships[nm]) setShip(nm); } });
   loadFromHash();
   setTimeout(()=>{ if(!state.ship)return; if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else{renderCatbar();renderCatalog();} renderLoadout(); },60);
 }
