@@ -11,6 +11,9 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.35 — 2026-06-13
+- More vertical spacing between hardpoint labels so two-line labels no longer overlap / crowd.
+
 ### v0.5.34 — 2026-06-13
 - Max Cargo / Max Crew presets now build a functional ship: they add a reactor and cooling (so the
   hull has power and stays cool) before maximising cargo/crew, instead of leaving it power-starved.

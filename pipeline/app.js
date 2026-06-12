@@ -326,10 +326,18 @@ function drawHardpoints(){
   let L=labels.filter(l=>l.side==='L').length, R=labels.filter(l=>l.side==='R').length;
   labels.filter(l=>!l.side).sort((a,b)=>a.y-b.y).forEach(l=>{ if(L<=R){l.side='L';L++;}else{l.side='R';R++;} });
   labels.forEach(l=>{ l.left=l.side==='L'; l.lx=l.left?4:SW-4; l.anchor=l.left?'start':'end'; });
+  // stack each side, spacing by how far each label extends above/below its anchor (2-line labels are taller),
+  // so a clear gap is kept between every pair regardless of 1- vs 2-line mix
+  const ext=l=>wrap(l.label).length>1?11:6;   // half-height of the label around its anchor
   for(const side of ['L','R']){
     const arr=labels.filter(l=>l.side===side).sort((a,b)=>a.y-b.y);
-    let prev=8; for(const l of arr){ const h=wrap(l.label).length>1?19:11; l.ly=Math.max(l.y, prev); prev=l.ly+h; }
-    const over=prev-(SH-4); if(over>0){ for(const l of arr) l.ly=Math.max(8, l.ly-over); }
+    const pos=arr.map(l=>l.y);
+    for(let i=1;i<pos.length;i++){ const need=ext(arr[i-1])+ext(arr[i])+4; if(pos[i]<pos[i-1]+need) pos[i]=pos[i-1]+need; }
+    if(pos.length){ const SHb=SH-4;
+      const bottom=pos[pos.length-1]+ext(arr[arr.length-1]); if(bottom>SHb){ const d=bottom-SHb; for(let i=0;i<pos.length;i++) pos[i]-=d; }
+      const top=pos[0]-ext(arr[0]); if(top<6){ const d=6-top; for(let i=0;i<pos.length;i++) pos[i]+=d; }
+    }
+    arr.forEach((l,i)=>l.ly=pos[i]);
   }
   let lab="";
   for(const l of labels){
