@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.45 — 2026-06-13
+- Added a Credits section in Settings: built on Endless Sky (code GPLv3, art mostly CC-BY-SA-4.0),
+  with a note that Drydock is an unaffiliated fan tool.
+
 ### v0.5.44 — 2026-06-13
 - Planet page: landscape image cropped to 16:9, with two squares beside it - the planet's actual
   map sprite (orbiting body) and a faction square in the owning government's colour. (Endless Sky
