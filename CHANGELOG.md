@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.49 — 2026-06-13
+- Removed the Buy Me a Coffee link from the credits modal (it lives only on the header coffee button).
+- Tech tier (Human / First contact / Deep space / All) now also gates the New Ship picker, the
+  galaxy map systems and links, the planets browser, and the system/planet sold lists, so spoiler
+  factions and locations are hidden until the tier is raised.
+
 ### v0.5.48 — 2026-06-13
 - Ship-card name can no longer be truncated: removed the ellipsis and re-fit the auto-shrink when the
   Ship Editor becomes visible (it was leaving the name at 30px when rendered while hidden).

@@ -19,6 +19,12 @@ const TIER = {
   wanderer:2, korath:2, remnant:2, coalition:2,
 };   // everything else => 3
 const factionTier = f => (f in TIER) ? TIER[f] : 3;
+function govTier(g){ if(!g) return 0; const s=(""+g).toLowerCase();
+  if(s==="uninhabited") return 0;
+  if(/republic|syndicate|free worlds|pirate|militia|merchant|neutral|bounty|independent|navy/.test(s)) return 0;
+  if(/hai|quarg|pug|unfettered/.test(s)) return 1;
+  if(/wanderer|korath|remnant|coalition/.test(s)) return 2;
+  return 3; }
 const FACLABEL = f => (f||"").replace(/(^|\s)\w/g,m=>m.toUpperCase());
 const CAT_COLOR = {
   "Guns":"var(--gun)","Turrets":"var(--turret)","Secondary Weapons":"#5fd0ff",
@@ -869,6 +875,7 @@ function shipsByFaction(){
   for(const s of Object.values(DATA.ships)){
     if(!state.showUnreleased && !s.obtainable) continue;
     if(!s.thumbnail) continue;                                  // no photo -> hide from picker
+    if(factionTier(s.faction)>state.tier) continue;             // respect the tech tier
     if(MODEL_RE.test(s.displayName||s.name)||MODEL_RE.test(s.name)) continue;  // "Model 8/16/.." automata
     (byFac[s.faction] ||= []).push(s);
   }
@@ -1056,7 +1063,7 @@ function init(){
     state.tier=+b.dataset.tier;
     document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",x===b));
     renderPartsFac(); renderCatbar(); renderCatalog(); renderPickerFac(); renderPickerGrid();
-    if(state.info==="shop")renderShop(); if(state.info==="yard")renderYard();});
+    if(state.info==="shop")renderShop(); if(state.info==="yard")renderYard(); if(state.info==="map")renderGalaxyMap(); if(state.info==="planets")renderPlanets();});
   el("search").addEventListener("input",e=>{state.q=e.target.value;state.catPage=0;renderCatalog();});
   el("catbar").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; state.catPage=0;
     if(b.classList.contains("subrow")){ state.cat=b.dataset.cat; state.series=b.dataset.series; renderCatbar(); renderCatalog(); return; }
@@ -1101,7 +1108,7 @@ function mapZoom(f,cx,cy){ const vb=state.mapVB, b=state._mapBounds; if(!vb||!b)
   vb[0]=cx-(cx-vb[0])*(nw/vb[2]); vb[1]=cy-(cy-vb[1])*(nh/vb[3]); vb[2]=nw; vb[3]=nh; mapSetVB(); }
 function renderGalaxyMap(){
   const cv=el("mapCanvas"); if(!cv) return;
-  const SYS=DATA.systems||{}; const names=Object.keys(SYS).filter(n=>Array.isArray(SYS[n].pos));
+  const SYS=DATA.systems||{}; const names=Object.keys(SYS).filter(n=>Array.isArray(SYS[n].pos) && govTier(SYS[n].government)<=state.tier);
   if(!names.length){ cv.innerHTML='<div class="map-empty">No system data available.</div>'; return; }
   // fit to the bulk (2nd-98th percentile) so a few far-flung systems don't shrink the whole galaxy
   const xs=names.map(n=>SYS[n].pos[0]).sort((a,b)=>a-b), ys=names.map(n=>SYS[n].pos[1]).sort((a,b)=>a-b);
@@ -1111,7 +1118,7 @@ function renderGalaxyMap(){
   const bw=Math.max(1,maxX-minX), bh=Math.max(1,maxY-minY); state._mapBounds=[minX,minY,bw,bh];
   const r=Math.max(bw,bh)/320;
   const seen=new Set(); let lines="";
-  for(const n of names){ const a=SYS[n]; for(const ln of (a.links||[])){ const b=SYS[ln]; if(!b||!Array.isArray(b.pos))continue; const k=n<ln?n+"|"+ln:ln+"|"+n; if(seen.has(k))continue; seen.add(k); lines+='<line x1="'+a.pos[0]+'" y1="'+a.pos[1]+'" x2="'+b.pos[0]+'" y2="'+b.pos[1]+'"/>'; } }
+  for(const n of names){ const a=SYS[n]; for(const ln of (a.links||[])){ const b=SYS[ln]; if(!b||!Array.isArray(b.pos)||govTier(b.government)>state.tier)continue; const k=n<ln?n+"|"+ln:ln+"|"+n; if(seen.has(k))continue; seen.add(k); lines+='<line x1="'+a.pos[0]+'" y1="'+a.pos[1]+'" x2="'+b.pos[0]+'" y2="'+b.pos[1]+'"/>'; } }
   let nodes="";
   for(const n of names){ const s=SYS[n]; const nm=esc(n); const dn=n.replace(/"/g,'&quot;');
     nodes+='<g class="sysnode" data-sys="'+dn+'"><circle cx="'+s.pos[0]+'" cy="'+s.pos[1]+'" r="'+r.toFixed(2)+'" fill="'+govColor(s.government)+'"/><text class="syslabel" x="'+s.pos[0]+'" y="'+s.pos[1]+'">'+nm+'</text></g>'; }
@@ -1125,9 +1132,9 @@ function mapSelect(name){ const SYS=DATA.systems||{}; if(!SYS[name]) return; sta
   renderSystemDetail(name); }
 function renderSystemDetail(name){ const box=el("mapDetail"); if(!box) return; const s=(DATA.systems||{})[name]; if(!s){ box.innerHTML=""; return; }
   const inSys=l=>l&&l.system===name;
-  const ofs=Object.values(DATA.outfits).filter(o=>(o.soldAt||[]).some(inSys)).map(o=>o.name).sort();
-  const shps=Object.values(DATA.ships).filter(sh=>(sh.soldAt||[]).some(inSys)).map(sh=>sh.displayName||sh.name).sort();
-  const links=(s.links||[]).filter(l=>(DATA.systems||{})[l]);
+  const ofs=Object.values(DATA.outfits).filter(o=>factionTier(o.faction)<=state.tier&&(o.soldAt||[]).some(inSys)).map(o=>o.name).sort();
+  const shps=Object.values(DATA.ships).filter(sh=>factionTier(sh.faction)<=state.tier&&(sh.soldAt||[]).some(inSys)).map(sh=>sh.displayName||sh.name).sort();
+  const links=(s.links||[]).filter(l=>(DATA.systems||{})[l] && govTier((DATA.systems||{})[l].government)<=state.tier);
   const chip=t=>'<span class="md-chip">'+esc(t)+'</span>';
   const lchip=t=>'<button class="md-chip md-link" data-sys-link="'+t.replace(/"/g,'&quot;')+'">'+esc(t)+'</button>';
   const pchip=t=>'<button class="md-chip md-link" data-go-planet="'+t.replace(/"/g,'&quot;')+'">'+esc(t)+'</button>';
@@ -1154,13 +1161,13 @@ function planetIndex(){ if(_planetIdx) return _planetIdx;
   for(const [sn,s] of Object.entries(DATA.systems||{})){ for(const p of (s.planets||[])){ if(!(p in sysOf)){ sysOf[p]=sn; gov[p]=s.government; } } }
   const ofs={}, shp={};
   for(const o of Object.values(DATA.outfits)) for(const l of (o.soldAt||[])){ if(l.planet){ (ofs[l.planet]=ofs[l.planet]||[]).push(o.name); if(!(l.planet in sysOf)) sysOf[l.planet]=l.system; } }
-  for(const s of Object.values(DATA.ships)) for(const l of (s.soldAt||[])){ if(l.planet){ (shp[l.planet]=shp[l.planet]||[]).push(s.displayName||s.name); if(!(l.planet in sysOf)) sysOf[l.planet]=l.system; } }
+  for(const s of Object.values(DATA.ships)) for(const l of (s.soldAt||[])){ if(l.planet){ (shp[l.planet]=shp[l.planet]||[]).push(s.name); if(!(l.planet in sysOf)) sysOf[l.planet]=l.system; } }
   const land=DATA.planetLand||{}, sprite=DATA.planetSprite||{};
   const list=Object.keys(sysOf).sort((a,b)=>a.localeCompare(b));
   _planetIdx={sysOf,gov,ofs,shp,land,sprite,list}; return _planetIdx; }
 function renderPlanets(){ const idx=planetIndex(); const rail=el("planetRail"); if(!rail) return;
   const q=(state.planetQ||"").toLowerCase();
-  const list=idx.list.filter(p=>!q||p.toLowerCase().includes(q)||(idx.sysOf[p]||"").toLowerCase().includes(q));
+  const list=idx.list.filter(p=>govTier(idx.gov[p])<=state.tier && (!q||p.toLowerCase().includes(q)||(idx.sysOf[p]||"").toLowerCase().includes(q)));
   rail.innerHTML=list.length?list.map(p=>'<button data-planet="'+p.replace(/"/g,'&quot;')+'"'+(p===state.planetSel?' aria-pressed="true"':'')+'><span class="st-pl">'+esc(p)+'</span> <span class="st-sy">'+esc(idx.sysOf[p]||'')+'</span></button>').join(""):'<div class="map-hint">No planets match.</div>';
   if(!list.length){ el("planetDetail").innerHTML='<div class="map-hint">No planets match.</div>'; }
   else if(!state.planetSel || !list.includes(state.planetSel)) renderPlanetDetail(list[0]);
@@ -1170,7 +1177,8 @@ function renderPlanetDetail(p){ const idx=planetIndex(); const box=el("planetDet
   document.querySelectorAll('#planetRail button[aria-pressed]').forEach(b=>b.removeAttribute('aria-pressed'));
   const rb=document.querySelector('#planetRail button[data-planet="'+p.replace(/"/g,'&quot;')+'"]'); if(rb) rb.setAttribute('aria-pressed','true');
   const sys=idx.sysOf[p], g=idx.gov[p];
-  const ofs=(idx.ofs[p]||[]).slice().sort((a,b)=>a.localeCompare(b)), shp=(idx.shp[p]||[]).slice().sort((a,b)=>a.localeCompare(b));
+  const ofs=(idx.ofs[p]||[]).filter(n=>factionTier(DATA.outfits[n]&&DATA.outfits[n].faction)<=state.tier).sort((a,b)=>a.localeCompare(b));
+  const shp=(idx.shp[p]||[]).filter(n=>factionTier(DATA.ships[n]&&DATA.ships[n].faction)<=state.tier).map(n=>(DATA.ships[n]&&DATA.ships[n].displayName)||n).sort((a,b)=>a.localeCompare(b));
   const chip=t=>'<span class="md-chip">'+esc(t)+'</span>';
   const sect=(title,arr)=> arr.length?'<div class="md-sect"><div class="md-h">'+title+' <b>'+arr.length+'</b></div><div class="md-list">'+arr.map(chip).join("")+'</div></div>':"";
   const goSys=sys?'<button class="md-chip md-link" data-go-sys="'+sys.replace(/"/g,'&quot;')+'">'+esc(sys)+' ↗ map</button>':"";
