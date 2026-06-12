@@ -172,7 +172,6 @@ function renderMeters(){
     row("Hull",v(`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair):""}`));
 
   el("ehPills").innerHTML =
-    `<div class="strow eh-head"><span class="lbl"></span><span class="vals"><b class="val mono en">E</b><b class="val mono ht">H</b></span></div>`+
     row("Idle",v(FMT(s.eh.idle[0]),"en"),v(FMT(s.eh.idle[1]),"ht"))+
     row("Moving",v(FMT(s.eh.moving[0]),"en"),v(FMT(s.eh.moving[1]),"ht"))+
     row("Firing",v(FMT(s.eh.firing[0]),"en"),v(FMT(s.eh.firing[1]),"ht"))+
@@ -605,18 +604,18 @@ function _expansionOutfit(){   // an outfit that trades cargo space for outfit s
     if(os>0 && cs<0){ const r=os/(-cs); if(r>bs){ bs=r; best=o; } } }
   return best;
 }
-function _addSmallest(attr, cat){   // smallest real outfit providing attr>0 (optionally restricted to a category)
-  let best=null, bsp=1e9;
-  for(const o of _eligibleOutfits()){ if(cat && o.category!==cat) continue; if(num(o.attributes[attr])>0){ const sp=Math.abs(num(o.attributes["outfit space"]))||1; if(sp<bsp && !limitBlocked(o,1)){ bsp=sp; best=o; } } }
+function _addSmallest(attr, cat){   // prefer the most accessible (lowest-tier) basic outfit providing attr>0, then smallest footprint
+  let best=null, bs=1e18;
+  for(const o of _eligibleOutfits()){ if(cat && o.category!==cat) continue; if(num(o.attributes[attr])>0 && !limitBlocked(o,1)){ const sp=Math.abs(num(o.attributes["outfit space"]))||1; const score=factionTier(o.faction)*100000+sp; if(score<bs){ bs=score; best=o; } } }
   if(best){ state.installed[best.name]=(state.installed[best.name]||0)+1; return true; }
   return false;
 }
-function _balancePowerHeat(){   // add a reactor / passive cooling until the hull can run & stay cool
+function _balancePowerHeat(){   // add a basic generator / cooler until the hull can run & stay cool
   let g=400;
   while(g-->0){ const s=computeStats();
     if(s.energyOK && s.heatOK) break;
-    if(!s.energyOK && _addBest(o=>_perSpace(o,"energy generation"))) continue;
-    if(!s.heatOK && _addBest(o=>_perSpace(o,"cooling"))) continue;
+    if(!s.energyOK && _addSmallest("energy generation","Power")) continue;
+    if(!s.heatOK && _addSmallest("cooling")) continue;
     break;   // nothing left that fits
   }
 }
@@ -625,7 +624,9 @@ function computeAutoFill(kind){
   // 1) smallest thruster + steering so the hull can move (and both always fit, leaving room for the rest)
   _addSmallest("thrust","Engines");
   _addSmallest("turn","Engines");
-  // 2) reactor + cooling so it has power and doesn't overheat (reserve this space first)
+  // 2) a basic generator + a capacitor buffer, then top up just enough to stay powered & cool
+  _addSmallest("energy generation","Power");
+  _addSmallest("energy capacity","Power");
   _balancePowerHeat();
   // 3) fill the remaining outfit space maximising the chosen stat
   let guard=8000;
@@ -961,6 +962,7 @@ function setInfo(v){ state.info=v||""; const sec=el("viewInfoSec"); if(sec) sec.
   if(state.info==="shop"){ renderShop(); const s=el("shopSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
   else if(state.info==="yard"){ renderYard(); const s=el("yardSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
   else if(state.info==="map"){ renderGalaxyMap(); }
+  else if(state.info==="planets"){ renderPlanets(); const s=el("planetSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
   try{ localStorage.setItem("drydock-info",state.info); }catch(e){} }
 function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
 function openShipPicker(){ togglePanel("ship"); }
@@ -1034,6 +1036,7 @@ function init(){
   el("openOutfitters").addEventListener("click",()=>setInfo("shop"));
   el("openShipyards").addEventListener("click",()=>setInfo("yard"));
   el("openMap").addEventListener("click",()=>setInfo("map"));
+  el("openPlanets").addEventListener("click",()=>setInfo("planets"));
   el("viewInfoSec").addEventListener("click",e=>{ if(e.target.closest("[data-info-back]")) setInfo(""); });
   el("shopRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.shopPage+=pg.dataset.pg==="next"?1:-1;renderShop();return;}const b=e.target.closest("[data-station]");if(b){state.shopStation=b.dataset.station;renderShop();}});
   el("yardRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.yardPage+=pg.dataset.pg==="next"?1:-1;renderYard();return;}const b=e.target.closest("[data-station]");if(b){state.yardStation=b.dataset.station;renderYard();}});
@@ -1132,3 +1135,38 @@ function _wireMap(){ if(_mapWired) return; _mapWired=true; const cv=el("mapCanva
   const ctr=document.querySelector('#infoMap .map-ctrls'); if(ctr) ctr.addEventListener("click",e=>{ const b=e.target.closest("[data-mapzoom]"); if(!b) return; const a=b.dataset.mapzoom; if(a==="in")mapZoom(0.8); else if(a==="out")mapZoom(1.25); else mapFit(); });
   const ms=el("mapSearch"); if(ms) ms.addEventListener("input",e=>{ const q=e.target.value.trim().toLowerCase(); if(!q)return; const SYS=DATA.systems||{}; const hit=Object.keys(SYS).find(n=>n.toLowerCase()===q)||Object.keys(SYS).find(n=>n.toLowerCase().includes(q)); if(hit&&Array.isArray(SYS[hit].pos)){ const p=SYS[hit].pos, b=state._mapBounds; const w=b[2]/12, h=w*(b[3]/b[2]); state.mapVB=[p[0]-w/2,p[1]-h/2,w,h]; mapSetVB(); mapSelect(hit); } });
 }
+
+/* ---------- planets browser ---------- */
+function mapGoto(name){ const SYS=DATA.systems||{}; if(!SYS[name]||!Array.isArray(SYS[name].pos)) return; setInfo("map");
+  requestAnimationFrame(()=>{ if(!state._mapBounds) return; const p=SYS[name].pos, b=state._mapBounds, w=b[2]/12, h=w*(b[3]/b[2]); state.mapVB=[p[0]-w/2,p[1]-h/2,w,h]; mapSetVB(); mapSelect(name); }); }
+let _planetIdx=null, _planetsWired=false;
+function planetIndex(){ if(_planetIdx) return _planetIdx;
+  const sysOf={}, gov={};
+  for(const [sn,s] of Object.entries(DATA.systems||{})){ for(const p of (s.planets||[])){ if(!(p in sysOf)){ sysOf[p]=sn; gov[p]=s.government; } } }
+  const ofs={}, shp={};
+  for(const o of Object.values(DATA.outfits)) for(const l of (o.soldAt||[])){ if(l.planet){ (ofs[l.planet]=ofs[l.planet]||[]).push(o.name); } }
+  for(const s of Object.values(DATA.ships)) for(const l of (s.soldAt||[])){ if(l.planet){ (shp[l.planet]=shp[l.planet]||[]).push(s.displayName||s.name); } }
+  const list=[...new Set([...Object.keys(ofs),...Object.keys(shp)])].sort((a,b)=>a.localeCompare(b));
+  _planetIdx={sysOf,gov,ofs,shp,list}; return _planetIdx; }
+function renderPlanets(){ const idx=planetIndex(); const rail=el("planetRail"); if(!rail) return;
+  const q=(state.planetQ||"").toLowerCase();
+  const list=idx.list.filter(p=>!q||p.toLowerCase().includes(q)||(idx.sysOf[p]||"").toLowerCase().includes(q));
+  rail.innerHTML=list.length?list.map(p=>'<button data-planet="'+p.replace(/"/g,'&quot;')+'"'+(p===state.planetSel?' aria-pressed="true"':'')+'><span class="st-pl">'+esc(p)+'</span> <span class="st-sy">'+esc(idx.sysOf[p]||'')+'</span></button>').join(""):'<div class="map-hint">No planets match.</div>';
+  if(!list.length){ el("planetDetail").innerHTML='<div class="map-hint">No planets match.</div>'; }
+  else if(!state.planetSel || !list.includes(state.planetSel)) renderPlanetDetail(list[0]);
+  else renderPlanetDetail(state.planetSel);
+  _wirePlanets(); }
+function renderPlanetDetail(p){ const idx=planetIndex(); const box=el("planetDetail"); if(!box) return; state.planetSel=p;
+  document.querySelectorAll('#planetRail button[aria-pressed]').forEach(b=>b.removeAttribute('aria-pressed'));
+  const rb=document.querySelector('#planetRail button[data-planet="'+p.replace(/"/g,'&quot;')+'"]'); if(rb) rb.setAttribute('aria-pressed','true');
+  const sys=idx.sysOf[p], g=idx.gov[p];
+  const ofs=(idx.ofs[p]||[]).slice().sort((a,b)=>a.localeCompare(b)), shp=(idx.shp[p]||[]).slice().sort((a,b)=>a.localeCompare(b));
+  const chip=t=>'<span class="md-chip">'+esc(t)+'</span>';
+  const sect=(title,arr)=> arr.length?'<div class="md-sect"><div class="md-h">'+title+' <b>'+arr.length+'</b></div><div class="md-list">'+arr.map(chip).join("")+'</div></div>':"";
+  const goSys=sys?'<button class="md-chip md-link" data-go-sys="'+sys.replace(/"/g,'&quot;')+'">'+esc(sys)+' ↗ map</button>':"";
+  box.innerHTML='<div class="md-head"><div class="md-nm">'+esc(p)+'</div><div class="md-gov" style="color:'+govColor(g)+'">'+esc(g||"Uninhabited")+'</div>'+(goSys?'<div class="md-golink">'+goSys+'</div>':'')+'</div>'+
+    sect("Ships sold",shp)+sect("Outfits sold",ofs); }
+function _wirePlanets(){ if(_planetsWired) return; _planetsWired=true;
+  el("planetRail").addEventListener("click",e=>{ const b=e.target.closest("[data-planet]"); if(b) renderPlanetDetail(b.dataset.planet); });
+  el("planetDetail").addEventListener("click",e=>{ const b=e.target.closest("[data-go-sys]"); if(b) mapGoto(b.dataset.goSys); });
+  el("planetSearch").addEventListener("input",e=>{ state.planetQ=e.target.value; renderPlanets(); }); }

@@ -93,7 +93,7 @@
           </div>
           <div class="sc-bot">
             <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
-            <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="mono dim">/s</span></div><div class="statpills" id="ehPills"></div></div>
+            <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="ehhdr"><b class="val en">E</b><b class="val ht">H</b></span></div><div class="statpills" id="ehPills"></div></div>
           </div>
           <div class="presetgrid" id="presetGrid">
             <button class="pbtn" data-load="empty">Empty Hull</button>
@@ -219,6 +219,13 @@
   <section class="view view-info" id="viewInfoSec" data-info="">
     <div class="info-deck" id="infoHome">
       <div class="info-section">
+        <div class="eyebrow">Galaxy</div>
+        <div class="info-cards">
+          <button class="infocard" id="openMap"><h3>Galaxy Map</h3><p>Explore systems, hyperlanes &amp; where things are sold.</p></button>
+          <button class="infocard" id="openPlanets"><h3>Planets</h3><p>Browse planets and what each one sells.</p></button>
+        </div>
+      </div>
+      <div class="info-section">
         <div class="eyebrow">Stations</div>
         <div class="info-cards">
           <button class="infocard" id="openOutfitters"><h3>Outfitters</h3><p>Browse every station and the outfits it sells.</p></button>
@@ -226,15 +233,9 @@
         </div>
       </div>
       <div class="info-section">
-        <div class="eyebrow">Galaxy</div>
-        <div class="info-cards">
-          <button class="infocard" id="openMap"><h3>Galaxy Map</h3><p>Explore systems, hyperlanes &amp; where things are sold.</p></button>
-        </div>
-      </div>
-      <div class="info-section">
         <div class="eyebrow">Coming soon</div>
         <div class="info-cards">
-          <div class="infocard soon"><h3>Ship &amp; Outfit Wiki</h3><p>Searchable reference for every hull and outfit.</p></div>
+          <div class="infocard soon"><h3>Starport Events</h3><p>Spaceport news &amp; events per planet.</p></div>
           <div class="infocard soon"><h3>Quest Tracker</h3><p>Needs mission data to be parsed first.</p></div>
         </div>
       </div>
@@ -250,6 +251,18 @@
       <div class="map-wrap">
         <div class="map-canvas" id="mapCanvas"></div>
         <div class="map-detail" id="mapDetail"><div class="map-hint">Click a system to see its planets and what's sold there. Drag to pan, scroll to zoom.</div></div>
+      </div>
+    </div>
+
+    <div class="info-tool" id="infoPlanets">
+      <div class="info-toolhead">
+        <button class="backbtn" data-info-back>← Information Deck</button>
+        <span class="sp-title">Planets</span>
+        <input type="search" id="planetSearch" placeholder="Find planet…" autocomplete="off">
+      </div>
+      <div class="sp-body">
+        <div class="sp-rail" id="planetRail"></div>
+        <div class="map-detail" id="planetDetail"><div class="map-hint">Select a planet to see its system and what's sold there.</div></div>
       </div>
     </div>
 
@@ -302,7 +315,7 @@
     <label>Content</label>
     <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.38 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.39 · ES data v<span id="ver"></span></div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>

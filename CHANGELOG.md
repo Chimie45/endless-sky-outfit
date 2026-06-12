@@ -11,6 +11,14 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.39 — 2026-06-13
+- Max Cargo / Max Crew auto-fill now uses a basic generator (e.g. nGVF-AA Fuel Cell) plus a
+  Supercapacitor instead of the most energy-dense reactor (no more Armageddon Core).
+- Energy & Heat: E and H are back in the section heading, aligned over their columns (not a row).
+- Information Deck reorganised: Galaxy, Planets, Outfitters, Shipyards, then Starport Events and
+  Quest Tracker (coming soon). Removed the Wiki. Added a Planets browser (planet -> system,
+  government, and the ships/outfits sold there, with a jump-to-map link).
+
 ### v0.5.38 — 2026-06-13
 - Galaxy Map added to the Information Deck: 708 systems plotted by position, hyperlane links,
   colored by government, with pan/zoom, search, and a detail panel (planets, links, and which
