@@ -463,11 +463,11 @@ function statChips(o){
   if(a["outfit space"]<0) chips.push(`<span class="chip">Outfit ${FMT(Math.abs(a["outfit space"]))}</span>`);
   return chips.join("");
 }
-function ocardHTML(o){
+function ocardHTML(o, browse){
   const n=o.name.replace(/"/g,'&quot;');
-  return `<div class="ocard" draggable="true" data-name="${n}">
+  return `<div class="ocard${browse?' browse':''}"${browse?'':' draggable="true"'} data-name="${n}">
       <div class="art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
-      <button class="addbtn" data-inc="${n}">+</button>
+      ${browse?'':`<button class="addbtn" data-inc="${n}">+</button>`}
       <div class="meta">
         <b data-detail="${n}" title="${o.name}">${o.name}</b>
         <div class="chips">${statChips(o)}</div>
@@ -899,11 +899,11 @@ function renderPickerGrid(){
   const per=_fitCount("pickerGrid",128,140,12), pages=Math.max(1,Math.ceil(list.length/per));
   state.pickPage=_clampPage(state.pickPage,pages);
   const pgi=list.slice(state.pickPage*per,(state.pickPage+1)*per);
-  el("pickerGrid").innerHTML = pgi.length ? pgi.map(shipcellHTML).join("") : `<div class="empty">No ships match.</div>`;
+  el("pickerGrid").innerHTML = pgi.length ? pgi.map(s=>shipcellHTML(s)).join("") : `<div class="empty">No ships match.</div>`;
   el("pickerGridPager").innerHTML=_pg(state.pickPage,pages);
 }
-function shipcellHTML(s){
-  return `<button class="shipcell ${state.ship&&state.ship.name===s.name?'sel':''}" draggable="true" data-ship="${s.name.replace(/"/g,'&quot;')}" title="${s.displayName||s.name}">
+function shipcellHTML(s, browse){
+  return `<button class="shipcell ${!browse&&state.ship&&state.ship.name===s.name?'sel':''}"${browse?'':' draggable="true"'} ${browse?'data-shipinfo':'data-ship'}="${s.name.replace(/"/g,'&quot;')}" title="${s.displayName||s.name}">
       <div class="sc-art">${artTile(s.thumbnail||s.sprite, mono2(s.displayName||s.name), "var(--accent)")}</div>
       <div class="sc-nm">${s.displayName||s.name}</div>
       <div class="sc-cat">${s.category}</div>
@@ -929,7 +929,7 @@ function renderShop(){
   const sPage=st.slice(state.shopPage*PER,(state.shopPage+1)*PER);
   el("shopRail").innerHTML = st.length? sPager+sPage.map(k=>`<button data-station="${k.replace(/"/g,'&quot;')}" title="${k.replace(/"/g,'&quot;')}" aria-pressed="${k===state.shopStation}">${stLabel(k)}</button>`).join("") : `<div class="empty">No stations match.</div>`;
   const items=(map[state.shopStation]||[]).filter(elig).sort((a,b)=>a.cost-b.cost||a.name.localeCompare(b.name));
-  el("shopGrid").innerHTML = items.length? items.map(o=>ocardHTML(o)).join("") : `<div class="empty">Nothing here at this tech level.</div>`;
+  el("shopGrid").innerHTML = items.length? items.map(o=>ocardHTML(o,true)).join("") : `<div class="empty">Nothing here at this tech level.</div>`;
 }
 function renderYard(){
   const map=buildYardMap(), elig=s=>(state.showUnreleased||s.obtainable)&&factionTier(s.faction)<=state.tier;
@@ -942,7 +942,7 @@ function renderYard(){
   const yPage=st.slice(state.yardPage*PER,(state.yardPage+1)*PER);
   el("yardRail").innerHTML = st.length? yPager+yPage.map(k=>`<button data-station="${k.replace(/"/g,'&quot;')}" title="${k.replace(/"/g,'&quot;')}" aria-pressed="${k===state.yardStation}">${stLabel(k)}</button>`).join("") : `<div class="empty">No stations match.</div>`;
   const ships=(map[state.yardStation]||[]).filter(elig).sort((a,b)=>(a.attributes.cost||0)-(b.attributes.cost||0)||(a.displayName||a.name).localeCompare(b.displayName||b.name));
-  el("yardGrid").innerHTML = ships.length? ships.map(shipcellHTML).join("") : `<div class="empty">No ships sold here at this tech level.</div>`;
+  el("yardGrid").innerHTML = ships.length? ships.map(s=>shipcellHTML(s,true)).join("") : `<div class="empty">No ships sold here at this tech level.</div>`;
 }
 
 function setTheme(t){
@@ -1040,7 +1040,7 @@ function init(){
   el("viewInfoSec").addEventListener("click",e=>{ if(e.target.closest("[data-info-back]")) setInfo(""); });
   el("shopRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.shopPage+=pg.dataset.pg==="next"?1:-1;renderShop();return;}const b=e.target.closest("[data-station]");if(b){state.shopStation=b.dataset.station;renderShop();}});
   el("yardRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.yardPage+=pg.dataset.pg==="next"?1:-1;renderYard();return;}const b=e.target.closest("[data-station]");if(b){state.yardStation=b.dataset.station;renderYard();}});
-  el("yardGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(b){setShip(b.dataset.ship);renderYard();}});
+  el("yardGrid").addEventListener("click",e=>{const b=e.target.closest("[data-shipinfo]");if(b){openShipInfo(b.dataset.shipinfo);}});
   el("shopSearch").addEventListener("input",e=>{state.shopQ=e.target.value;state.shopPage=0;renderShop();});
   el("yardSearch").addEventListener("input",e=>{state.yardQ=e.target.value;state.yardPage=0;renderYard();});
   el("catalogPager").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(b){state.catPage+=b.dataset.pg==="next"?1:-1;renderCatalog();}});
@@ -1127,16 +1127,17 @@ function renderSystemDetail(name){ const box=el("mapDetail"); if(!box) return; c
   const links=(s.links||[]).filter(l=>(DATA.systems||{})[l]);
   const chip=t=>'<span class="md-chip">'+esc(t)+'</span>';
   const lchip=t=>'<button class="md-chip md-link" data-sys-link="'+t.replace(/"/g,'&quot;')+'">'+esc(t)+'</button>';
+  const pchip=t=>'<button class="md-chip md-link" data-go-planet="'+t.replace(/"/g,'&quot;')+'">'+esc(t)+'</button>';
   const sect=(title,arr,fn)=> arr.length?'<div class="md-sect"><div class="md-h">'+title+' <b>'+arr.length+'</b></div><div class="md-list">'+arr.map(fn||chip).join("")+'</div></div>':"";
   box.innerHTML='<div class="md-head"><div class="md-nm">'+esc(name)+'</div><div class="md-gov" style="color:'+govColor(s.government)+'">'+esc(s.government||"Uninhabited")+'</div></div>'+
-    sect("Hyperlanes",links,lchip)+sect("Planets",s.planets||[])+sect("Ships sold",shps)+sect("Outfits sold",ofs); }
+    sect("Hyperlanes",links,lchip)+sect("Planets",s.planets||[],pchip)+sect("Ships sold",shps)+sect("Outfits sold",ofs); }
 let _mapWired=false;
 function _wireMap(){ if(_mapWired) return; _mapWired=true; const cv=el("mapCanvas"); let drag=null;
   cv.addEventListener("mousedown",e=>{ drag={x:e.clientX,y:e.clientY,moved:false}; });
   window.addEventListener("mousemove",e=>{ if(!drag||!state.mapVB) return; const sc=_mapScale(); if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>3) drag.moved=true; state.mapVB[0]-=(e.clientX-drag.x)/sc; state.mapVB[1]-=(e.clientY-drag.y)/sc; drag.x=e.clientX; drag.y=e.clientY; mapSetVB(); });
   window.addEventListener("mouseup",e=>{ if(drag&&!drag.moved){ const g=e.target.closest&&e.target.closest('.sysnode'); if(g) mapSelect(g.dataset.sys); } drag=null; });
   cv.addEventListener("wheel",e=>{ if(!state.mapVB) return; e.preventDefault(); mapZoom(e.deltaY<0?0.82:1.22); },{passive:false});
-  const det=el("mapDetail"); if(det) det.addEventListener("click",e=>{ const b=e.target.closest("[data-sys-link]"); if(b) mapSelect(b.dataset.sysLink); });
+  const det=el("mapDetail"); if(det) det.addEventListener("click",e=>{ const gp=e.target.closest("[data-go-planet]"); if(gp){ goPlanet(gp.dataset.goPlanet); return; } const b=e.target.closest("[data-sys-link]"); if(b) mapSelect(b.dataset.sysLink); });
   const ctr=document.querySelector('#infoMap .map-ctrls'); if(ctr) ctr.addEventListener("click",e=>{ const b=e.target.closest("[data-mapzoom]"); if(!b) return; const a=b.dataset.mapzoom; if(a==="in")mapZoom(0.8); else if(a==="out")mapZoom(1.25); else mapFit(); });
   const ms=el("mapSearch"); if(ms) ms.addEventListener("input",e=>{ const q=e.target.value.trim().toLowerCase(); if(!q)return; const SYS=DATA.systems||{}; const hit=Object.keys(SYS).find(n=>n.toLowerCase()===q)||Object.keys(SYS).find(n=>n.toLowerCase().includes(q)); if(hit&&Array.isArray(SYS[hit].pos)){ const p=SYS[hit].pos, b=state._mapBounds; const w=b[2]/12, h=w*(b[3]/b[2]); state.mapVB=[p[0]-w/2,p[1]-h/2,w,h]; mapSetVB(); mapSelect(hit); } });
 }
@@ -1149,10 +1150,11 @@ function planetIndex(){ if(_planetIdx) return _planetIdx;
   const sysOf={}, gov={};
   for(const [sn,s] of Object.entries(DATA.systems||{})){ for(const p of (s.planets||[])){ if(!(p in sysOf)){ sysOf[p]=sn; gov[p]=s.government; } } }
   const ofs={}, shp={};
-  for(const o of Object.values(DATA.outfits)) for(const l of (o.soldAt||[])){ if(l.planet){ (ofs[l.planet]=ofs[l.planet]||[]).push(o.name); } }
-  for(const s of Object.values(DATA.ships)) for(const l of (s.soldAt||[])){ if(l.planet){ (shp[l.planet]=shp[l.planet]||[]).push(s.displayName||s.name); } }
-  const list=[...new Set([...Object.keys(ofs),...Object.keys(shp)])].sort((a,b)=>a.localeCompare(b));
-  _planetIdx={sysOf,gov,ofs,shp,list}; return _planetIdx; }
+  for(const o of Object.values(DATA.outfits)) for(const l of (o.soldAt||[])){ if(l.planet){ (ofs[l.planet]=ofs[l.planet]||[]).push(o.name); if(!(l.planet in sysOf)) sysOf[l.planet]=l.system; } }
+  for(const s of Object.values(DATA.ships)) for(const l of (s.soldAt||[])){ if(l.planet){ (shp[l.planet]=shp[l.planet]||[]).push(s.displayName||s.name); if(!(l.planet in sysOf)) sysOf[l.planet]=l.system; } }
+  const land=DATA.planetLand||{};
+  const list=Object.keys(sysOf).sort((a,b)=>a.localeCompare(b));
+  _planetIdx={sysOf,gov,ofs,shp,land,list}; return _planetIdx; }
 function renderPlanets(){ const idx=planetIndex(); const rail=el("planetRail"); if(!rail) return;
   const q=(state.planetQ||"").toLowerCase();
   const list=idx.list.filter(p=>!q||p.toLowerCase().includes(q)||(idx.sysOf[p]||"").toLowerCase().includes(q));
@@ -1169,9 +1171,26 @@ function renderPlanetDetail(p){ const idx=planetIndex(); const box=el("planetDet
   const chip=t=>'<span class="md-chip">'+esc(t)+'</span>';
   const sect=(title,arr)=> arr.length?'<div class="md-sect"><div class="md-h">'+title+' <b>'+arr.length+'</b></div><div class="md-list">'+arr.map(chip).join("")+'</div></div>':"";
   const goSys=sys?'<button class="md-chip md-link" data-go-sys="'+sys.replace(/"/g,'&quot;')+'">'+esc(sys)+' ↗ map</button>':"";
-  box.innerHTML='<div class="md-head"><div class="md-nm">'+esc(p)+'</div><div class="md-gov" style="color:'+govColor(g)+'">'+esc(g||"Uninhabited")+'</div>'+(goSys?'<div class="md-golink">'+goSys+'</div>':'')+'</div>'+
+  const land=idx.land[p];
+  const shot=land?'<div class="pd-shot"><img src="images/'+land+'.jpg" alt="" loading="lazy" onerror="var w=this.closest(\'.pd-shot\'); if(w) w.style.display=\'none\'"></div>':"";
+  box.innerHTML=shot+'<div class="md-head"><div class="md-nm">'+esc(p)+'</div><div class="md-gov" style="color:'+govColor(g)+'">'+esc(g||"Uninhabited")+'</div>'+(goSys?'<div class="md-golink">'+goSys+'</div>':'')+'</div>'+
     sect("Ships sold",shp)+sect("Outfits sold",ofs); }
 function _wirePlanets(){ if(_planetsWired) return; _planetsWired=true;
   el("planetRail").addEventListener("click",e=>{ const b=e.target.closest("[data-planet]"); if(b) renderPlanetDetail(b.dataset.planet); });
   el("planetDetail").addEventListener("click",e=>{ const b=e.target.closest("[data-go-sys]"); if(b) mapGoto(b.dataset.goSys); });
   el("planetSearch").addEventListener("input",e=>{ state.planetQ=e.target.value; renderPlanets(); }); }
+
+function goPlanet(name){ state.planetSel=name; state.planetQ=""; const ms=el("planetSearch"); if(ms) ms.value=""; setInfo("planets");
+  requestAnimationFrame(()=>{ const rb=document.querySelector('#planetRail button[data-planet="'+name.replace(/"/g,'&quot;')+'"]'); if(rb) rb.scrollIntoView({block:"center"}); }); }
+function openShipInfo(name){ const sh=DATA.ships[name]; if(!sh) return; const base=sh.displayName||sh.name; let html="";
+  _withBuild({ship:name, outfits:sh.defaultOutfits||{}}, ()=>{
+    const s=computeStats(); const crew=requiredCrew(), bunks=eff("bunks"), mass=eff("mass"); const X=String.fromCharCode(215);
+    const stat=(l,v)=>'<div class="fd-stat"><span>'+l+'</span><b>'+v+'</b></div>';
+    const outs=Object.entries(state.installed).filter(([n,c])=>c>0).sort((a,b)=>b[1]-a[1]);
+    const load=outs.length?outs.map(([n,c])=>'<div class="fd-out"><span>'+esc(DATA.outfits[n]?.displayName||n)+'</span><b>'+X+c+'</b></div>').join(""):'<div class="fd-out fd-out-none">No default outfits</div>';
+    html='<div class="fd-head"><div class="fd-art">'+artTile(sh.thumbnail||sh.sprite, mono2(base), "var(--accent)")+'</div>'+
+      '<div class="fd-id"><div class="fd-fac">'+esc(FACLABEL(sh.faction))+'</div><div class="fd-nm">'+esc(base)+'</div><div class="fd-cat">'+esc(sh.category)+'</div></div></div>'+
+      '<div class="fd-grid">'+stat("Cost",MONEY(s.cost))+stat("Crew",FMT(crew))+stat("Bunks",FMT(bunks))+stat("Cargo",FMT(s.cargo)+" t")+stat("Fuel",FMT(s.fuel))+stat("Mass",FMT(mass)+" t")+stat("Shields",FMT(s.shields))+stat("Hull",FMT(s.hull))+stat("Speed",FMT(s.maxSpeed))+'</div>'+
+      '<div class="fd-loadtitle">Default loadout</div><div class="fd-load">'+load+'</div>';
+  });
+  el("drawerBody").innerHTML=html; el("drawer").classList.add("open"); }

@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.42 — 2026-06-13
+- Planets browser now shows the planet's landscape image (the spaceport view) and lists every
+  planet; clicking a system's planets on the Galaxy Map opens that planet's page.
+- Outfitters and Shipyards in the Information Deck are now browse-only: they no longer add to the
+  build or load ships into the editor. Clicking an outfit shows its details; clicking a ship shows
+  a read-only ship summary.
+
 ### v0.5.41 — 2026-06-13
 - Galaxy map: system dots and names now stay a constant on-screen size when zooming (zoom reveals more
   area instead of inflating the labels), so names are readable at any zoom.

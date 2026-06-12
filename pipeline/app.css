@@ -904,3 +904,11 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 /* v0.5.41: keep galaxy-map dots & labels a constant screen size when zooming */
 .map-svg .sysnode circle{r:var(--dotr,4px);vector-effect:non-scaling-stroke}
 .map-svg .syslabel{font-size:var(--lblsize,8px);transform:translate(var(--lbldx,5px),var(--lbldy,3px))}
+
+/* v0.5.42: planet landscape image + drawer ship-info */
+.pd-shot{border-radius:8px;overflow:hidden;border:1px solid var(--line2);margin-bottom:10px;background:var(--panel2)}
+.pd-shot img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+#drawerBody .fd-head{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+#drawerBody .fd-art{width:72px;height:72px;flex:none}
+#drawerBody .fd-art .tile{width:100%;height:100%;border-radius:8px}
+.ocard.browse{cursor:default}
