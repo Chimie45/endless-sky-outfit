@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.48 — 2026-06-13
+- Ship-card name can no longer be truncated: removed the ellipsis and re-fit the auto-shrink when the
+  Ship Editor becomes visible (it was leaving the name at 30px when rendered while hidden).
+
 ### v0.5.47 — 2026-06-13
 - Removed the source-repo link from the credits modal.
 

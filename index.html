@@ -961,6 +961,9 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 .cm-sect .cm-h{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:6px}
 .cm-panel a{color:var(--accent2);text-decoration:none}
 .cm-panel a:hover{text-decoration:underline;color:var(--bright)}
+
+/* v0.5.48: ship-card name never truncates (no ellipsis; auto-shrink keeps it one line) */
+.shiptitle .nm{overflow:visible;text-overflow:clip}
 </style>
 <div id="app">
 
@@ -1286,7 +1289,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
     <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.47 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.48 · ES data v<span id="ver"></span></div>
 </div>
 
 <div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
@@ -1526,7 +1529,7 @@ function fitShipName(){
   const e=el("hullName"); if(!e||!e.clientWidth) return;   // skip until laid out (avoids stale wide measurement)
   let size=30; e.style.fontSize=size+"px";
   let g=60;
-  while(e.scrollWidth>e.clientWidth+1 && size>9 && g-->0){ size-=0.5; e.style.fontSize=size+"px"; }
+  while(e.scrollWidth>e.clientWidth+1 && size>8 && g-->0){ size-=0.5; e.style.fontSize=size+"px"; }
 }
 function renderShipCard(){
   const ship = state.ship;
@@ -2283,7 +2286,7 @@ function setInfo(v){ state.info=v||""; const sec=el("viewInfoSec"); if(sec) sec.
 function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
 function openShipPicker(){ togglePanel("ship"); }
 function closeShipPicker(){ closePanels(); }
-function setView(v){ document.body.dataset.view=v; try{localStorage.setItem("drydock-view",v);}catch(e){} mountFleet(); if(v==="fleet") renderFleet(); if(v==="ship") requestAnimationFrame(()=>{ renderLoadout(); if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else if(state.dock==="fleet"){renderFleet();}else{renderCatbar();renderCatalog();} }); }
+function setView(v){ document.body.dataset.view=v; try{localStorage.setItem("drydock-view",v);}catch(e){} mountFleet(); if(v==="fleet") renderFleet(); if(v==="ship") requestAnimationFrame(()=>{ if(state.ship) fitShipName(); renderLoadout(); if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else if(state.dock==="fleet"){renderFleet();}else{renderCatbar();renderCatalog();} }); }
 function mountFleet(){ const fp=el("fleetPanel"); if(!fp) return; const target=(document.body.dataset.view==="ship" && state.dock==="fleet") ? el("dockFleetPane") : el("viewFleetSec"); if(target && fp.parentElement!==target) target.appendChild(fp); }
 function setDock(d){ state.dock=d;
   ["parts","ship","fleet"].forEach(k=>{ const pane=el("dock"+k.charAt(0).toUpperCase()+k.slice(1)+"Pane"); if(pane) pane.classList.toggle("show",k===d); const tab=el("dock"+k.charAt(0).toUpperCase()+k.slice(1)+"Tab"); if(tab) tab.setAttribute("aria-pressed",k===d); });

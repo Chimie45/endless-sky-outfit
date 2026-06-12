@@ -210,7 +210,7 @@ function fitShipName(){
   const e=el("hullName"); if(!e||!e.clientWidth) return;   // skip until laid out (avoids stale wide measurement)
   let size=30; e.style.fontSize=size+"px";
   let g=60;
-  while(e.scrollWidth>e.clientWidth+1 && size>9 && g-->0){ size-=0.5; e.style.fontSize=size+"px"; }
+  while(e.scrollWidth>e.clientWidth+1 && size>8 && g-->0){ size-=0.5; e.style.fontSize=size+"px"; }
 }
 function renderShipCard(){
   const ship = state.ship;
@@ -967,7 +967,7 @@ function setInfo(v){ state.info=v||""; const sec=el("viewInfoSec"); if(sec) sec.
 function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
 function openShipPicker(){ togglePanel("ship"); }
 function closeShipPicker(){ closePanels(); }
-function setView(v){ document.body.dataset.view=v; try{localStorage.setItem("drydock-view",v);}catch(e){} mountFleet(); if(v==="fleet") renderFleet(); if(v==="ship") requestAnimationFrame(()=>{ renderLoadout(); if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else if(state.dock==="fleet"){renderFleet();}else{renderCatbar();renderCatalog();} }); }
+function setView(v){ document.body.dataset.view=v; try{localStorage.setItem("drydock-view",v);}catch(e){} mountFleet(); if(v==="fleet") renderFleet(); if(v==="ship") requestAnimationFrame(()=>{ if(state.ship) fitShipName(); renderLoadout(); if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else if(state.dock==="fleet"){renderFleet();}else{renderCatbar();renderCatalog();} }); }
 function mountFleet(){ const fp=el("fleetPanel"); if(!fp) return; const target=(document.body.dataset.view==="ship" && state.dock==="fleet") ? el("dockFleetPane") : el("viewFleetSec"); if(target && fp.parentElement!==target) target.appendChild(fp); }
 function setDock(d){ state.dock=d;
   ["parts","ship","fleet"].forEach(k=>{ const pane=el("dock"+k.charAt(0).toUpperCase()+k.slice(1)+"Pane"); if(pane) pane.classList.toggle("show",k===d); const tab=el("dock"+k.charAt(0).toUpperCase()+k.slice(1)+"Tab"); if(tab) tab.setAttribute("aria-pressed",k===d); });
