@@ -11,6 +11,9 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.40 — 2026-06-13
+- Added a coffee-cup icon in the header (next to the gear) linking to the Buy Me a Coffee page.
+
 ### v0.5.39 — 2026-06-13
 - Max Cargo / Max Crew auto-fill now uses a basic generator (e.g. nGVF-AA Fuel Cell) plus a
   Supercapacitor instead of the most energy-dense reactor (no more Armageddon Core).
