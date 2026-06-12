@@ -597,13 +597,29 @@ function _expansionOutfit(){   // an outfit that trades cargo space for outfit s
     if(os>0 && cs<0){ const r=os/(-cs); if(r>bs){ bs=r; best=o; } } }
   return best;
 }
+function _addSmallest(attr){   // smallest-footprint outfit that provides attr>0 (so essentials always fit)
+  let best=null, bsp=1e9;
+  for(const o of _eligibleOutfits()){ if(num(o.attributes[attr])>0){ const sp=Math.abs(num(o.attributes["outfit space"]))||1; if(sp<bsp && !limitBlocked(o,1)){ bsp=sp; best=o; } } }
+  if(best){ state.installed[best.name]=(state.installed[best.name]||0)+1; return true; }
+  return false;
+}
+function _balancePowerHeat(){   // add a reactor / passive cooling until the hull can run & stay cool
+  let g=400;
+  while(g-->0){ const s=computeStats();
+    if(s.energyOK && s.heatOK) break;
+    if(!s.energyOK && _addBest(o=>_perSpace(o,"energy generation"))) continue;
+    if(!s.heatOK && _addBest(o=>_perSpace(o,"cooling"))) continue;
+    break;   // nothing left that fits
+  }
+}
 function computeAutoFill(kind){
   state.installed={};
-  // Engines only: just enough thrust + steering. We deliberately add NO reactor
-  // and NO cooling - these presets maximise a single stat, so the hull is left
-  // power-starved (it has engines but can't actually take off).
-  _addBest(o=>_perSpace(o,"thrust"));
-  _addBest(o=>_perSpace(o,"turn"));
+  // 1) smallest thruster + steering so the hull can move (and both always fit, leaving room for the rest)
+  _addSmallest("thrust");
+  _addSmallest("turn");
+  // 2) reactor + cooling so it has power and doesn't overheat (reserve this space first)
+  _balancePowerHeat();
+  // 3) fill the remaining outfit space maximising the chosen stat
   let guard=8000;
   while(guard-->0){
     if(_fillStep(kind)) continue;
@@ -618,6 +634,8 @@ function computeAutoFill(kind){
     }
     break;
   }
+  // 4) re-check power/heat in case adding mass shifted the balance
+  _balancePowerHeat();
 }
 function loadLoadout(token){
   if(token==="empty"){ state.installed={}; }

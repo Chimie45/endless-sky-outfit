@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.34 — 2026-06-13
+- Max Cargo / Max Crew presets now build a functional ship: they add a reactor and cooling (so the
+  hull has power and stays cool) before maximising cargo/crew, instead of leaving it power-starved.
+
 ### v0.5.33 — 2026-06-13
 - Hardpoint labels reworked: anchored to the overlay edges (text grows inward so it never runs off-
   screen), balanced across both sides (fixes radial ships like the Archon piling all labels on one
