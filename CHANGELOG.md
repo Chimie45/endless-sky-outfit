@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.30 — 2026-06-13
+- Removed Licenses and the Local Map from Add Parts (not installable on a ship).
+- Sub-category labels in the parts rail are now vertically centered.
+
 ### v0.5.29 — 2026-06-13
 - Build actions are now a 3-button row: Add to Fleet, Share Build (copies the link), and a new
   Import Build (paste a build link/code to load it).

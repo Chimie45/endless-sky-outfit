@@ -389,11 +389,10 @@ function renderLoadout(){
 }
 
 function outfitEligible(o){
-  if(o.category==="Minerals"||o.category==="Unique") return false;
-  const isLicense=o.category==="Licenses";
-  if(o.thumbnail==="outfit/unknown" && !isLicense) return false;  // hide "?" placeholder outfits (licenses keep, shown with an initials tile)
-  if(!o.thumbnail && !isLicense) return false;              // need art, except licenses
-  if(!state.showUnreleased && !o.obtainable && !isLicense) return false; // licenses always shown
+  if(o.category==="Minerals"||o.category==="Unique"||o.category==="Licenses") return false; // not installable parts
+  if(o.name==="Local Map") return false;                    // map item, not installable
+  if(!o.thumbnail||o.thumbnail==="outfit/unknown") return false; // need real bundled art
+  if(!state.showUnreleased && !o.obtainable) return false;
   if(factionTier(o.faction)>state.tier) return false;
   return true;
 }

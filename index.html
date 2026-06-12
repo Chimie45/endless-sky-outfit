@@ -840,6 +840,9 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 /* v0.5.29: 3-button build-actions row (Add to Fleet / Share Build / Import Build) */
 .buildactions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px}
 #fleetAddBtn{grid-column:auto}
+
+/* v0.5.30: vertically center sub-category rows (were display:block, top-aligned) */
+.sp-rail .subrow{display:flex;align-items:center}
 </style>
 <div id="app">
 
@@ -1125,7 +1128,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <label>Content</label>
     <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.29 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.30 · ES data v<span id="ver"></span></div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>
@@ -1523,11 +1526,10 @@ function renderLoadout(){
 }
 
 function outfitEligible(o){
-  if(o.category==="Minerals"||o.category==="Unique") return false;
-  const isLicense=o.category==="Licenses";
-  if(o.thumbnail==="outfit/unknown" && !isLicense) return false;  // hide "?" placeholder outfits (licenses keep, shown with an initials tile)
-  if(!o.thumbnail && !isLicense) return false;              // need art, except licenses
-  if(!state.showUnreleased && !o.obtainable && !isLicense) return false; // licenses always shown
+  if(o.category==="Minerals"||o.category==="Unique"||o.category==="Licenses") return false; // not installable parts
+  if(o.name==="Local Map") return false;                    // map item, not installable
+  if(!o.thumbnail||o.thumbnail==="outfit/unknown") return false; // need real bundled art
+  if(!state.showUnreleased && !o.obtainable) return false;
   if(factionTier(o.faction)>state.tier) return false;
   return true;
 }

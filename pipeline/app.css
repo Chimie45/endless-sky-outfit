@@ -837,3 +837,6 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 /* v0.5.29: 3-button build-actions row (Add to Fleet / Share Build / Import Build) */
 .buildactions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px}
 #fleetAddBtn{grid-column:auto}
+
+/* v0.5.30: vertically center sub-category rows (were display:block, top-aligned) */
+.sp-rail .subrow{display:flex;align-items:center}
