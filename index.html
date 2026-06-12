@@ -843,6 +843,16 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 
 /* v0.5.30: vertically center sub-category rows (were display:block, top-aligned) */
 .sp-rail .subrow{display:flex;align-items:center}
+
+/* v0.5.36: Outfitters/Shipyards as full Information Deck views (no modal) */
+.info-tool{display:none;flex:1;min-height:0;flex-direction:column;gap:12px;max-width:1400px;width:100%;margin:0 auto}
+#viewInfoSec[data-info="shop"] #infoHome,#viewInfoSec[data-info="yard"] #infoHome{display:none}
+#viewInfoSec[data-info="shop"] #infoShop,#viewInfoSec[data-info="yard"] #infoYard{display:flex}
+.info-toolhead{display:flex;align-items:center;gap:10px;flex:none;border-bottom:1px solid var(--line);padding-bottom:10px}
+.info-toolhead .sp-title{font-size:13px}
+.info-toolhead input[type=search]{flex:1;min-width:0;height:34px}
+.backbtn{flex:none;height:34px;padding:0 14px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);font-size:12px;font-weight:600;cursor:pointer}
+.backbtn:hover{border-color:var(--accent);color:var(--bright)}
 </style>
 <div id="app">
 
@@ -1058,8 +1068,8 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
   </section>
 
   <!-- ============ INFORMATION DECK ============ -->
-  <section class="view view-info" id="viewInfoSec">
-    <div class="info-deck">
+  <section class="view view-info" id="viewInfoSec" data-info="">
+    <div class="info-deck" id="infoHome">
       <div class="info-section">
         <div class="eyebrow">Stations</div>
         <div class="info-cards">
@@ -1070,42 +1080,40 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
       <div class="info-section">
         <div class="eyebrow">Coming soon</div>
         <div class="info-cards">
+          <div class="infocard soon"><h3>Galaxy Map</h3><p>Systems, hyperlanes &amp; where things are sold.</p></div>
           <div class="infocard soon"><h3>Ship &amp; Outfit Wiki</h3><p>Searchable reference for every hull and outfit.</p></div>
-          <div class="infocard soon"><h3>Galaxy Map</h3><p>Needs system coordinates &amp; hyperlanes (parser work).</p></div>
           <div class="infocard soon"><h3>Quest Tracker</h3><p>Needs mission data to be parsed first.</p></div>
         </div>
+      </div>
+    </div>
+
+    <div class="info-tool" id="infoShop">
+      <div class="info-toolhead">
+        <button class="backbtn" data-info-back>← Information Deck</button>
+        <span class="sp-title">Outfitters</span>
+        <input type="search" id="shopSearch" placeholder="Find station…" autocomplete="off">
+      </div>
+      <div class="sp-body">
+        <div class="sp-rail" id="shopRail"></div>
+        <div class="ogrid sp-grid" id="shopGrid"></div>
+      </div>
+    </div>
+
+    <div class="info-tool" id="infoYard">
+      <div class="info-toolhead">
+        <button class="backbtn" data-info-back>← Information Deck</button>
+        <span class="sp-title">Shipyards</span>
+        <input type="search" id="yardSearch" placeholder="Find station…" autocomplete="off">
+      </div>
+      <div class="sp-body">
+        <div class="sp-rail" id="yardRail"></div>
+        <div class="shipgrid sp-grid" id="yardGrid"></div>
       </div>
     </div>
   </section>
 </main>
 
 <div class="panelscrim" id="panelScrim"></div>
-
-<!-- Outfitters: browse stations -> outfits sold there -->
-<section class="sidepanel" id="outfitters" aria-label="Outfitters">
-  <div class="sp-head">
-    <span class="sp-title">Outfitters</span>
-    <input type="search" id="shopSearch" placeholder="Find station…" autocomplete="off">
-    <button class="modalx" id="shopClose" aria-label="Close">×</button>
-  </div>
-  <div class="sp-body">
-    <div class="sp-rail" id="shopRail"></div>
-    <div class="ogrid sp-grid" id="shopGrid"></div>
-  </div>
-</section>
-
-<!-- Shipyards: browse stations -> ships sold there -->
-<section class="sidepanel" id="shipyards" aria-label="Shipyards">
-  <div class="sp-head">
-    <span class="sp-title">Shipyards</span>
-    <input type="search" id="yardSearch" placeholder="Find station…" autocomplete="off">
-    <button class="modalx" id="yardClose" aria-label="Close">×</button>
-  </div>
-  <div class="sp-body">
-    <div class="sp-rail" id="yardRail"></div>
-    <div class="shipgrid sp-grid" id="yardGrid"></div>
-  </div>
-</section>
 
 <div class="drawer" id="drawer">
   <div class="panel">
@@ -1128,7 +1136,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <label>Content</label>
     <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.35 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.36 · ES data v<span id="ver"></span></div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>
@@ -2094,6 +2102,10 @@ function openPanel(name){
   try{ localStorage.setItem("drydock-panel", name); }catch(e){}
 }
 function closePanels(){ delete document.body.dataset.panel; try{ localStorage.setItem("drydock-panel",""); }catch(e){} }
+function setInfo(v){ state.info=v||""; const sec=el("viewInfoSec"); if(sec) sec.dataset.info=state.info;
+  if(state.info==="shop"){ renderShop(); const s=el("shopSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
+  else if(state.info==="yard"){ renderYard(); const s=el("yardSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
+  try{ localStorage.setItem("drydock-info",state.info); }catch(e){} }
 function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
 function openShipPicker(){ togglePanel("ship"); }
 function closeShipPicker(){ closePanels(); }
@@ -2163,10 +2175,9 @@ function init(){
   el("dockPartsTab").addEventListener("click",()=>setDock("parts"));
   el("dockShipTab").addEventListener("click",()=>setDock("ship"));
   el("dockFleetTab").addEventListener("click",()=>setDock("fleet"));
-  el("openOutfitters").addEventListener("click",()=>openPanel("shop"));
-  el("openShipyards").addEventListener("click",()=>openPanel("yard"));
-  el("shopClose").addEventListener("click",closePanels);
-  el("yardClose").addEventListener("click",closePanels);
+  el("openOutfitters").addEventListener("click",()=>setInfo("shop"));
+  el("openShipyards").addEventListener("click",()=>setInfo("yard"));
+  el("viewInfoSec").addEventListener("click",e=>{ if(e.target.closest("[data-info-back]")) setInfo(""); });
   el("shopRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.shopPage+=pg.dataset.pg==="next"?1:-1;renderShop();return;}const b=e.target.closest("[data-station]");if(b){state.shopStation=b.dataset.station;renderShop();}});
   el("yardRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.yardPage+=pg.dataset.pg==="next"?1:-1;renderYard();return;}const b=e.target.closest("[data-station]");if(b){state.yardStation=b.dataset.station;renderYard();}});
   el("yardGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(b){setShip(b.dataset.ship);renderYard();}});
@@ -2182,7 +2193,7 @@ function init(){
     state.tier=+b.dataset.tier;
     document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",x===b));
     renderPartsFac(); renderCatbar(); renderCatalog(); renderPickerFac(); renderPickerGrid();
-    if(document.body.dataset.panel==="shop")renderShop(); if(document.body.dataset.panel==="yard")renderYard();});
+    if(state.info==="shop")renderShop(); if(state.info==="yard")renderYard();});
   el("search").addEventListener("input",e=>{state.q=e.target.value;state.catPage=0;renderCatalog();});
   el("catbar").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; state.catPage=0;
     if(b.classList.contains("subrow")){ state.cat=b.dataset.cat; state.series=b.dataset.series; renderCatbar(); renderCatalog(); return; }

@@ -840,3 +840,13 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 
 /* v0.5.30: vertically center sub-category rows (were display:block, top-aligned) */
 .sp-rail .subrow{display:flex;align-items:center}
+
+/* v0.5.36: Outfitters/Shipyards as full Information Deck views (no modal) */
+.info-tool{display:none;flex:1;min-height:0;flex-direction:column;gap:12px;max-width:1400px;width:100%;margin:0 auto}
+#viewInfoSec[data-info="shop"] #infoHome,#viewInfoSec[data-info="yard"] #infoHome{display:none}
+#viewInfoSec[data-info="shop"] #infoShop,#viewInfoSec[data-info="yard"] #infoYard{display:flex}
+.info-toolhead{display:flex;align-items:center;gap:10px;flex:none;border-bottom:1px solid var(--line);padding-bottom:10px}
+.info-toolhead .sp-title{font-size:13px}
+.info-toolhead input[type=search]{flex:1;min-width:0;height:34px}
+.backbtn{flex:none;height:34px;padding:0 14px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);font-size:12px;font-weight:600;cursor:pointer}
+.backbtn:hover{border-color:var(--accent);color:var(--bright)}

@@ -957,6 +957,10 @@ function openPanel(name){
   try{ localStorage.setItem("drydock-panel", name); }catch(e){}
 }
 function closePanels(){ delete document.body.dataset.panel; try{ localStorage.setItem("drydock-panel",""); }catch(e){} }
+function setInfo(v){ state.info=v||""; const sec=el("viewInfoSec"); if(sec) sec.dataset.info=state.info;
+  if(state.info==="shop"){ renderShop(); const s=el("shopSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
+  else if(state.info==="yard"){ renderYard(); const s=el("yardSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
+  try{ localStorage.setItem("drydock-info",state.info); }catch(e){} }
 function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
 function openShipPicker(){ togglePanel("ship"); }
 function closeShipPicker(){ closePanels(); }
@@ -1026,10 +1030,9 @@ function init(){
   el("dockPartsTab").addEventListener("click",()=>setDock("parts"));
   el("dockShipTab").addEventListener("click",()=>setDock("ship"));
   el("dockFleetTab").addEventListener("click",()=>setDock("fleet"));
-  el("openOutfitters").addEventListener("click",()=>openPanel("shop"));
-  el("openShipyards").addEventListener("click",()=>openPanel("yard"));
-  el("shopClose").addEventListener("click",closePanels);
-  el("yardClose").addEventListener("click",closePanels);
+  el("openOutfitters").addEventListener("click",()=>setInfo("shop"));
+  el("openShipyards").addEventListener("click",()=>setInfo("yard"));
+  el("viewInfoSec").addEventListener("click",e=>{ if(e.target.closest("[data-info-back]")) setInfo(""); });
   el("shopRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.shopPage+=pg.dataset.pg==="next"?1:-1;renderShop();return;}const b=e.target.closest("[data-station]");if(b){state.shopStation=b.dataset.station;renderShop();}});
   el("yardRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.yardPage+=pg.dataset.pg==="next"?1:-1;renderYard();return;}const b=e.target.closest("[data-station]");if(b){state.yardStation=b.dataset.station;renderYard();}});
   el("yardGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(b){setShip(b.dataset.ship);renderYard();}});
@@ -1045,7 +1048,7 @@ function init(){
     state.tier=+b.dataset.tier;
     document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",x===b));
     renderPartsFac(); renderCatbar(); renderCatalog(); renderPickerFac(); renderPickerGrid();
-    if(document.body.dataset.panel==="shop")renderShop(); if(document.body.dataset.panel==="yard")renderYard();});
+    if(state.info==="shop")renderShop(); if(state.info==="yard")renderYard();});
   el("search").addEventListener("input",e=>{state.q=e.target.value;state.catPage=0;renderCatalog();});
   el("catbar").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; state.catPage=0;
     if(b.classList.contains("subrow")){ state.cat=b.dataset.cat; state.series=b.dataset.series; renderCatbar(); renderCatalog(); return; }

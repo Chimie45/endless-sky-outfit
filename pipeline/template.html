@@ -216,8 +216,8 @@
   </section>
 
   <!-- ============ INFORMATION DECK ============ -->
-  <section class="view view-info" id="viewInfoSec">
-    <div class="info-deck">
+  <section class="view view-info" id="viewInfoSec" data-info="">
+    <div class="info-deck" id="infoHome">
       <div class="info-section">
         <div class="eyebrow">Stations</div>
         <div class="info-cards">
@@ -228,42 +228,40 @@
       <div class="info-section">
         <div class="eyebrow">Coming soon</div>
         <div class="info-cards">
+          <div class="infocard soon"><h3>Galaxy Map</h3><p>Systems, hyperlanes &amp; where things are sold.</p></div>
           <div class="infocard soon"><h3>Ship &amp; Outfit Wiki</h3><p>Searchable reference for every hull and outfit.</p></div>
-          <div class="infocard soon"><h3>Galaxy Map</h3><p>Needs system coordinates &amp; hyperlanes (parser work).</p></div>
           <div class="infocard soon"><h3>Quest Tracker</h3><p>Needs mission data to be parsed first.</p></div>
         </div>
+      </div>
+    </div>
+
+    <div class="info-tool" id="infoShop">
+      <div class="info-toolhead">
+        <button class="backbtn" data-info-back>← Information Deck</button>
+        <span class="sp-title">Outfitters</span>
+        <input type="search" id="shopSearch" placeholder="Find station…" autocomplete="off">
+      </div>
+      <div class="sp-body">
+        <div class="sp-rail" id="shopRail"></div>
+        <div class="ogrid sp-grid" id="shopGrid"></div>
+      </div>
+    </div>
+
+    <div class="info-tool" id="infoYard">
+      <div class="info-toolhead">
+        <button class="backbtn" data-info-back>← Information Deck</button>
+        <span class="sp-title">Shipyards</span>
+        <input type="search" id="yardSearch" placeholder="Find station…" autocomplete="off">
+      </div>
+      <div class="sp-body">
+        <div class="sp-rail" id="yardRail"></div>
+        <div class="shipgrid sp-grid" id="yardGrid"></div>
       </div>
     </div>
   </section>
 </main>
 
 <div class="panelscrim" id="panelScrim"></div>
-
-<!-- Outfitters: browse stations -> outfits sold there -->
-<section class="sidepanel" id="outfitters" aria-label="Outfitters">
-  <div class="sp-head">
-    <span class="sp-title">Outfitters</span>
-    <input type="search" id="shopSearch" placeholder="Find station…" autocomplete="off">
-    <button class="modalx" id="shopClose" aria-label="Close">×</button>
-  </div>
-  <div class="sp-body">
-    <div class="sp-rail" id="shopRail"></div>
-    <div class="ogrid sp-grid" id="shopGrid"></div>
-  </div>
-</section>
-
-<!-- Shipyards: browse stations -> ships sold there -->
-<section class="sidepanel" id="shipyards" aria-label="Shipyards">
-  <div class="sp-head">
-    <span class="sp-title">Shipyards</span>
-    <input type="search" id="yardSearch" placeholder="Find station…" autocomplete="off">
-    <button class="modalx" id="yardClose" aria-label="Close">×</button>
-  </div>
-  <div class="sp-body">
-    <div class="sp-rail" id="yardRail"></div>
-    <div class="shipgrid sp-grid" id="yardGrid"></div>
-  </div>
-</section>
 
 <div class="drawer" id="drawer">
   <div class="panel">
@@ -286,7 +284,7 @@
     <label>Content</label>
     <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.35 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.36 · ES data v<span id="ver"></span></div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>

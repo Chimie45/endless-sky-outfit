@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.36 — 2026-06-13
+- Outfitters and Shipyards are no longer modal popups - they open as full-window views inside the
+  Information Deck (like the Ship/Fleet editors), with a back button to the deck.
+
 ### v0.5.35 — 2026-06-13
 - More vertical spacing between hardpoint labels so two-line labels no longer overlap / crowd.
 
