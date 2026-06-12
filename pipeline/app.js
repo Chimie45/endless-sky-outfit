@@ -444,7 +444,8 @@ function statChips(o){
   const a=o.attributes, w=o.weapon;
   const kmb=n=> n>=1e6?(n/1e6).toFixed(n>=1e7?0:1).replace(/\.0$/,"")+"M":n>=1e3?Math.round(n/1e3)+"K":String(Math.round(n));
   const chips=[`<span class="chip fac">${FACLABEL(o.faction)}</span>`,`<span class="chip">Price ${kmb(o.cost)}</span>`];
-  if(w&&w.reload){ const dps=(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload; chips.push(`<span class="chip">${FMT(dps)} DPS</span>`); }
+  const dps=(w&&w.reload)?(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload:0;
+  chips.push(`<span class="chip">${Math.round(dps)} DPS</span>`);
   if(a["outfit space"]<0) chips.push(`<span class="chip">Outfit ${FMT(Math.abs(a["outfit space"]))}</span>`);
   return chips.join("");
 }

@@ -11,6 +11,9 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.28 — 2026-06-13
+- Outfit DPS tag rounded to whole numbers, and always shown (0 DPS for non-weapons).
+
 ### v0.5.27 — 2026-06-13
 - Ship-card title: faction/name/type now grouped with even spacing (was spread out by space-between).
 - Ship name fit is more reliable: skips measuring before layout, re-fits on a short delay, and shrinks
