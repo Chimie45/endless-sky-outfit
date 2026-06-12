@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.46 — 2026-06-13
+- Credits in Settings now opens a full-credits modal (Endless Sky attribution, GPLv3 code,
+  CC-BY-SA-4.0 art with links to the upstream copyright/license, plus source & donate links).
+
 ### v0.5.45 — 2026-06-13
 - Added a Credits section in Settings: built on Endless Sky (code GPLv3, art mostly CC-BY-SA-4.0),
   with a note that Drydock is an unaffiliated fan tool.

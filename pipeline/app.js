@@ -997,7 +997,10 @@ function init(){
   el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; state.pickPage=0; renderPickerGrid(); });
   el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;state.pickPage=0;renderPickerFac();renderPickerGrid();});
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);});
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); } });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); } });
+  el("creditsBtn").addEventListener("click",()=>{ el("settings").classList.remove("open"); el("creditsModal").classList.add("open"); });
+  el("creditsClose").addEventListener("click",()=>el("creditsModal").classList.remove("open"));
+  el("creditsModal").addEventListener("click",e=>{ if(e.target===el("creditsModal")) el("creditsModal").classList.remove("open"); });
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("fleetAddBtn").addEventListener("click",addToFleet);

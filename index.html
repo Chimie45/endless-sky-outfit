@@ -949,6 +949,18 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 .headmenu .hm-credits a{color:var(--accent2);text-decoration:none}
 .headmenu .hm-credits a:hover{text-decoration:underline;color:var(--bright)}
 .headmenu .hm-ver{margin-top:12px}
+
+/* v0.5.46: credits modal */
+.creditsmodal{position:fixed;inset:0;background:rgba(4,7,12,.62);backdrop-filter:blur(2px);display:none;z-index:70;align-items:center;justify-content:center;padding:20px}
+.creditsmodal.open{display:flex}
+.cm-panel{position:relative;width:min(560px,96vw);max-height:86vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:24px 24px 22px;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.cm-x{position:absolute;top:16px;right:18px}
+.cm-panel h2{color:var(--bright);font-size:21px;margin:0 0 12px}
+.cm-panel p{font-size:12.5px;color:var(--txt);line-height:1.6;margin:0 0 8px}
+.cm-sect{margin-top:16px}
+.cm-sect .cm-h{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:6px}
+.cm-panel a{color:var(--accent2);text-decoration:none}
+.cm-panel a:hover{text-decoration:underline;color:var(--bright)}
 </style>
 <div id="app">
 
@@ -1271,10 +1283,31 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
   </div>
   <div class="hm-credits">
     <div class="hm-clabel">Credits</div>
-    <p>Built on <a href="https://endless-sky.github.io/" target="_blank" rel="noopener noreferrer">Endless Sky</a> and the work of its contributors. Game code is licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">GPLv3</a>; the art assets are mostly under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC-BY-SA-4.0</a>.</p>
-    <p>Drydock is a fan-made tool and is not affiliated with the Endless Sky project.</p>
+    <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
+    <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.45 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.46 · ES data v<span id="ver"></span></div>
+</div>
+
+<div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
+  <div class="cm-panel">
+    <button class="linkbtn cm-x" id="creditsClose" type="button">Close</button>
+    <h2>Credits</h2>
+    <p><b>Drydock</b> is a fan-made ship &amp; fleet outfit builder for <a href="https://endless-sky.github.io/" target="_blank" rel="noopener noreferrer">Endless Sky</a>. It is not affiliated with or endorsed by the Endless Sky project.</p>
+    <div class="cm-sect">
+      <div class="cm-h">Game content &amp; art</div>
+      <p>All ships, outfits, systems, planets, landscapes and sprites are from <a href="https://github.com/endless-sky/endless-sky" target="_blank" rel="noopener noreferrer">Endless Sky</a> and its many contributors, parsed and bundled from the game's data and image files.</p>
+    </div>
+    <div class="cm-sect">
+      <div class="cm-h">Licenses</div>
+      <p>Endless Sky's source code is licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">GNU General Public License v3</a>.</p>
+      <p>Endless Sky's art assets bundled here (sprites, thumbnails, planet landscapes &amp; sprites) are mostly licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC-BY-SA-4.0</a>: attribution to the Endless Sky authors and contributors is required, and derivatives keep the same license. A few assets use other free licenses · see the upstream <a href="https://github.com/endless-sky/endless-sky/blob/master/copyright" target="_blank" rel="noopener noreferrer">copyright</a> and <a href="https://github.com/endless-sky/endless-sky/blob/master/license" target="_blank" rel="noopener noreferrer">license</a> files for the full per-asset author credits.</p>
+    </div>
+    <div class="cm-sect">
+      <div class="cm-h">This tool</div>
+      <p><a href="https://github.com/Chimie45/endless-sky-outfit" target="_blank" rel="noopener noreferrer">Source on GitHub</a> · <a href="https://www.buymeacoffee.com/drydock" target="_blank" rel="noopener noreferrer">Buy me a coffee</a></p>
+    </div>
+  </div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>
@@ -2280,7 +2313,10 @@ function init(){
   el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; state.pickPage=0; renderPickerGrid(); });
   el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;state.pickPage=0;renderPickerFac();renderPickerGrid();});
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);});
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); } });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); } });
+  el("creditsBtn").addEventListener("click",()=>{ el("settings").classList.remove("open"); el("creditsModal").classList.add("open"); });
+  el("creditsClose").addEventListener("click",()=>el("creditsModal").classList.remove("open"));
+  el("creditsModal").addEventListener("click",e=>{ if(e.target===el("creditsModal")) el("creditsModal").classList.remove("open"); });
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("fleetAddBtn").addEventListener("click",addToFleet);

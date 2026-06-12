@@ -946,3 +946,15 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 .headmenu .hm-credits a{color:var(--accent2);text-decoration:none}
 .headmenu .hm-credits a:hover{text-decoration:underline;color:var(--bright)}
 .headmenu .hm-ver{margin-top:12px}
+
+/* v0.5.46: credits modal */
+.creditsmodal{position:fixed;inset:0;background:rgba(4,7,12,.62);backdrop-filter:blur(2px);display:none;z-index:70;align-items:center;justify-content:center;padding:20px}
+.creditsmodal.open{display:flex}
+.cm-panel{position:relative;width:min(560px,96vw);max-height:86vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:24px 24px 22px;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.cm-x{position:absolute;top:16px;right:18px}
+.cm-panel h2{color:var(--bright);font-size:21px;margin:0 0 12px}
+.cm-panel p{font-size:12.5px;color:var(--txt);line-height:1.6;margin:0 0 8px}
+.cm-sect{margin-top:16px}
+.cm-sect .cm-h{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:6px}
+.cm-panel a{color:var(--accent2);text-decoration:none}
+.cm-panel a:hover{text-decoration:underline;color:var(--bright)}

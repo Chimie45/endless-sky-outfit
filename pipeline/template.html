@@ -323,10 +323,31 @@
   </div>
   <div class="hm-credits">
     <div class="hm-clabel">Credits</div>
-    <p>Built on <a href="https://endless-sky.github.io/" target="_blank" rel="noopener noreferrer">Endless Sky</a> and the work of its contributors. Game code is licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">GPLv3</a>; the art assets are mostly under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC-BY-SA-4.0</a>.</p>
-    <p>Drydock is a fan-made tool and is not affiliated with the Endless Sky project.</p>
+    <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
+    <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.45 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.46 · ES data v<span id="ver"></span></div>
+</div>
+
+<div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
+  <div class="cm-panel">
+    <button class="linkbtn cm-x" id="creditsClose" type="button">Close</button>
+    <h2>Credits</h2>
+    <p><b>Drydock</b> is a fan-made ship &amp; fleet outfit builder for <a href="https://endless-sky.github.io/" target="_blank" rel="noopener noreferrer">Endless Sky</a>. It is not affiliated with or endorsed by the Endless Sky project.</p>
+    <div class="cm-sect">
+      <div class="cm-h">Game content &amp; art</div>
+      <p>All ships, outfits, systems, planets, landscapes and sprites are from <a href="https://github.com/endless-sky/endless-sky" target="_blank" rel="noopener noreferrer">Endless Sky</a> and its many contributors, parsed and bundled from the game's data and image files.</p>
+    </div>
+    <div class="cm-sect">
+      <div class="cm-h">Licenses</div>
+      <p>Endless Sky's source code is licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">GNU General Public License v3</a>.</p>
+      <p>Endless Sky's art assets bundled here (sprites, thumbnails, planet landscapes &amp; sprites) are mostly licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC-BY-SA-4.0</a>: attribution to the Endless Sky authors and contributors is required, and derivatives keep the same license. A few assets use other free licenses · see the upstream <a href="https://github.com/endless-sky/endless-sky/blob/master/copyright" target="_blank" rel="noopener noreferrer">copyright</a> and <a href="https://github.com/endless-sky/endless-sky/blob/master/license" target="_blank" rel="noopener noreferrer">license</a> files for the full per-asset author credits.</p>
+    </div>
+    <div class="cm-sect">
+      <div class="cm-h">This tool</div>
+      <p><a href="https://github.com/Chimie45/endless-sky-outfit" target="_blank" rel="noopener noreferrer">Source on GitHub</a> · <a href="https://www.buymeacoffee.com/drydock" target="_blank" rel="noopener noreferrer">Buy me a coffee</a></p>
+    </div>
+  </div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>
