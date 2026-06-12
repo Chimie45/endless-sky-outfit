@@ -467,7 +467,7 @@ function ocardHTML(o, browse){
   const n=o.name.replace(/"/g,'&quot;');
   return `<div class="ocard${browse?' browse':''}"${browse?'':' draggable="true"'} data-name="${n}">
       <div class="art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
-      ${browse?'':`<button class="addbtn" data-inc="${n}">+</button>`}
+      <div class="cardbtns">${browse?'':`<button class="cbtn addbtn" data-inc="${n}" title="Install">+</button>`}<button class="cbtn detailbtn" data-detail="${n}" title="Details" aria-label="Details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.3-4.3"/></svg></button></div>
       <div class="meta">
         <b data-detail="${n}" title="${o.name}">${o.name}</b>
         <div class="chips">${statChips(o)}</div>
@@ -505,21 +505,21 @@ function openDetail(nm){
   }
   const sold=o.soldAt||[];
   const soldHTML = sold.length
-    ? `<div class="soldlist">${sold.slice(0,40).map(s=>`<div class="p">${s.planet}${s.system?` <small>· ${s.system}</small>`:''}</div>`).join("")}${sold.length>40?`<div class="note">+${sold.length-40} more locations</div>`:''}</div>`
+    ? `<div class="soldlist">${sold.slice().sort((a,b)=>(a.planet||"").localeCompare(b.planet||"")).map(s=>`<div class="p"><b>${esc(s.planet)}</b>${s.system?` <small>· ${esc(s.system)}</small>`:''}</div>`).join("")}</div>`
     : `<div class="note">Not sold at any outfitter — this is loot / mission-only / starting equipment.</div>`;
   const heroURL=imgURL(o.thumbnail);
   el("drawerBody").innerHTML=`
     <div class="eyebrow">${o.category} · ${o.faction}</div>
     <h2>${nm}</h2>
-    ${heroURL?`<div class="tile hero"><img src="${heroURL}" alt="" style="object-fit:contain;padding:14px" onerror="this.parentNode.style.display='none'"></div>`:""}
+    ${heroURL?`<div class="tile hero"><img src="${heroURL}" alt="" onerror="this.parentNode.style.display='none'"></div>`:""}
     <div class="kv"><div class="k">cost</div><div class="v mono">${MONEY(o.cost)}</div>
       <div class="k">mass</div><div class="v mono">${FMT(o.mass)} t</div></div>
     ${o.description?`<div class="desc">${o.description}</div>`:""}
     <div class="eyebrow">Attributes</div><div class="kv">${kv||'<div class="k">—</div><div class="v">—</div>'}</div>
     ${wk}
     <div class="eyebrow" style="margin-top:14px">Sold at (${sold.length})</div>
-    ${soldHTML}
-    <button class="addbtn" style="position:static;width:auto;padding:8px 16px;margin-top:16px;border-radius:8px" data-inc="${nm.replace(/"/g,'&quot;')}">+ Install</button>`;
+    ${soldHTML}`;
+  { const inst=el("drawerInstall"); if(inst){ const allow=document.body.dataset.view==="ship"&&state.ship; inst.dataset.inc=nm; inst.style.display=allow?"":"none"; } }
   el("drawer").classList.add("open");
 }
 

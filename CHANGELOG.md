@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.43 — 2026-06-13
+- Outfit cards gained a magnifying-glass button (under the +) that opens the item's info card.
+- Item info card: fixed the hero image sizing/resolution; the Sold-at list now shows every location
+  in two columns (no "+N more"); the Install button moved to the top next to Close and restyled.
+
 ### v0.5.42 — 2026-06-13
 - Planets browser now shows the planet's landscape image (the spaceport view) and lists every
   planet; clicking a system's planets on the Galaxy Map opens that planet's page.

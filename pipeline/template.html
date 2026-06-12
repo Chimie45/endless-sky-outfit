@@ -299,7 +299,10 @@
 
 <div class="drawer" id="drawer">
   <div class="panel">
-    <button class="linkbtn x" id="drawerX">Close</button>
+    <div class="drawer-head">
+      <button class="dr-install" id="drawerInstall" type="button" style="display:none">+ Install</button>
+      <button class="linkbtn x" id="drawerX">Close</button>
+    </div>
     <div id="drawerBody"></div>
   </div>
 </div>
@@ -318,7 +321,7 @@
     <label>Content</label>
     <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.42 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.43 · ES data v<span id="ver"></span></div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>

@@ -915,6 +915,22 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 #drawerBody .fd-art{width:72px;height:72px;flex:none}
 #drawerBody .fd-art .tile{width:100%;height:100%;border-radius:8px}
 .ocard.browse{cursor:default}
+
+/* v0.5.43: card magnifier, fixed detail hero/sold-at, top install button */
+.ocard .cardbtns{position:absolute;top:6px;right:6px;display:flex;flex-direction:column;gap:5px;z-index:2}
+.ocard .cardbtns .cbtn{position:static}
+.ocard .detailbtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--line2);background:rgba(8,12,20,.78);color:var(--accent2);display:grid;place-items:center;backdrop-filter:blur(3px);cursor:pointer}
+.ocard .detailbtn:hover{background:var(--accent2);color:#04121f;border-color:var(--accent2)}
+.ocard .detailbtn svg{width:15px;height:15px}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.drawer .x{position:static}
+.dr-install{height:38px;padding:0 16px;border-radius:8px;border:1px solid var(--ok);background:rgba(61,220,151,.14);color:var(--ok);font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.dr-install:hover{background:var(--ok);color:#04121f}
+.drawer .hero{height:150px;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,var(--tile1),var(--tile2));overflow:hidden}
+.drawer .hero img{width:auto;height:auto;max-width:84%;max-height:84%;object-fit:contain}
+.soldlist{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.soldlist .p{padding:5px 0;border-bottom:1px solid var(--line);font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.soldlist .p b{color:var(--bright);font-weight:600}
 </style>
 <div id="app">
 
@@ -1213,7 +1229,10 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 
 <div class="drawer" id="drawer">
   <div class="panel">
-    <button class="linkbtn x" id="drawerX">Close</button>
+    <div class="drawer-head">
+      <button class="dr-install" id="drawerInstall" type="button" style="display:none">+ Install</button>
+      <button class="linkbtn x" id="drawerX">Close</button>
+    </div>
     <div id="drawerBody"></div>
   </div>
 </div>
@@ -1232,7 +1251,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <label>Content</label>
     <button class="toggle" id="unrelBtn" aria-pressed="false">Show unreleased</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.42 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.43 · ES data v<span id="ver"></span></div>
 </div>
 
 <div id="fleetHover" class="fleet-hover"></div>
@@ -1708,7 +1727,7 @@ function ocardHTML(o, browse){
   const n=o.name.replace(/"/g,'&quot;');
   return `<div class="ocard${browse?' browse':''}"${browse?'':' draggable="true"'} data-name="${n}">
       <div class="art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
-      ${browse?'':`<button class="addbtn" data-inc="${n}">+</button>`}
+      <div class="cardbtns">${browse?'':`<button class="cbtn addbtn" data-inc="${n}" title="Install">+</button>`}<button class="cbtn detailbtn" data-detail="${n}" title="Details" aria-label="Details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.3-4.3"/></svg></button></div>
       <div class="meta">
         <b data-detail="${n}" title="${o.name}">${o.name}</b>
         <div class="chips">${statChips(o)}</div>
@@ -1746,21 +1765,21 @@ function openDetail(nm){
   }
   const sold=o.soldAt||[];
   const soldHTML = sold.length
-    ? `<div class="soldlist">${sold.slice(0,40).map(s=>`<div class="p">${s.planet}${s.system?` <small>· ${s.system}</small>`:''}</div>`).join("")}${sold.length>40?`<div class="note">+${sold.length-40} more locations</div>`:''}</div>`
+    ? `<div class="soldlist">${sold.slice().sort((a,b)=>(a.planet||"").localeCompare(b.planet||"")).map(s=>`<div class="p"><b>${esc(s.planet)}</b>${s.system?` <small>· ${esc(s.system)}</small>`:''}</div>`).join("")}</div>`
     : `<div class="note">Not sold at any outfitter — this is loot / mission-only / starting equipment.</div>`;
   const heroURL=imgURL(o.thumbnail);
   el("drawerBody").innerHTML=`
     <div class="eyebrow">${o.category} · ${o.faction}</div>
     <h2>${nm}</h2>
-    ${heroURL?`<div class="tile hero"><img src="${heroURL}" alt="" style="object-fit:contain;padding:14px" onerror="this.parentNode.style.display='none'"></div>`:""}
+    ${heroURL?`<div class="tile hero"><img src="${heroURL}" alt="" onerror="this.parentNode.style.display='none'"></div>`:""}
     <div class="kv"><div class="k">cost</div><div class="v mono">${MONEY(o.cost)}</div>
       <div class="k">mass</div><div class="v mono">${FMT(o.mass)} t</div></div>
     ${o.description?`<div class="desc">${o.description}</div>`:""}
     <div class="eyebrow">Attributes</div><div class="kv">${kv||'<div class="k">—</div><div class="v">—</div>'}</div>
     ${wk}
     <div class="eyebrow" style="margin-top:14px">Sold at (${sold.length})</div>
-    ${soldHTML}
-    <button class="addbtn" style="position:static;width:auto;padding:8px 16px;margin-top:16px;border-radius:8px" data-inc="${nm.replace(/"/g,'&quot;')}">+ Install</button>`;
+    ${soldHTML}`;
+  { const inst=el("drawerInstall"); if(inst){ const allow=document.body.dataset.view==="ship"&&state.ship; inst.dataset.inc=nm; inst.style.display=allow?"":"none"; } }
   el("drawer").classList.add("open");
 }
 
