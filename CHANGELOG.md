@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.50 — 2026-06-13
+- Human tech tier is now strictly Republic, Free Worlds, Syndicate and Pirate space. The planets browser
+  shows only those governments at Human, and the galaxy map keeps uninhabited frontier systems but
+  hides deeper/alien space until the tier is raised.
+
 ### v0.5.49 — 2026-06-13
 - Removed the Buy Me a Coffee link from the credits modal (it lives only on the header coffee button).
 - Tech tier (Human / First contact / Deep space / All) now also gates the New Ship picker, the
