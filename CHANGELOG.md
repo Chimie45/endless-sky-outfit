@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.32 — 2026-06-13
+- Fixed outfit/weapon/engine capacity bars: the total was inflated by the consumed amount (e.g. a
+  265t weapon hull showed /515). Total now reflects hull capacity (plus any capacity-adding outfits),
+  and used = consumed. Over-capacity builds still correctly show used > total.
+
 ### v0.5.31 — 2026-06-13
 - Hardpoint schematic labels now fit inside the overlay: smaller sprite for wider label gutters,
   tighter label wrapping, and smaller label font so names like "Quad Blaster Turret" no longer clip.

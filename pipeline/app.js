@@ -55,7 +55,7 @@ function capacity(key){       // returns {free,total,used} matching the game's d
   let total = num(state.ship.attributes[key]);
   for(const [nm,c] of Object.entries(state.installed)){
     const o = DATA.outfits[nm]; if(!o) continue;
-    total -= Math.min(0, c*num(o.attributes[key]));
+    total += Math.max(0, c*num(o.attributes[key]));   // only capacity-ADDING outfits raise the total; consumers reduce `free`
   }
   return {free, total, used: total-free};
 }
