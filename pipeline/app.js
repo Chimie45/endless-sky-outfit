@@ -36,7 +36,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0 };
+let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0, partsList:false, shipList:false };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -483,15 +483,65 @@ function ocardHTML(o, browse){
       </div>
     </div>`;
 }
+// ---- list-view rows for Add Parts / New Ship (v0.5.59) ----
+function priceK(n){ n=n||0; return n>=1e6?(n/1e6).toFixed(n>=1e7?0:1).replace(/\.0$/,"")+"M":n>=1e3?Math.round(n/1e3)+"K":String(Math.round(n)); }
+function _rowCount(id,rh,gap){ const b=el(id); if(!b||!b.clientHeight) return 6; return Math.max(1,Math.floor((b.clientHeight+gap)/(rh+gap))); }
+function outfitStatPairs(o){
+  const a=o.attributes||{}, w=o.weapon, lead=[], attrs=[];
+  if(o.mass) lead.push(["mass", FMT(o.mass)+" t"]);
+  for(const k in a){ const v=a[k]; if(typeof v==="number"&&v!==0&&k!=="mass") attrs.push([k, FMT(v)]); }
+  attrs.sort((x,y)=>x[0].localeCompare(y[0]));
+  const wp=[];
+  if(w){ const dps=w.reload?(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload:0;
+    if(dps) wp.push(["dps", String(Math.round(dps))]);
+    [["shield damage","shield dmg"],["hull damage","hull dmg"],["reload","reload"],["firing energy","firing E"],["firing heat","firing H"],["velocity","velocity"]].forEach(p=>{ if(w[p[0]]) wp.push([p[1], FMT(w[p[0]])]); });
+    if(w.velocity&&w.lifetime) wp.push(["range", FMT(w.velocity*w.lifetime)]);
+  }
+  return lead.concat(wp, attrs);
+}
+function shipStatPairs(s){
+  const a=s.attributes||{}, hp=s.hardpoints||{}, out=[];
+  const order=[["hull","hull"],["shields","shields"],["mass","mass"],["required crew","crew"],["bunks","bunks"],["cargo space","cargo"],["outfit space","outfit sp"],["weapon capacity","weapon cap"],["engine capacity","engine cap"],["fuel capacity","fuel"],["heat dissipation","heat dissip"],["drag","drag"]];
+  for(const p of order){ const v=a[p[0]]; if(typeof v==="number"&&v!==0) out.push([p[1], FMT(v)]); }
+  out.push(["guns", String(hp.guns||0)], ["turrets", String(hp.turrets||0)]);
+  const bays=Object.values(hp.bays||{}).reduce((x,y)=>x+y,0); if(bays) out.push(["bays", String(bays)]);
+  return out;
+}
+function _statGrid(pairs){ return pairs.length? pairs.map(p=>`<div class="rs"><span class="rs-k">${p[0]}</span><span class="rs-v mono">${p[1]}</span></div>`).join("") : `<div class="rs-empty">No stats</div>`; }
+function olistHTML(o, browse){
+  const n=o.name.replace(/"/g,'&quot;');
+  return `<div class="lrow orow${browse?' browse':''}"${browse?'':' draggable="true"'} data-name="${n}">
+      <div class="lrow-left">
+        <div class="lrow-art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
+        <b class="lrow-nm" data-detail="${n}" title="${o.name}">${o.name}</b>
+        <div class="lrow-sub"><span class="chip fac">${FACLABEL(o.faction)}</span><span class="chip">Price ${priceK(o.cost)}</span></div>
+      </div>
+      <div class="lrow-stats">${_statGrid(outfitStatPairs(o))}</div>
+      <div class="cardbtns">${browse?'':`<button class="cbtn addbtn" data-inc="${n}" title="Install">+</button>`}<button class="cbtn detailbtn" data-detail="${n}" title="Details" aria-label="Details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.3-4.3"/></svg></button></div>
+    </div>`;
+}
+function shiplistHTML(s, browse){
+  const nm=s.displayName||s.name, id=s.name.replace(/"/g,'&quot;');
+  const sel=!browse&&state.ship&&state.ship.name===s.name?' sel':'';
+  return `<div class="lrow shiprow${sel}${browse?' browse':''}"${browse?'':' draggable="true"'} ${browse?'data-shipinfo':'data-ship'}="${id}" title="${nm}">
+      <div class="lrow-left">
+        <div class="lrow-art">${artTile(s.thumbnail||s.sprite, mono2(nm), "var(--accent)")}</div>
+        <b class="lrow-nm">${nm}</b>
+        <div class="lrow-sub"><span class="chip fac">${FACLABEL(s.faction)}</span><span class="chip">Price ${priceK((s.attributes&&s.attributes.cost)||0)}</span></div>
+      </div>
+      <div class="lrow-stats">${_statGrid(shipStatPairs(s))}</div>
+    </div>`;
+}
 function renderCatalog(){
   const list=visibleOutfits().sort((a,b)=>{
     const ai=DATA.categoryOrder.indexOf(a.category), bi=DATA.categoryOrder.indexOf(b.category);
     return ai-bi || a.cost-b.cost || a.name.localeCompare(b.name);
   });
-  const per=_fitCount("catalog",128,157,8), pages=Math.max(1,Math.ceil(list.length/per));
+  const lst=state.partsList; el("catalog").classList.toggle("aslist",lst);
+  const per=lst?_rowCount("catalog",150,8):_fitCount("catalog",128,157,8), pages=Math.max(1,Math.ceil(list.length/per));
   state.catPage=_clampPage(state.catPage,pages);
   const pgi=list.slice(state.catPage*per,(state.catPage+1)*per);
-  el("catalog").innerHTML = pgi.length? pgi.map(o=>ocardHTML(o)).join("")
+  el("catalog").innerHTML = pgi.length? pgi.map(o=>lst?olistHTML(o):ocardHTML(o)).join("")
     : `<div class="empty">No outfits match. Raise the tech access or clear the search.</div>`;
   el("catalogPager").innerHTML=_pg(state.catPage,pages);
 }
@@ -985,10 +1035,11 @@ function renderPickerGrid(){
   const q=(state.pickerQ||"").toLowerCase();
   if(q) list=list.filter(s=>(s.displayName||s.name).toLowerCase().includes(q)||s.name.toLowerCase().includes(q));
   list.sort((a,b)=> a.category.localeCompare(b.category) || (a.displayName||a.name).localeCompare(b.displayName||b.name));
-  const per=_fitCount("pickerGrid",128,140,12), pages=Math.max(1,Math.ceil(list.length/per));
+  const lst=state.shipList; el("pickerGrid").classList.toggle("aslist",lst);
+  const per=lst?_rowCount("pickerGrid",150,8):_fitCount("pickerGrid",128,140,12), pages=Math.max(1,Math.ceil(list.length/per));
   state.pickPage=_clampPage(state.pickPage,pages);
   const pgi=list.slice(state.pickPage*per,(state.pickPage+1)*per);
-  el("pickerGrid").innerHTML = pgi.length ? pgi.map(s=>shipcellHTML(s)).join("") : `<div class="empty">No ships match.</div>`;
+  el("pickerGrid").innerHTML = pgi.length ? pgi.map(s=>lst?shiplistHTML(s):shipcellHTML(s)).join("") : `<div class="empty">No ships match.</div>`;
   el("pickerGridPager").innerHTML=_pg(state.pickPage,pages);
 }
 function shipcellHTML(s, browse){
@@ -1075,6 +1126,9 @@ function init(){
   let su=null; try{ su=localStorage.getItem("drydock-unreleased"); }catch(e){}
   state.showUnreleased = su==="1";
   el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
+  let pl=null,sl=null; try{ pl=localStorage.getItem("drydock-partslist"); sl=localStorage.getItem("drydock-shiplist"); }catch(e){}
+  state.partsList = pl==="1"; state.shipList = sl==="1";
+  el("partsListChk").checked=state.partsList; el("shipListChk").checked=state.shipList;
   renderCatbar(); renderPartsFac();
   loadFleet();
   const def = DATA.ships["Bactrian"]||DATA.ships["Falcon"]||DATA.ships["Leviathan"]||Object.values(DATA.ships)[0];
@@ -1128,6 +1182,8 @@ function init(){
     el("unrelBtn").setAttribute("aria-pressed", state.showUnreleased);
     renderPartsFac(); renderCatbar(); renderCatalog(); renderPickerFac(); renderPickerGrid(); if(document.body.dataset.panel==="shop")renderShop(); if(document.body.dataset.panel==="yard")renderYard();
   });
+  el("partsListChk").addEventListener("change",e=>{ state.partsList=e.target.checked; try{localStorage.setItem("drydock-partslist",state.partsList?"1":"0");}catch(x){} state.catPage=0; renderCatalog(); });
+  el("shipListChk").addEventListener("change",e=>{ state.shipList=e.target.checked; try{localStorage.setItem("drydock-shiplist",state.shipList?"1":"0");}catch(x){} state.pickPage=0; renderPickerGrid(); });
   el("viewShip").addEventListener("click",()=>setView("ship"));
   el("viewFleet").addEventListener("click",()=>setView("fleet"));
   el("viewInfo").addEventListener("click",()=>setView("info"));
@@ -1173,7 +1229,7 @@ function init(){
   document.addEventListener("click",e=>{ if(el("settings").classList.contains("open") && !e.target.closest("#settings") && !e.target.closest("#gearBtn")) el("settings").classList.remove("open"); });
 
   el("panelScrim").addEventListener("click",closePanels);
-  document.body.addEventListener("dragstart",e=>{ const oc=e.target.closest('.ocard'), sc=e.target.closest('.shipcell'); if(oc){ e.dataTransfer.setData("text/plain","o:"+oc.dataset.name); document.body.classList.add("dnd"); } else if(sc){ e.dataTransfer.setData("text/plain","s:"+sc.dataset.ship); document.body.classList.add("dnd"); } });
+  document.body.addEventListener("dragstart",e=>{ const oc=e.target.closest('.ocard,.orow'), sc=e.target.closest('.shipcell,.shiprow'); if(oc){ e.dataTransfer.setData("text/plain","o:"+oc.dataset.name); document.body.classList.add("dnd"); } else if(sc){ e.dataTransfer.setData("text/plain","s:"+sc.dataset.ship); document.body.classList.add("dnd"); } });
   document.body.addEventListener("dragend",()=>document.body.classList.remove("dnd"));
   document.addEventListener("dragover",e=>{ if(document.body.classList.contains("dnd") && !e.target.closest('.se-dock')) e.preventDefault(); });
   document.addEventListener("drop",e=>{ if(!document.body.classList.contains("dnd")) return; document.body.classList.remove("dnd"); if(e.target.closest('.se-dock')) return; e.preventDefault(); const d=e.dataTransfer.getData("text/plain"); if(!d) return; if(d[0]==="o"){ const nm=d.slice(2); if(DATA.outfits[nm]) add(nm,clickMult(e)); } else if(d[0]==="s"){ const nm=d.slice(2); if(DATA.ships[nm]) setShip(nm); } });

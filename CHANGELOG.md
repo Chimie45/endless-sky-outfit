@@ -11,6 +11,12 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.59 — 2026-06-13
+- Added two checkboxes in Settings ("Add Parts as a list" / "New Ship as a list") that switch either
+  dock menu from the card grid to a detailed list: each row shows the photo, name, race and price on
+  the left and the full attribute/weapon stats on the right, keeping the + (install) and magnifier
+  (details) buttons. The choice is remembered.
+
 ### v0.5.58 — 2026-06-13
 - Added Import from Save: a new button between the Tech slider and Share opens a modal where you can
   pick an Endless Sky save file (.txt) and import either just your flagship (into the Ship Editor) or
