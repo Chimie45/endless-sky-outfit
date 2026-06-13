@@ -24,6 +24,10 @@
     </div>
   </div>
   <div class="headact">
+    <button class="actbtn" id="importSaveBtn" title="Import a ship or fleet from an Endless Sky save file">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/></svg>
+      <span>Import Save</span>
+    </button>
     <button class="actbtn" id="shareTop" title="Copy a share message for this build">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
       <span>Share</span>
@@ -329,7 +333,7 @@
     <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
     <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.57 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.58 · ES data v<span id="ver"></span></div>
 </div>
 
 <div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
@@ -345,6 +349,33 @@
       <div class="cm-h">Licenses</div>
       <p>Endless Sky's source code is licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">GNU General Public License v3</a>.</p>
       <p>Endless Sky's art assets bundled here (sprites, thumbnails, planet landscapes &amp; sprites) are mostly licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC-BY-SA-4.0</a>: attribution to the Endless Sky authors and contributors is required, and derivatives keep the same license. A few assets use other free licenses · see the upstream <a href="https://github.com/endless-sky/endless-sky/blob/master/copyright" target="_blank" rel="noopener noreferrer">copyright</a> and <a href="https://github.com/endless-sky/endless-sky/blob/master/license" target="_blank" rel="noopener noreferrer">license</a> files for the full per-asset author credits.</p>
+    </div>
+  </div>
+</div>
+
+<div class="creditsmodal" id="importModal" role="dialog" aria-label="Import from save">
+  <div class="cm-panel">
+    <button class="linkbtn cm-x" id="importClose" type="button">Close</button>
+    <h2>Import from Save</h2>
+    <p>Load a ship or your whole fleet straight from an Endless Sky save file (a <code>.txt</code> from the game's <code>saves</code> folder). The file is read in your browser &mdash; nothing is uploaded anywhere.</p>
+    <div class="cm-sect">
+      <div class="cm-h">What to import</div>
+      <div class="imp-opts">
+        <label class="imp-opt"><input type="radio" name="impMode" value="flagship" checked><span class="imp-optmain">Flagship only</span><span class="imp-optsub">Loads your flagship into the Ship Editor</span></label>
+        <label class="imp-opt"><input type="radio" name="impMode" value="fleet"><span class="imp-optmain">Whole fleet</span><span class="imp-optsub">Imports every ship as a new saved fleet</span></label>
+      </div>
+    </div>
+    <div class="cm-sect">
+      <div class="cm-h">Save file</div>
+      <label class="imp-file" id="impDrop">
+        <input type="file" id="impFile" accept=".txt,text/plain" hidden>
+        <svg class="imp-fileic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>
+        <span class="imp-filetext" id="impFileText">Choose a save file&hellip;</span>
+      </label>
+      <div class="imp-summary" id="impSummary"></div>
+    </div>
+    <div class="imp-actions">
+      <button class="pbtn act" id="impGo" type="button" disabled>Import</button>
     </div>
   </div>
 </div>

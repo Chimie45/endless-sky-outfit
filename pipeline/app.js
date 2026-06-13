@@ -865,6 +865,74 @@ function shareBuildText(){ const h=buildToHash(); if(!h||!state.ship) return; co
   const msg="Check out my Endless Sky "+nm+" build on Drydock: "+url;
   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(msg).then(()=>showToast("Share message copied"),()=>prompt("Copy this:",msg)); }
   else prompt("Copy this:",msg); }
+// ---- import a ship / fleet from an Endless Sky save file (v0.5.58) ----
+function _saveToks(line){ const out=[]; const re=/"([^"]*)"|`([^`]*)`|(\S+)/g; let m; while((m=re.exec(line))){ out.push(m[1]!=null?m[1]:(m[2]!=null?m[2]:m[3])); } return out; }
+function parseSaveText(text){
+  const lines=String(text||"").split(/\r?\n/);
+  const ind=s=>{ let n=0; while(n<s.length && s[n]==="\t") n++; return n; };
+  let pilot=null, flagIdx=0; const ships=[]; const skipped=[];
+  for(let i=0;i<lines.length;i++){
+    if(ind(lines[i])!==0) continue;
+    const t=_saveToks(lines[i]); if(!t.length) continue;
+    if(t[0]==="pilot"){ pilot=t.slice(1).join(" "); continue; }
+    if(t[0]==="flagship index"){ flagIdx=parseInt(t[1],10)||0; continue; }
+    if(t[0]==="ship" && t.length>=2){
+      const model=t[1]; const blk={model, name:null, outfits:{}, valid:!!DATA.ships[model], n:0};
+      let j=i+1;
+      while(j<lines.length && (lines[j].trim()==="" || ind(lines[j])>=1)){
+        if(ind(lines[j])===1){
+          const t2=_saveToks(lines[j]);
+          if(t2[0]==="name" && t2.length>1){ blk.name=t2.slice(1).join(" "); }
+          else if(t2[0]==="outfits"){
+            let k=j+1;
+            while(k<lines.length && (lines[k].trim()==="" || ind(lines[k])>=2)){
+              if(ind(lines[k])===2){ const ot=_saveToks(lines[k]); if(ot.length){ const cnt=(ot.length>1 && /^-?\d+$/.test(ot[1]))?parseInt(ot[1],10):1; if(DATA.outfits[ot[0]] && cnt>0){ blk.outfits[ot[0]]=(blk.outfits[ot[0]]||0)+cnt; blk.n+=cnt; } } }
+              k++;
+            }
+            j=k; continue;
+          }
+        }
+        j++;
+      }
+      ships.push(blk); if(!blk.valid) skipped.push(model);
+      i=j-1;
+    }
+  }
+  return {pilot, flagIdx, ships, skipped};
+}
+function _impFlagshipOf(P){ return (P.ships[P.flagIdx] && P.ships[P.flagIdx].valid) ? P.ships[P.flagIdx] : P.ships.find(s=>s.valid)||null; }
+function _impSummarize(P){
+  const valid=P.ships.filter(s=>s.valid).length;
+  if(!valid) return {ok:false, html:"No recognizable ships in this file. Make sure it's an Endless Sky save (.txt)."};
+  const fs=_impFlagshipOf(P);
+  let h="<b>"+esc(P.pilot||"Pilot")+"</b> "+chr183+" "+valid+" ship"+(valid!==1?"s":"")+" recognized";
+  if(fs) h+=" "+chr183+" flagship: <b>"+esc(fs.name||fs.model)+"</b>";
+  if(P.skipped.length) h+=" "+chr183+" "+P.skipped.length+" unrecognized skipped";
+  return {ok:true, html:h};
+}
+function _impDo(mode){
+  const P=state._impParsed; if(!P||!P.ships.length) return;
+  if(mode==="fleet"){
+    const valid=P.ships.filter(s=>s.valid);
+    if(!valid.length){ showToast("No recognizable ships in that save"); return; }
+    const flagship=_impFlagshipOf(P);
+    const arr=valid.map(s=>{ const o={ship:s.model, outfits:{...s.outfits}}; if(s.name && s.name!==s.model) o.label=s.name; if(s===flagship) o.flag=true; return o; });
+    if(!arr.some(e=>e.flag) && arr.length) arr[0].flag=true;
+    const name=uniqueFleetName(P.pilot?(P.pilot+"’s fleet"):"Imported fleet");
+    state.fleets[name]=arr; state.fleetName=name; state.fleet=arr; state.fleetSel=-1; saveFleet();
+    el("importModal").classList.remove("open");
+    setView("fleet"); renderFleet();
+    showToast("Imported "+arr.length+" ships as “"+name+"”");
+  } else {
+    const fs=_impFlagshipOf(P);
+    if(!fs){ showToast("Couldn't read a ship from that save"); return; }
+    state.ship=DATA.ships[fs.model]; state.installed={...fs.outfits}; state.loadoutName="save";
+    el("importModal").classList.remove("open");
+    setView("ship"); renderAll(); if(typeof updateShipPickBtn==="function") updateShipPickBtn();
+    showToast("Imported flagship: "+(fs.name||fs.model));
+  }
+}
+const chr183="·";
 function importBuild(){ const str=prompt("Paste a build link or code:"); if(str==null) return;
   let p=null; try{ const m=String(str).match(/b=([^&\s]+)/); const code=m?m[1]:String(str).trim(); p=JSON.parse(decodeURIComponent(escape(atob(code)))); }catch(e){}
   if(!(p&&p.s&&DATA.ships[p.s])){ showToast("Couldn’t read that build link"); return; }
@@ -1018,10 +1086,19 @@ function init(){
   el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; state.pickPage=0; renderPickerGrid(); });
   el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;state.pickPage=0;renderPickerFac();renderPickerGrid();});
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);});
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); } });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); } });
   el("creditsBtn").addEventListener("click",()=>{ el("settings").classList.remove("open"); el("creditsModal").classList.add("open"); });
   el("creditsClose").addEventListener("click",()=>el("creditsModal").classList.remove("open"));
   el("creditsModal").addEventListener("click",e=>{ if(e.target===el("creditsModal")) el("creditsModal").classList.remove("open"); });
+  el("importSaveBtn").addEventListener("click",()=>{ state._impParsed=null; el("impFile").value=""; el("impFileText").innerHTML="Choose a save file&hellip;"; el("impSummary").innerHTML=""; el("impGo").disabled=true; el("settings").classList.remove("open"); el("importModal").classList.add("open"); });
+  el("importClose").addEventListener("click",()=>el("importModal").classList.remove("open"));
+  el("importModal").addEventListener("click",e=>{ if(e.target===el("importModal")) el("importModal").classList.remove("open"); });
+  el("impFile").addEventListener("change",e=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; el("impFileText").textContent=f.name; const rd=new FileReader();
+    rd.onload=()=>{ try{ const P=parseSaveText(String(rd.result||"")); state._impParsed=P; const sm=_impSummarize(P); el("impSummary").innerHTML=sm.html; el("impGo").disabled=!sm.ok; }
+      catch(err){ state._impParsed=null; el("impSummary").textContent="Couldn't read that file as a save."; el("impGo").disabled=true; } };
+    rd.onerror=()=>{ el("impSummary").textContent="Couldn't read that file."; el("impGo").disabled=true; };
+    rd.readAsText(f); });
+  el("impGo").addEventListener("click",()=>{ const r=document.querySelector('input[name=impMode]:checked'); _impDo(r?r.value:"flagship"); });
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("fleetAddBtn").addEventListener("click",addToFleet);

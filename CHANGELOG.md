@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.58 — 2026-06-13
+- Added Import from Save: a new button between the Tech slider and Share opens a modal where you can
+  pick an Endless Sky save file (.txt) and import either just your flagship (into the Ship Editor) or
+  your whole fleet (as a new saved fleet). The file is parsed entirely in-browser; nothing is uploaded.
+
 ### v0.5.57 — 2026-06-13
 - Bundled three missing outfit sprites that were showing fallback art: the Hai \"Benga\" Atomic
   Thruster, the Thruster (Comet Class), and the Successor Pulse Laser Turret. (A handful of v0.11.0
