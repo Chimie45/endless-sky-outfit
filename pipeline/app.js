@@ -36,7 +36,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0, partsList:false, shipList:false };
+let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0, partsList:false, shipList:false, partsSort:"cat", shipSort:"cat" };
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -532,11 +532,29 @@ function shiplistHTML(s, browse){
       <div class="lrow-stats">${_statGrid(shipStatPairs(s))}</div>
     </div>`;
 }
+function outfitSortVal(o,key){
+  const a=o.attributes||{}, w=o.weapon;
+  switch(key){
+    case "space": return Math.abs(num(a["outfit space"]));
+    case "weapon": return Math.abs(num(a["weapon capacity"]));
+    case "range": return (w&&w.velocity&&w.lifetime)?w.velocity*w.lifetime:0;
+    case "dps": return (w&&w.reload)?(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload:0;
+    case "heat": return w?num(w["firing heat"]):num(a["heat generation"]);
+    case "energy": return w?num(w["firing energy"]):(num(a["energy generation"])||num(a["energy capacity"]));
+    case "mass": return o.mass||0;
+    case "price": return o.cost||0;
+    default: return 0;
+  }
+}
+function sortOutfits(list){
+  const k=state.partsSort||"cat";
+  if(k==="name") return list.sort((a,b)=>a.name.localeCompare(b.name));
+  if(k==="race") return list.sort((a,b)=>(a.faction||"").localeCompare(b.faction||"")||a.name.localeCompare(b.name));
+  if(k==="cat") return list.sort((a,b)=>{ const ai=DATA.categoryOrder.indexOf(a.category),bi=DATA.categoryOrder.indexOf(b.category); return ai-bi||a.cost-b.cost||a.name.localeCompare(b.name); });
+  return list.sort((a,b)=> outfitSortVal(b,k)-outfitSortVal(a,k) || a.name.localeCompare(b.name));
+}
 function renderCatalog(){
-  const list=visibleOutfits().sort((a,b)=>{
-    const ai=DATA.categoryOrder.indexOf(a.category), bi=DATA.categoryOrder.indexOf(b.category);
-    return ai-bi || a.cost-b.cost || a.name.localeCompare(b.name);
-  });
+  const list=sortOutfits(visibleOutfits());
   const lst=state.partsList; el("catalog").classList.toggle("aslist",lst);
   let pgi, pages=1;
   if(lst){ pgi=list; state.catPage=0; }
@@ -1028,13 +1046,36 @@ function renderPickerFac(){
   el("pickerFac").innerHTML=items.map(it=>`<button class="fchip" data-fac="${it.f}" aria-pressed="${state.pickerFac===it.f}">${it.label}</button>`).join("");
   if(el("pickerFacPager")) el("pickerFacPager").innerHTML="";
 }
+function shipSortVal(s,key){
+  const a=s.attributes||{}, hp=s.hardpoints||{};
+  switch(key){
+    case "space": return num(a["outfit space"]);
+    case "weapon": return num(a["weapon capacity"]);
+    case "fuel": return num(a["fuel capacity"]);
+    case "bays": return Object.values(hp.bays||{}).reduce((x,y)=>x+y,0);
+    case "hull": return num(a.hull);
+    case "shields": return num(a.shields);
+    case "cargo": return num(a["cargo space"]);
+    case "crew": return num(a["required crew"])||num(a.bunks);
+    case "mass": return num(a.mass);
+    case "price": return num(a.cost);
+    default: return 0;
+  }
+}
+function sortShips(list){
+  const k=state.shipSort||"cat", nm=s=>s.displayName||s.name;
+  if(k==="name") return list.sort((a,b)=>nm(a).localeCompare(nm(b)));
+  if(k==="race") return list.sort((a,b)=>(a.faction||"").localeCompare(b.faction||"")||nm(a).localeCompare(nm(b)));
+  if(k==="cat") return list.sort((a,b)=>a.category.localeCompare(b.category)||nm(a).localeCompare(nm(b)));
+  return list.sort((a,b)=> shipSortVal(b,k)-shipSortVal(a,k) || nm(a).localeCompare(nm(b)));
+}
 function renderPickerGrid(){
   const byFac=shipsByFaction();
   let list=[];
   for(const f in byFac){ if(state.pickerFac==='all'||state.pickerFac===f) list.push(...byFac[f]); }
   const q=(state.pickerQ||"").toLowerCase();
   if(q) list=list.filter(s=>(s.displayName||s.name).toLowerCase().includes(q)||s.name.toLowerCase().includes(q));
-  list.sort((a,b)=> a.category.localeCompare(b.category) || (a.displayName||a.name).localeCompare(b.displayName||b.name));
+  sortShips(list);
   const lst=state.shipList; el("pickerGrid").classList.toggle("aslist",lst);
   let pgi, pages=1;
   if(lst){ pgi=list; state.pickPage=0; }
@@ -1129,6 +1170,9 @@ function init(){
   let pl=null,sl=null; try{ pl=localStorage.getItem("drydock-partslist"); sl=localStorage.getItem("drydock-shiplist"); }catch(e){}
   state.partsList = pl==="1"; state.shipList = sl==="1";
   el("partsListChk").checked=state.partsList; el("shipListChk").checked=state.shipList;
+  let ps=null,ss=null; try{ ps=localStorage.getItem("drydock-partssort"); ss=localStorage.getItem("drydock-shipsort"); }catch(e){}
+  state.partsSort=ps||"cat"; state.shipSort=ss||"cat";
+  el("partsSort").value=state.partsSort; el("shipSort").value=state.shipSort;
   renderCatbar(); renderPartsFac();
   loadFleet();
   const def = DATA.ships["Bactrian"]||DATA.ships["Falcon"]||DATA.ships["Leviathan"]||Object.values(DATA.ships)[0];
@@ -1184,6 +1228,8 @@ function init(){
   });
   el("partsListChk").addEventListener("change",e=>{ state.partsList=e.target.checked; try{localStorage.setItem("drydock-partslist",state.partsList?"1":"0");}catch(x){} state.catPage=0; renderCatalog(); });
   el("shipListChk").addEventListener("change",e=>{ state.shipList=e.target.checked; try{localStorage.setItem("drydock-shiplist",state.shipList?"1":"0");}catch(x){} state.pickPage=0; renderPickerGrid(); });
+  el("partsSort").addEventListener("change",e=>{ state.partsSort=e.target.value; try{localStorage.setItem("drydock-partssort",state.partsSort);}catch(x){} state.catPage=0; renderCatalog(); });
+  el("shipSort").addEventListener("change",e=>{ state.shipSort=e.target.value; try{localStorage.setItem("drydock-shipsort",state.shipSort);}catch(x){} state.pickPage=0; renderPickerGrid(); });
   el("viewShip").addEventListener("click",()=>setView("ship"));
   el("viewFleet").addEventListener("click",()=>setView("fleet"));
   el("viewInfo").addEventListener("click",()=>setView("info"));

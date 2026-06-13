@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.61 — 2026-06-13
+- Centered the part/ship photos in the list view (they were overflowing their frame and clipping).
+- Added a "Sort by" dropdown to both Add Parts and New Ship. Outfits: Category, Alphabetical, Race,
+  Outfit space, Weapon capacity, Range, DPS, Heat, Energy use, Mass, Price. Ships: Category,
+  Alphabetical, Race, Outfit space, Weapon capacity, Fuel, Bays, Hull, Shields, Cargo, Crew, Mass,
+  Price. The choice is remembered and applies to both the grid and list views.
+
 ### v0.5.60 — 2026-06-13
 - The list (wide) view for Add Parts and New Ship now shows every item in one continuous scroll with
   no pagination, instead of paging.

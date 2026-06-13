@@ -145,6 +145,19 @@
               <div class="grid-searchrow">
                 <input type="search" id="search" class="grid-search" placeholder="Search parts…" autocomplete="off">
                 <select id="partsFac" class="grid-facsel" title="Filter by race" aria-label="Filter by race"></select>
+                <select id="partsSort" class="grid-sortsel" title="Sort by" aria-label="Sort by">
+                  <option value="cat">⇅ Category</option>
+                  <option value="name">⇅ Alphabetical</option>
+                  <option value="race">⇅ Race</option>
+                  <option value="space">⇅ Outfit space</option>
+                  <option value="weapon">⇅ Weapon capacity</option>
+                  <option value="range">⇅ Range</option>
+                  <option value="dps">⇅ DPS</option>
+                  <option value="heat">⇅ Heat</option>
+                  <option value="energy">⇅ Energy use</option>
+                  <option value="mass">⇅ Mass</option>
+                  <option value="price">⇅ Price</option>
+                </select>
               </div>
               <div class="ogrid sp-grid" id="catalog"></div>
               <div class="grid-pager" id="catalogPager"></div>
@@ -158,7 +171,24 @@
               <div class="rail-pager" id="pickerFacPager"></div>
             </div>
             <div class="sp-gridwrap">
-              <input type="search" id="pickerSearch" class="grid-search" placeholder="Search ships…" autocomplete="off">
+              <div class="grid-searchrow">
+                <input type="search" id="pickerSearch" class="grid-search" placeholder="Search ships…" autocomplete="off">
+                <select id="shipSort" class="grid-sortsel" title="Sort by" aria-label="Sort by">
+                  <option value="cat">⇅ Category</option>
+                  <option value="name">⇅ Alphabetical</option>
+                  <option value="race">⇅ Race</option>
+                  <option value="space">⇅ Outfit space</option>
+                  <option value="weapon">⇅ Weapon capacity</option>
+                  <option value="fuel">⇅ Fuel</option>
+                  <option value="bays">⇅ Bays</option>
+                  <option value="hull">⇅ Hull</option>
+                  <option value="shields">⇅ Shields</option>
+                  <option value="cargo">⇅ Cargo</option>
+                  <option value="crew">⇅ Crew</option>
+                  <option value="mass">⇅ Mass</option>
+                  <option value="price">⇅ Price</option>
+                </select>
+              </div>
               <div class="shipgrid sp-grid" id="pickerGrid"></div>
               <div class="grid-pager" id="pickerGridPager"></div>
             </div>
@@ -340,7 +370,7 @@
     <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
     <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.60 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.61 · ES data v<span id="ver"></span></div>
 </div>
 
 <div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
