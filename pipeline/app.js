@@ -538,12 +538,12 @@ function renderCatalog(){
     return ai-bi || a.cost-b.cost || a.name.localeCompare(b.name);
   });
   const lst=state.partsList; el("catalog").classList.toggle("aslist",lst);
-  const per=lst?_rowCount("catalog",150,8):_fitCount("catalog",128,157,8), pages=Math.max(1,Math.ceil(list.length/per));
-  state.catPage=_clampPage(state.catPage,pages);
-  const pgi=list.slice(state.catPage*per,(state.catPage+1)*per);
+  let pgi, pages=1;
+  if(lst){ pgi=list; state.catPage=0; }
+  else { const per=_fitCount("catalog",128,157,8); pages=Math.max(1,Math.ceil(list.length/per)); state.catPage=_clampPage(state.catPage,pages); pgi=list.slice(state.catPage*per,(state.catPage+1)*per); }
   el("catalog").innerHTML = pgi.length? pgi.map(o=>lst?olistHTML(o):ocardHTML(o)).join("")
     : `<div class="empty">No outfits match. Raise the tech access or clear the search.</div>`;
-  el("catalogPager").innerHTML=_pg(state.catPage,pages);
+  el("catalogPager").innerHTML=lst?"":_pg(state.catPage,pages);
 }
 
 /* ---------- detail drawer ---------- */
@@ -1036,11 +1036,11 @@ function renderPickerGrid(){
   if(q) list=list.filter(s=>(s.displayName||s.name).toLowerCase().includes(q)||s.name.toLowerCase().includes(q));
   list.sort((a,b)=> a.category.localeCompare(b.category) || (a.displayName||a.name).localeCompare(b.displayName||b.name));
   const lst=state.shipList; el("pickerGrid").classList.toggle("aslist",lst);
-  const per=lst?_rowCount("pickerGrid",150,8):_fitCount("pickerGrid",128,140,12), pages=Math.max(1,Math.ceil(list.length/per));
-  state.pickPage=_clampPage(state.pickPage,pages);
-  const pgi=list.slice(state.pickPage*per,(state.pickPage+1)*per);
+  let pgi, pages=1;
+  if(lst){ pgi=list; state.pickPage=0; }
+  else { const per=_fitCount("pickerGrid",128,140,12); pages=Math.max(1,Math.ceil(list.length/per)); state.pickPage=_clampPage(state.pickPage,pages); pgi=list.slice(state.pickPage*per,(state.pickPage+1)*per); }
   el("pickerGrid").innerHTML = pgi.length ? pgi.map(s=>lst?shiplistHTML(s):shipcellHTML(s)).join("") : `<div class="empty">No ships match.</div>`;
-  el("pickerGridPager").innerHTML=_pg(state.pickPage,pages);
+  el("pickerGridPager").innerHTML=lst?"":_pg(state.pickPage,pages);
 }
 function shipcellHTML(s, browse){
   return `<button class="shipcell ${!browse&&state.ship&&state.ship.name===s.name?'sel':''}"${browse?'':' draggable="true"'} ${browse?'data-shipinfo':'data-ship'}="${s.name.replace(/"/g,'&quot;')}" title="${s.displayName||s.name}">

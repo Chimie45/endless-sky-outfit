@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.60 — 2026-06-13
+- The list (wide) view for Add Parts and New Ship now shows every item in one continuous scroll with
+  no pagination, instead of paging.
+
 ### v0.5.59 — 2026-06-13
 - Added two checkboxes in Settings ("Add Parts as a list" / "New Ship as a list") that switch either
   dock menu from the card grid to a detailed list: each row shows the photo, name, race and price on
