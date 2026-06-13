@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.62 — 2026-06-13
+- List-view rows now vertically center the photo: the left block is centered as a group and the
+  photo is the middle element (name above, race/price below), so the image sits at the row center
+  instead of hugging the top.
+
 ### v0.5.61 — 2026-06-13
 - Centered the part/ship photos in the list view (they were overflowing their frame and clipping).
 - Added a "Sort by" dropdown to both Add Parts and New Ship. Outfits: Category, Alphabetical, Race,

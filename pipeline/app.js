@@ -512,8 +512,8 @@ function olistHTML(o, browse){
   const n=o.name.replace(/"/g,'&quot;');
   return `<div class="lrow orow${browse?' browse':''}"${browse?'':' draggable="true"'} data-name="${n}">
       <div class="lrow-left">
-        <div class="lrow-art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
         <b class="lrow-nm" data-detail="${n}" title="${o.name}">${o.name}</b>
+        <div class="lrow-art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
         <div class="lrow-sub"><span class="chip fac">${FACLABEL(o.faction)}</span><span class="chip">Price ${priceK(o.cost)}</span></div>
       </div>
       <div class="lrow-stats">${_statGrid(outfitStatPairs(o))}</div>
@@ -525,8 +525,8 @@ function shiplistHTML(s, browse){
   const sel=!browse&&state.ship&&state.ship.name===s.name?' sel':'';
   return `<div class="lrow shiprow${sel}${browse?' browse':''}"${browse?'':' draggable="true"'} ${browse?'data-shipinfo':'data-ship'}="${id}" title="${nm}">
       <div class="lrow-left">
-        <div class="lrow-art">${artTile(s.thumbnail||s.sprite, mono2(nm), "var(--accent)")}</div>
         <b class="lrow-nm">${nm}</b>
+        <div class="lrow-art">${artTile(s.thumbnail||s.sprite, mono2(nm), "var(--accent)")}</div>
         <div class="lrow-sub"><span class="chip fac">${FACLABEL(s.faction)}</span><span class="chip">Price ${priceK((s.attributes&&s.attributes.cost)||0)}</span></div>
       </div>
       <div class="lrow-stats">${_statGrid(shipStatPairs(s))}</div>

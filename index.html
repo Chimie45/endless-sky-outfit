@@ -1003,13 +1003,13 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 .lrow:hover{border-color:var(--accent2)}
 .lrow.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .lrow.browse{cursor:default}
-.lrow-left{flex:none;width:134px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.lrow-left{flex:none;width:134px;display:flex;flex-direction:column;gap:6px;min-width:0;justify-content:center}
 .lrow-art{height:76px;border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative;flex:none}
 .lrow-art .tile{position:absolute;inset:0;border-radius:7px;display:grid;place-items:center}
 .lrow-art .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:7px}
 .lrow-art .tile .fb{width:100%;height:100%}
 .lrow-nm{color:var(--bright);font-weight:600;font-size:12px;line-height:1.2;cursor:pointer;white-space:normal;word-break:break-word}
-.lrow-sub{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto}
+.lrow-sub{display:flex;flex-wrap:wrap;gap:4px}
 .lrow-stats{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;gap:0 16px;align-content:start;overflow:hidden;padding-right:32px}
 .lrow-stats .rs{display:flex;justify-content:space-between;gap:8px;min-width:0;font-size:10.5px;line-height:1.62;border-bottom:1px solid var(--line)}
 .lrow-stats .rs-k{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:capitalize}
@@ -1390,7 +1390,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
     <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.61 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.62 · ES data v<span id="ver"></span></div>
 </div>
 
 <div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
@@ -1955,8 +1955,8 @@ function olistHTML(o, browse){
   const n=o.name.replace(/"/g,'&quot;');
   return `<div class="lrow orow${browse?' browse':''}"${browse?'':' draggable="true"'} data-name="${n}">
       <div class="lrow-left">
-        <div class="lrow-art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
         <b class="lrow-nm" data-detail="${n}" title="${o.name}">${o.name}</b>
+        <div class="lrow-art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
         <div class="lrow-sub"><span class="chip fac">${FACLABEL(o.faction)}</span><span class="chip">Price ${priceK(o.cost)}</span></div>
       </div>
       <div class="lrow-stats">${_statGrid(outfitStatPairs(o))}</div>
@@ -1968,8 +1968,8 @@ function shiplistHTML(s, browse){
   const sel=!browse&&state.ship&&state.ship.name===s.name?' sel':'';
   return `<div class="lrow shiprow${sel}${browse?' browse':''}"${browse?'':' draggable="true"'} ${browse?'data-shipinfo':'data-ship'}="${id}" title="${nm}">
       <div class="lrow-left">
-        <div class="lrow-art">${artTile(s.thumbnail||s.sprite, mono2(nm), "var(--accent)")}</div>
         <b class="lrow-nm">${nm}</b>
+        <div class="lrow-art">${artTile(s.thumbnail||s.sprite, mono2(nm), "var(--accent)")}</div>
         <div class="lrow-sub"><span class="chip fac">${FACLABEL(s.faction)}</span><span class="chip">Price ${priceK((s.attributes&&s.attributes.cost)||0)}</span></div>
       </div>
       <div class="lrow-stats">${_statGrid(shipStatPairs(s))}</div>
