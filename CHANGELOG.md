@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.56 — 2026-06-13
+- Added a race filter dropdown next to the Add Parts search, so you can quickly narrow outfits to a
+  single race (Hai, Wanderer, etc.). The race list respects the spoiler/tech gate — hidden races only
+  appear once their tech tier is unlocked.
+
 ### v0.5.55 — 2026-06-13
 - Fixed items with quotes in their names (e.g. the Hai \"Basrem\"/\"Baellie\" atomic engines) being
   wrongly hidden from Add Parts: an outfit/ship is now treated as obtainable if it is sold anywhere or

@@ -964,3 +964,8 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 
 /* v0.5.52: galaxy background images behind the map */
 .map-svg .map-bg-img{opacity:.5}
+
+/* ---- v0.5.56: race filter dropdown beside the parts search ---- */
+.sp-gridwrap .grid-searchrow{display:flex;gap:8px;margin-bottom:8px;flex:none}
+.sp-gridwrap .grid-searchrow .grid-search{flex:1;width:auto;margin-bottom:0;min-width:0}
+.sp-gridwrap .grid-facsel{flex:none;width:148px;height:34px;min-width:0}

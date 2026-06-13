@@ -1079,6 +1079,7 @@ function init(){
     renderPartsFac(); renderCatbar(); renderCatalog(); renderPickerFac(); renderPickerGrid();
     if(state.info==="shop")renderShop(); if(state.info==="yard")renderYard(); if(state.info==="map")renderGalaxyMap(); if(state.info==="planets")renderPlanets();});
   el("search").addEventListener("input",e=>{state.q=e.target.value;state.catPage=0;renderCatalog();});
+  el("partsFac").addEventListener("change",e=>{state.faction=e.target.value;state.catPage=0;renderCatalog();});
   el("catbar").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; state.catPage=0;
     if(b.classList.contains("subrow")){ state.cat=b.dataset.cat; state.series=b.dataset.series; renderCatbar(); renderCatalog(); return; }
     if(b.dataset.cat===""){ state.cat=""; state.series="All"; state.openCat=""; renderCatbar(); renderCatalog(); return; }

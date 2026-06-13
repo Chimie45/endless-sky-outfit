@@ -967,6 +967,11 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 
 /* v0.5.52: galaxy background images behind the map */
 .map-svg .map-bg-img{opacity:.5}
+
+/* ---- v0.5.56: race filter dropdown beside the parts search ---- */
+.sp-gridwrap .grid-searchrow{display:flex;gap:8px;margin-bottom:8px;flex:none}
+.sp-gridwrap .grid-searchrow .grid-search{flex:1;width:auto;margin-bottom:0;min-width:0}
+.sp-gridwrap .grid-facsel{flex:none;width:148px;height:34px;min-width:0}
 </style>
 <div id="app">
 
@@ -1104,7 +1109,10 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
               <div class="rail-pager" id="catbarPager"></div>
             </div>
             <div class="sp-gridwrap">
-              <input type="search" id="search" class="grid-search" placeholder="Search parts…" autocomplete="off">
+              <div class="grid-searchrow">
+                <input type="search" id="search" class="grid-search" placeholder="Search parts…" autocomplete="off">
+                <select id="partsFac" class="grid-facsel" title="Filter by race" aria-label="Filter by race"></select>
+              </div>
               <div class="ogrid sp-grid" id="catalog"></div>
               <div class="grid-pager" id="catalogPager"></div>
             </div>
@@ -1292,7 +1300,7 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
     <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.55 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.5.56 · ES data v<span id="ver"></span></div>
 </div>
 
 <div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
@@ -2397,6 +2405,7 @@ function init(){
     renderPartsFac(); renderCatbar(); renderCatalog(); renderPickerFac(); renderPickerGrid();
     if(state.info==="shop")renderShop(); if(state.info==="yard")renderYard(); if(state.info==="map")renderGalaxyMap(); if(state.info==="planets")renderPlanets();});
   el("search").addEventListener("input",e=>{state.q=e.target.value;state.catPage=0;renderCatalog();});
+  el("partsFac").addEventListener("change",e=>{state.faction=e.target.value;state.catPage=0;renderCatalog();});
   el("catbar").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; state.catPage=0;
     if(b.classList.contains("subrow")){ state.cat=b.dataset.cat; state.series=b.dataset.series; renderCatbar(); renderCatalog(); return; }
     if(b.dataset.cat===""){ state.cat=""; state.series="All"; state.openCat=""; renderCatbar(); renderCatalog(); return; }
