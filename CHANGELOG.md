@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.55 — 2026-06-13
+- Fixed items with quotes in their names (e.g. the Hai \"Basrem\"/\"Baellie\" atomic engines) being
+  wrongly hidden from Add Parts: an outfit/ship is now treated as obtainable if it is sold anywhere or
+  used on a ship, and the parser counts references via the tokenizer (handles quoted/backtick names).
+
 ### v0.5.54 — 2026-06-13
 - Add multiples at once with modifier keys on + / - / Install / drag, matching the game: Shift x5,
   Ctrl x20, Ctrl+Shift x100, Alt x500, Alt+Shift x2500, Ctrl+Alt x10000, Ctrl+Shift+Alt x50000.

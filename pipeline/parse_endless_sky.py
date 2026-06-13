@@ -203,15 +203,17 @@ for nm, s in ships.items():
 # name appears only once (its own definition) and nowhere else - no shipyard,
 # fleet, variant, mission or default loadout - is unreleased / unused content
 # (e.g. the "Emperor Beetle"). Anything referenced elsewhere is obtainable.
+# Count references by TOKENIZING each line (handles names wrapped in `backticks` or "quotes",
+# including names that themselves contain quotes like `"Baellie" Atomic Engines`). Anything
+# sold at an outfitter/shipyard is also obtainable regardless of reference count.
 _ref = collections.Counter()
-_q = re.compile(r'"([^"]*)"')
 for _p in files:
     with open(_p, encoding="utf-8", errors="replace") as _fh:
         for _line in _fh:
             if _line.lstrip().startswith("#"): continue
-            for _m in _q.finditer(_line): _ref[_m.group(1)] += 1
-for _nm, _s in ships.items():   _s["obtainable"] = _ref[_nm] > 1
-for _nm, _o in outfits.items(): _o["obtainable"] = _ref[_nm] > 1
+            for _t in tokenize(_line.strip()): _ref[_t] += 1
+for _nm, _s in ships.items():   _s["obtainable"] = _ref[_nm] > 1 or _nm in buy_ship
+for _nm, _o in outfits.items(): _o["obtainable"] = _ref[_nm] > 1 or _nm in buy_outfit
 
 OUTFIT_ORDER = ["Guns","Turrets","Secondary Weapons","Ammunition","Systems","Power","Engines","Hand to Hand","Unique","Minerals","Special","Licenses"]
 out = {"version":VERSION,"generated":"endless-sky stable data pipeline (phase 0)","categoryOrder":OUTFIT_ORDER,"ships":ships,"outfits":outfits,"systems":systems}
