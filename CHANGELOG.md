@@ -11,6 +11,11 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.57 — 2026-06-13
+- Bundled three missing outfit sprites that were showing fallback art: the Hai \"Benga\" Atomic
+  Thruster, the Thruster (Comet Class), and the Successor Pulse Laser Turret. (A handful of v0.11.0
+  exotic alien ships still use fallback art — their sprites aren’t in the current image set.)
+
 ### v0.5.56 — 2026-06-13
 - Added a race filter dropdown next to the Add Parts search, so you can quickly narrow outfits to a
   single race (Hai, Wanderer, etc.). The race list respects the spoiler/tech gate — hidden races only
