@@ -1001,6 +1001,75 @@ function _impDo(mode){
   }
 }
 const chr183="·";
+// ---- Edit Save: rename ships and write back to the save file (v0.5.63) ----
+function esQuote(v){ if(v==="") return '""'; if(/[\s"`#]/.test(v)){ return v.indexOf('"')===-1 ? '"'+v+'"' : '`'+v+'`'; } return v; }
+function downloadText(filename, text){ const blob=new Blob([text],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=filename||"save.txt"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); }
+function parseSaveShips(text){
+  const lines=text.split(/\r?\n/);
+  const ind=s=>{ let n=0; while(n<s.length && s[n]==="\t") n++; return n; };
+  let pilot=null; const ships=[];
+  for(let i=0;i<lines.length;i++){
+    if(ind(lines[i])!==0) continue;
+    const t=_saveToks(lines[i]); if(!t.length) continue;
+    if(t[0]==="pilot"){ pilot=t.slice(1).join(" "); continue; }
+    if(t[0]==="ship" && t.length>=2){
+      const model=t[1]; let name=null, uuid=null, nameIdx=-1; let j=i+1;
+      while(j<lines.length && (lines[j].trim()==="" || ind(lines[j])>=1)){
+        if(ind(lines[j])===1){ const tt=_saveToks(lines[j]);
+          if(tt[0]==="name" && nameIdx<0){ name=tt.slice(1).join(" "); nameIdx=j; }
+          else if(tt[0]==="uuid" && !uuid){ uuid=tt[1]; } }
+        j++;
+      }
+      ships.push({model, name:name||"", uuid, nameIdx}); i=j-1;
+    }
+  }
+  return {pilot, lines, ships};
+}
+function esLoad(text, fname, writable){
+  const P=parseSaveShips(text);
+  state._esLines=P.lines; state._esNL=text.indexOf("\r\n")>=0?"\r\n":"\n"; state._esFile=fname; state._esWritable=writable;
+  el("esOpenInfo").innerHTML='<b>'+esc(P.pilot||fname)+'</b> '+chr183+' '+P.ships.length+' ship'+(P.ships.length!==1?'s':'')+(writable?'':' '+chr183+' will download an edited copy');
+  el("esList").innerHTML = P.ships.length ? P.ships.map(s=>{
+    const d=DATA.ships[s.model]; const art=artTile(d?(d.thumbnail||d.sprite):null, mono2(s.model), d?'var(--accent)':'var(--dim)');
+    const nm=esc(s.name);
+    return '<div class="es-row"><div class="es-thumb">'+art+'</div><span class="es-model" title="'+esc(s.model)+'">'+esc(s.model)+'</span>'
+      +'<input class="es-name" type="text" spellcheck="false" value="'+nm+'" data-idx="'+s.nameIdx+'" data-orig="'+nm+'"></div>';
+  }).join('') : '<div class="rs-empty">No ships found in this file. Is it an Endless Sky save?</div>';
+  el("esSaveBtn").disabled = !P.ships.length;
+  el("esSaveBtn").textContent = writable ? "Save to file" : "Download edited save";
+}
+async function esOpen(){
+  if(window.showOpenFilePicker){
+    let handle;
+    try{ [handle]=await window.showOpenFilePicker({multiple:false, types:[{description:"Endless Sky save", accept:{"text/plain":[".txt"]}}]}); }
+    catch(e){ return; }
+    try{ const file=await handle.getFile(); const text=await file.text(); state._esHandle=handle; esLoad(text, file.name, true); }
+    catch(e){ showToast("Couldn't read that file"); }
+  } else {
+    state._esHandle=null; el("esFileInput").value=""; el("esFileInput").click();
+  }
+}
+async function esSave(){
+  if(!state._esLines) return;
+  const inputs=[...document.querySelectorAll("#esList .es-name")];
+  let changed=0, blank=0;
+  for(const inp of inputs){ const idx=+inp.dataset.idx; if(idx<0) continue; const val=inp.value.trim(); if(!val){ blank++; continue; }
+    const line="\tname "+esQuote(val); if(state._esLines[idx]!==line){ state._esLines[idx]=line; changed++; } }
+  if(blank){ showToast(blank+" ship name"+(blank!==1?"s":"")+" left blank — fill them in"); return; }
+  if(!changed){ showToast("No name changes to save"); return; }
+  const out=state._esLines.join(state._esNL||"\n");
+  if(state._esHandle){
+    if(!confirm("Overwrite “"+(state._esFile||"the save")+"” with "+changed+" renamed ship"+(changed!==1?"s":"")+"?\n\nMake sure Endless Sky is closed first.")) return;
+    try{ const w=await state._esHandle.createWritable(); await w.write(out); await w.close();
+      inputs.forEach(inp=>{ inp.dataset.orig=inp.value.trim(); inp.classList.remove("changed"); });
+      showToast("Saved "+changed+" rename"+(changed!==1?"s":"")+" to the file"); }
+    catch(e){ showToast("Couldn't write the file (permission denied?)"); }
+  } else {
+    downloadText(state._esFile||"save.txt", out);
+    inputs.forEach(inp=>{ inp.dataset.orig=inp.value.trim(); inp.classList.remove("changed"); });
+    showToast("Downloaded edited save ("+changed+" renamed)");
+  }
+}
 function importBuild(){ const str=prompt("Paste a build link or code:"); if(str==null) return;
   let p=null; try{ const m=String(str).match(/b=([^&\s]+)/); const code=m?m[1]:String(str).trim(); p=JSON.parse(decodeURIComponent(escape(atob(code)))); }catch(e){}
   if(!(p&&p.s&&DATA.ships[p.s])){ showToast("Couldn’t read that build link"); return; }
@@ -1184,7 +1253,7 @@ function init(){
   el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; state.pickPage=0; renderPickerGrid(); });
   el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;state.pickPage=0;renderPickerFac();renderPickerGrid();});
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);});
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); } });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); el("editSaveModal").classList.remove("open"); } });
   el("creditsBtn").addEventListener("click",()=>{ el("settings").classList.remove("open"); el("creditsModal").classList.add("open"); });
   el("creditsClose").addEventListener("click",()=>el("creditsModal").classList.remove("open"));
   el("creditsModal").addEventListener("click",e=>{ if(e.target===el("creditsModal")) el("creditsModal").classList.remove("open"); });
@@ -1197,6 +1266,13 @@ function init(){
     rd.onerror=()=>{ el("impSummary").textContent="Couldn't read that file."; el("impGo").disabled=true; };
     rd.readAsText(f); });
   el("impGo").addEventListener("click",()=>{ const r=document.querySelector('input[name=impMode]:checked'); _impDo(r?r.value:"flagship"); });
+  el("editSaveBtn").addEventListener("click",()=>{ state._esLines=null; state._esHandle=null; el("esOpenInfo").textContent=""; el("esList").innerHTML=""; el("esSaveBtn").disabled=true; el("esSaveBtn").textContent="Save to file"; el("settings").classList.remove("open"); el("editSaveModal").classList.add("open"); });
+  el("editSaveClose").addEventListener("click",()=>el("editSaveModal").classList.remove("open"));
+  el("editSaveModal").addEventListener("click",e=>{ if(e.target===el("editSaveModal")) el("editSaveModal").classList.remove("open"); });
+  el("esOpenBtn").addEventListener("click",esOpen);
+  el("esFileInput").addEventListener("change",e=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ state._esHandle=null; esLoad(String(rd.result||""), f.name, false); }; rd.onerror=()=>showToast("Couldn't read that file"); rd.readAsText(f); });
+  el("esSaveBtn").addEventListener("click",esSave);
+  el("esList").addEventListener("input",e=>{ const inp=e.target.closest(".es-name"); if(inp) inp.classList.toggle("changed", inp.value.trim()!==inp.dataset.orig); });
   el("variants").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-load]");if(!b)return;loadLoadout(b.dataset.load);});
   el("fleetAddBtn").addEventListener("click",addToFleet);

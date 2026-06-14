@@ -11,6 +11,13 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.63 — 2026-06-13
+- Added Edit Save: a new header button opens a save file (.txt), lists every ship with an editable
+  name field, and writes the renames back. In Chrome/Edge it overwrites the file in place (with a
+  permission prompt); other browsers download an edited copy to drop into the saves folder. Only each
+  ship’s name line is changed (matched precisely), so the rest of the save is preserved exactly.
+  Close Endless Sky before editing — it rewrites the save while running.
+
 ### v0.5.62 — 2026-06-13
 - List-view rows now vertically center the photo: the left block is centered as a group and the
   photo is the middle element (name above, race/price below), so the image sits at the row center
