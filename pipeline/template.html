@@ -146,9 +146,9 @@
                 <input type="search" id="search" class="grid-search" placeholder="Search parts…" autocomplete="off">
                 <select id="partsFac" class="grid-facsel" title="Filter by race" aria-label="Filter by race"></select>
                 <select id="partsSort" class="grid-sortsel" title="Sort by" aria-label="Sort by">
-                  <option value="cat">⇅ Category</option>
-                  <option value="name">⇅ Alphabetical</option>
-                  <option value="race">⇅ Race</option>
+                  <option value="cat">Category</option>
+                  <option value="name">Alphabetical</option>
+                  <option value="race">Race</option>
                   <optgroup label="Size">
                     <option value="space">Outfit space (low→high)</option>
                     <option value="netspace">Net outfit space (low→high)</option>
@@ -175,8 +175,9 @@
                     <option value="thrustspace">Thrust / space</option>
                     <option value="turnspace">Turn / space</option>
                   </optgroup>
-                  <option value="price">⇅ Price (low→high)</option>
+                  <option value="price">Price (low→high)</option>
                 </select>
+                <button id="partsSortDir" class="grid-sortdir" type="button" title="Reverse sort order" aria-label="Reverse sort order">↓</button>
               </div>
               <div class="ogrid sp-grid" id="catalog"></div>
               <div class="grid-pager" id="catalogPager"></div>
@@ -193,24 +194,31 @@
               <div class="grid-searchrow">
                 <input type="search" id="pickerSearch" class="grid-search" placeholder="Search ships…" autocomplete="off">
                 <select id="shipSort" class="grid-sortsel" title="Sort by" aria-label="Sort by">
-                  <option value="cat">⇅ Category</option>
-                  <option value="name">⇅ Alphabetical</option>
-                  <option value="race">⇅ Race</option>
-                  <option value="space">⇅ Outfit space</option>
-                  <option value="weapon">⇅ Weapon capacity</option>
-                  <option value="fuel">⇅ Fuel</option>
-                  <option value="bays">⇅ Bays (total)</option>
-                  <option value="guns">⇅ Gun ports</option>
-                  <option value="turrets">⇅ Turret mounts</option>
-                  <option value="fighters">⇅ Fighter bays</option>
-                  <option value="drones">⇅ Drone bays</option>
-                  <option value="hull">⇅ Hull</option>
-                  <option value="shields">⇅ Shields</option>
-                  <option value="cargo">⇅ Cargo</option>
-                  <option value="crew">⇅ Crew</option>
-                  <option value="mass">⇅ Mass (low→high)</option>
-                  <option value="price">⇅ Price (low→high)</option>
+                  <option value="cat">Category</option>
+                  <option value="name">Alphabetical</option>
+                  <option value="race">Race</option>
+                  <optgroup label="Capacity">
+                    <option value="space">Outfit space</option>
+                    <option value="weapon">Weapon capacity</option>
+                    <option value="cargo">Cargo</option>
+                    <option value="fuel">Fuel</option>
+                    <option value="crew">Crew</option>
+                    <option value="mass">Mass (low→high)</option>
+                  </optgroup>
+                  <optgroup label="Hardpoints">
+                    <option value="bays">Bays (total)</option>
+                    <option value="guns">Gun ports</option>
+                    <option value="turrets">Turret mounts</option>
+                    <option value="fighters">Fighter bays</option>
+                    <option value="drones">Drone bays</option>
+                  </optgroup>
+                  <optgroup label="Defense">
+                    <option value="hull">Hull</option>
+                    <option value="shields">Shields</option>
+                  </optgroup>
+                  <option value="price">Price (low→high)</option>
                 </select>
+                <button id="shipSortDir" class="grid-sortdir" type="button" title="Reverse sort order" aria-label="Reverse sort order">↓</button>
               </div>
               <div class="shipgrid sp-grid" id="pickerGrid"></div>
               <div class="grid-pager" id="pickerGridPager"></div>

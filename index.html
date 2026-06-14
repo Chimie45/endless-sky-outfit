@@ -1067,6 +1067,11 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
 .hm-refs{display:flex;flex-direction:column;gap:7px}
 .hm-refs .fleet-select{height:32px}
 .hm-hint{font-size:9px;letter-spacing:0;text-transform:none;color:var(--dim);font-weight:400}
+
+/* ---- v0.6.0: reverse-sort direction button ---- */
+.sp-gridwrap .grid-sortdir{flex:none;width:34px;height:34px;border:1px solid var(--line2);background:var(--panel2);color:var(--bright);border-radius:8px;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sp-gridwrap .grid-sortdir:hover{border-color:var(--accent2);color:var(--accent2)}
+.sp-gridwrap .grid-sortdir:active{transform:translateY(1px)}
 </style>
 <div id="app">
 
@@ -1212,9 +1217,9 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
                 <input type="search" id="search" class="grid-search" placeholder="Search parts…" autocomplete="off">
                 <select id="partsFac" class="grid-facsel" title="Filter by race" aria-label="Filter by race"></select>
                 <select id="partsSort" class="grid-sortsel" title="Sort by" aria-label="Sort by">
-                  <option value="cat">⇅ Category</option>
-                  <option value="name">⇅ Alphabetical</option>
-                  <option value="race">⇅ Race</option>
+                  <option value="cat">Category</option>
+                  <option value="name">Alphabetical</option>
+                  <option value="race">Race</option>
                   <optgroup label="Size">
                     <option value="space">Outfit space (low→high)</option>
                     <option value="netspace">Net outfit space (low→high)</option>
@@ -1241,8 +1246,9 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
                     <option value="thrustspace">Thrust / space</option>
                     <option value="turnspace">Turn / space</option>
                   </optgroup>
-                  <option value="price">⇅ Price (low→high)</option>
+                  <option value="price">Price (low→high)</option>
                 </select>
+                <button id="partsSortDir" class="grid-sortdir" type="button" title="Reverse sort order" aria-label="Reverse sort order">↓</button>
               </div>
               <div class="ogrid sp-grid" id="catalog"></div>
               <div class="grid-pager" id="catalogPager"></div>
@@ -1259,24 +1265,31 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
               <div class="grid-searchrow">
                 <input type="search" id="pickerSearch" class="grid-search" placeholder="Search ships…" autocomplete="off">
                 <select id="shipSort" class="grid-sortsel" title="Sort by" aria-label="Sort by">
-                  <option value="cat">⇅ Category</option>
-                  <option value="name">⇅ Alphabetical</option>
-                  <option value="race">⇅ Race</option>
-                  <option value="space">⇅ Outfit space</option>
-                  <option value="weapon">⇅ Weapon capacity</option>
-                  <option value="fuel">⇅ Fuel</option>
-                  <option value="bays">⇅ Bays (total)</option>
-                  <option value="guns">⇅ Gun ports</option>
-                  <option value="turrets">⇅ Turret mounts</option>
-                  <option value="fighters">⇅ Fighter bays</option>
-                  <option value="drones">⇅ Drone bays</option>
-                  <option value="hull">⇅ Hull</option>
-                  <option value="shields">⇅ Shields</option>
-                  <option value="cargo">⇅ Cargo</option>
-                  <option value="crew">⇅ Crew</option>
-                  <option value="mass">⇅ Mass (low→high)</option>
-                  <option value="price">⇅ Price (low→high)</option>
+                  <option value="cat">Category</option>
+                  <option value="name">Alphabetical</option>
+                  <option value="race">Race</option>
+                  <optgroup label="Capacity">
+                    <option value="space">Outfit space</option>
+                    <option value="weapon">Weapon capacity</option>
+                    <option value="cargo">Cargo</option>
+                    <option value="fuel">Fuel</option>
+                    <option value="crew">Crew</option>
+                    <option value="mass">Mass (low→high)</option>
+                  </optgroup>
+                  <optgroup label="Hardpoints">
+                    <option value="bays">Bays (total)</option>
+                    <option value="guns">Gun ports</option>
+                    <option value="turrets">Turret mounts</option>
+                    <option value="fighters">Fighter bays</option>
+                    <option value="drones">Drone bays</option>
+                  </optgroup>
+                  <optgroup label="Defense">
+                    <option value="hull">Hull</option>
+                    <option value="shields">Shields</option>
+                  </optgroup>
+                  <option value="price">Price (low→high)</option>
                 </select>
+                <button id="shipSortDir" class="grid-sortdir" type="button" title="Reverse sort order" aria-label="Reverse sort order">↓</button>
               </div>
               <div class="shipgrid sp-grid" id="pickerGrid"></div>
               <div class="grid-pager" id="pickerGridPager"></div>
@@ -1585,7 +1598,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0, partsList:false, shipList:false, partsSort:"cat", shipSort:"cat", netCoolRef:"Small Heat Shunt", netEnergyRef:"Boulder Reactor" };
+let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0, partsList:false, shipList:false, partsSort:"cat", shipSort:"cat", partsRev:false, shipRev:false, netCoolRef:"Small Heat Shunt", netEnergyRef:"Boulder Reactor" };
 
 // ---- patch notes (newest first); each +0.0.1 bundles ~7-10 changes ----
 const PATCH_NOTES=[
@@ -1598,8 +1611,8 @@ const PATCH_NOTES=[
       "<b>Race filter</b> in Add Parts, spoiler-aware.",
       "<b>Add multiples</b> with modifier keys (Shift ×5, Ctrl ×20, Alt ×500, and combos), respecting ship limits.",
       "<b>Information Deck</b> — galaxy map, planet pages and outfitter / shipyard browsers, all spoiler-gated.",
-      "<b>Deeper stats</b> — weapons now show split shield / hull / combined DPS, shots-per-second, extra damage types, and energy &amp; heat <i>per second</i>; generators show in-game per-second output; space costs show as absolute values.",
-      "<b>Smarter sorting</b> — direction-aware (“less is better” stats sort low→high), plus new keys: split DPS, shots/sec, energy &amp; heat/sec, energy gen, cooling, and ship gun ports / turret mounts / fighter &amp; drone bays.",
+      "<b>Deeper stats</b> — weapons now show split shield / hull / combined DPS, shots-per-second, extra damage types, and energy &amp; heat <i>per second</i>; generators show in-game per-second output; space costs show as absolute values. An outfit’s full info page now lists every stat.",
+      "<b>Smarter sorting</b> — a reverse-direction button next to the sort menu, sensible defaults (“less is better” stats start low→high), plus new keys: split DPS, shots/sec, energy &amp; heat/sec, energy gen, cooling, and ship gun ports / turret mounts / fighter &amp; drone bays.",
       "<b>Net outfit space &amp; efficiency</b> — a weapon’s heat &amp; energy cost folded into its effective outfit space (matching the game’s heat math, with reference outfits adjustable in Settings), plus per-space ratios: DPS / space, DPS / net space, thrust &amp; turn / space, cooling &amp; energy-gen / space — all sortable.",
       "<b>Fixes</b> — quote-named outfits (Hai atomic engines, etc.) now show up; list photos centered; missing outfit sprites bundled.",
       "<b>Patch notes</b> — this panel.",
@@ -2103,6 +2116,8 @@ function outfitStatPairs(o){
       if(w["firing energy"]) wp.push(["energy/s", FMT(num(w["firing energy"])*sps)]);
       if(w["firing heat"]) wp.push(["heat/s", FMT(num(w["firing heat"])*sps)]);
     }
+    if(w["anti-missile"]) wp.push(["anti-missile", FMT(num(w["anti-missile"]))]);
+    if(w["tractor beam"]) wp.push(["tractor", FMT(num(w["tractor beam"]))]);
     if(w.velocity&&w.lifetime) wp.push(["range", FMT(w.velocity*w.lifetime)]);
   }
   for(const k in a){
@@ -2187,13 +2202,13 @@ function outfitSortVal(o,key){
 // keys where smaller is better -> ascending
 const ASC_OUTFIT=new Set(["space","weapon","engine","fenergy","fheat","mass","price","netspace"]);
 function sortOutfits(list){
-  const k=state.partsSort||"cat";
-  if(k==="name") return list.sort((a,b)=>a.name.localeCompare(b.name));
-  if(k==="race") return list.sort((a,b)=>(a.faction||"").localeCompare(b.faction||"")||a.name.localeCompare(b.name));
-  if(k==="cat") return list.sort((a,b)=>{ const ai=DATA.categoryOrder.indexOf(a.category),bi=DATA.categoryOrder.indexOf(b.category); return ai-bi||a.cost-b.cost||a.name.localeCompare(b.name); });
-  const dir=ASC_OUTFIT.has(k)?1:-1;
+  const k=state.partsSort||"cat", rev=state.partsRev?-1:1;
+  if(k==="name") return list.sort((a,b)=>rev*a.name.localeCompare(b.name));
+  if(k==="race") return list.sort((a,b)=>rev*((a.faction||"").localeCompare(b.faction||"")||a.name.localeCompare(b.name)));
+  if(k==="cat") return list.sort((a,b)=>rev*((DATA.categoryOrder.indexOf(a.category)-DATA.categoryOrder.indexOf(b.category))||(a.cost-b.cost)||a.name.localeCompare(b.name)));
+  const dir=(ASC_OUTFIT.has(k)?1:-1)*rev;
   return list.sort((a,b)=>{ const av=outfitSortVal(a,k), bv=outfitSortVal(b,k);
-    // zero-value items (e.g. non-weapons under a weapon sort) sink to the bottom
+    // zero-value items (e.g. non-weapons under a weapon sort) always sink to the bottom
     if(!av&&bv) return 1; if(av&&!bv) return -1;
     return dir*(av-bv) || a.name.localeCompare(b.name); });
 }
@@ -2211,33 +2226,36 @@ function renderCatalog(){
 /* ---------- detail drawer ---------- */
 function openDetail(nm){
   const o=DATA.outfits[nm]; if(!o) return;
-  const a=o.attributes;
-  const skip=new Set(["mass"]);
-  const kv=Object.entries(a).filter(([k,v])=>typeof v==="number"&&v!==0&&!skip.has(k))
-    .sort((x,y)=>x[0].localeCompare(y[0]))
-    .map(([k,v])=>`<div class="k">${k}</div><div class="v mono">${FMT(v)}</div>`).join("");
+  const a=o.attributes||{}, w=o.weapon;
+  const dash='<div class="k">—</div><div class="v">—</div>';
+  const row=(k,v)=>`<div class="k">${esc(k)}</div><div class="v mono">${typeof v==="number"?FMT(v):esc(String(v))}</div>`;
+  // 1) computed stats (same engine as the list view) — minus mass (shown in the header)
+  const stats=outfitStatPairs(o).filter(p=>p[0]!=="mass").map(p=>row(p[0],p[1])).join("");
+  // 2) every raw weapon property
   let wk="";
-  if(o.weapon){ const w=o.weapon;
-    const rows=[["shield damage",w["shield damage"]],["hull damage",w["hull damage"]],
-      ["reload (frames)",w.reload],["firing energy",w["firing energy"]],["firing heat",w["firing heat"]],
-      ["velocity",w.velocity],["range",w.velocity&&w.lifetime?w.velocity*w.lifetime:0]];
-    wk=`<div class="eyebrow" style="margin-top:14px">Weapon</div><div class="kv">`+
-      rows.filter(r=>r[1]).map(r=>`<div class="k">${r[0]}</div><div class="v mono">${FMT(r[1])}</div>`).join("")+`</div>`;
+  if(w){
+    const wr=Object.entries(w).filter(([k,v])=>(typeof v==="number"&&v!==0)||(typeof v==="string"&&v.length))
+      .sort((x,y)=>x[0].localeCompare(y[0])).map(([k,v])=>row(k,v)).join("");
+    if(wr) wk=`<div class="eyebrow" style="margin-top:14px">Weapon (raw)</div><div class="kv">${wr}</div>`;
   }
+  // 3) every raw attribute (signed), minus internal flags + mass
+  const kv=Object.entries(a).filter(([k,v])=>typeof v==="number"&&v!==0&&k!=="mass"&&!SKIP_ATTR.has(k))
+    .sort((x,y)=>x[0].localeCompare(y[0])).map(([k,v])=>row(k,v)).join("");
   const sold=o.soldAt||[];
   const soldHTML = sold.length
     ? `<div class="soldlist">${sold.slice().sort((a,b)=>(a.planet||"").localeCompare(b.planet||"")).map(s=>`<div class="p"><b>${esc(s.planet)}</b>${s.system?` <small>· ${esc(s.system)}</small>`:''}</div>`).join("")}</div>`
     : `<div class="note">Not sold at any outfitter — this is loot / mission-only / starting equipment.</div>`;
   const heroURL=imgURL(o.thumbnail);
   el("drawerBody").innerHTML=`
-    <div class="eyebrow">${o.category} · ${o.faction}</div>
-    <h2>${nm}</h2>
+    <div class="eyebrow">${esc(o.category)} · ${esc(o.faction)}</div>
+    <h2>${esc(nm)}</h2>
     ${heroURL?`<div class="tile hero"><img src="${heroURL}" alt="" onerror="this.parentNode.style.display='none'"></div>`:""}
     <div class="kv"><div class="k">cost</div><div class="v mono">${MONEY(o.cost)}</div>
       <div class="k">mass</div><div class="v mono">${FMT(o.mass)} t</div></div>
     ${o.description?`<div class="desc">${o.description}</div>`:""}
-    <div class="eyebrow">Attributes</div><div class="kv">${kv||'<div class="k">—</div><div class="v">—</div>'}</div>
+    <div class="eyebrow">Stats</div><div class="kv">${stats||dash}</div>
     ${wk}
+    <div class="eyebrow" style="margin-top:14px">Attributes (raw)</div><div class="kv">${kv||dash}</div>
     <div class="eyebrow" style="margin-top:14px">Sold at (${sold.length})</div>
     ${soldHTML}`;
   { const inst=el("drawerInstall"); if(inst){ const allow=document.body.dataset.view==="ship"&&state.ship; inst.dataset.inc=nm; inst.style.display=allow?"":"none"; } }
@@ -2781,15 +2799,18 @@ function shipSortVal(s,key){
 }
 const ASC_SHIP=new Set(["mass","price"]);
 function sortShips(list){
-  const k=state.shipSort||"cat", nm=s=>s.displayName||s.name;
-  if(k==="name") return list.sort((a,b)=>nm(a).localeCompare(nm(b)));
-  if(k==="race") return list.sort((a,b)=>(a.faction||"").localeCompare(b.faction||"")||nm(a).localeCompare(nm(b)));
-  if(k==="cat") return list.sort((a,b)=>a.category.localeCompare(b.category)||nm(a).localeCompare(nm(b)));
-  const dir=ASC_SHIP.has(k)?1:-1;
+  const k=state.shipSort||"cat", nm=s=>s.displayName||s.name, rev=state.shipRev?-1:1;
+  if(k==="name") return list.sort((a,b)=>rev*nm(a).localeCompare(nm(b)));
+  if(k==="race") return list.sort((a,b)=>rev*((a.faction||"").localeCompare(b.faction||"")||nm(a).localeCompare(nm(b))));
+  if(k==="cat") return list.sort((a,b)=>rev*(a.category.localeCompare(b.category)||nm(a).localeCompare(nm(b))));
+  const dir=(ASC_SHIP.has(k)?1:-1)*rev;
   return list.sort((a,b)=>{ const av=shipSortVal(a,k), bv=shipSortVal(b,k);
     if(!av&&bv) return 1; if(av&&!bv) return -1;
     return dir*(av-bv) || nm(a).localeCompare(nm(b)); });
 }
+function partsAsc(){ const k=state.partsSort; const base=(k==="name"||k==="race"||k==="cat")?true:ASC_OUTFIT.has(k); return state.partsRev?!base:base; }
+function shipAsc(){ const k=state.shipSort; const base=(k==="name"||k==="race"||k==="cat")?true:ASC_SHIP.has(k); return state.shipRev?!base:base; }
+function updateSortDirBtns(){ const a=el("partsSortDir"), b=el("shipSortDir"); if(a) a.textContent=partsAsc()?"↑":"↓"; if(b) b.textContent=shipAsc()?"↑":"↓"; }
 function renderPickerGrid(){
   const byFac=shipsByFaction();
   let list=[];
@@ -2891,9 +2912,9 @@ function init(){
   let pl=null,sl=null; try{ pl=localStorage.getItem("drydock-partslist"); sl=localStorage.getItem("drydock-shiplist"); }catch(e){}
   state.partsList = pl==="1"; state.shipList = sl==="1";
   el("partsListChk").checked=state.partsList; el("shipListChk").checked=state.shipList;
-  let ps=null,ss=null; try{ ps=localStorage.getItem("drydock-partssort"); ss=localStorage.getItem("drydock-shipsort"); }catch(e){}
-  state.partsSort=ps||"cat"; state.shipSort=ss||"cat";
-  el("partsSort").value=state.partsSort; el("shipSort").value=state.shipSort;
+  let ps=null,ss=null,pr=null,sr=null; try{ ps=localStorage.getItem("drydock-partssort"); ss=localStorage.getItem("drydock-shipsort"); pr=localStorage.getItem("drydock-partsrev"); sr=localStorage.getItem("drydock-shiprev"); }catch(e){}
+  state.partsSort=ps||"cat"; state.shipSort=ss||"cat"; state.partsRev=pr==="1"; state.shipRev=sr==="1";
+  el("partsSort").value=state.partsSort; el("shipSort").value=state.shipSort; updateSortDirBtns();
   let ncr=null,ner=null; try{ ncr=localStorage.getItem("drydock-netcool"); ner=localStorage.getItem("drydock-netenergy"); }catch(e){}
   if(ncr&&DATA.outfits[ncr]) state.netCoolRef=ncr;
   if(ner&&DATA.outfits[ner]) state.netEnergyRef=ner;
@@ -2964,8 +2985,10 @@ function init(){
   });
   el("partsListChk").addEventListener("change",e=>{ state.partsList=e.target.checked; try{localStorage.setItem("drydock-partslist",state.partsList?"1":"0");}catch(x){} state.catPage=0; renderCatalog(); });
   el("shipListChk").addEventListener("change",e=>{ state.shipList=e.target.checked; try{localStorage.setItem("drydock-shiplist",state.shipList?"1":"0");}catch(x){} state.pickPage=0; renderPickerGrid(); });
-  el("partsSort").addEventListener("change",e=>{ state.partsSort=e.target.value; try{localStorage.setItem("drydock-partssort",state.partsSort);}catch(x){} state.catPage=0; renderCatalog(); });
-  el("shipSort").addEventListener("change",e=>{ state.shipSort=e.target.value; try{localStorage.setItem("drydock-shipsort",state.shipSort);}catch(x){} state.pickPage=0; renderPickerGrid(); });
+  el("partsSort").addEventListener("change",e=>{ state.partsSort=e.target.value; try{localStorage.setItem("drydock-partssort",state.partsSort);}catch(x){} updateSortDirBtns(); state.catPage=0; renderCatalog(); });
+  el("shipSort").addEventListener("change",e=>{ state.shipSort=e.target.value; try{localStorage.setItem("drydock-shipsort",state.shipSort);}catch(x){} updateSortDirBtns(); state.pickPage=0; renderPickerGrid(); });
+  el("partsSortDir").addEventListener("click",()=>{ state.partsRev=!state.partsRev; try{localStorage.setItem("drydock-partsrev",state.partsRev?"1":"0");}catch(x){} updateSortDirBtns(); state.catPage=0; renderCatalog(); });
+  el("shipSortDir").addEventListener("click",()=>{ state.shipRev=!state.shipRev; try{localStorage.setItem("drydock-shiprev",state.shipRev?"1":"0");}catch(x){} updateSortDirBtns(); state.pickPage=0; renderPickerGrid(); });
   el("netCoolSel").addEventListener("change",e=>{ state.netCoolRef=e.target.value; try{localStorage.setItem("drydock-netcool",state.netCoolRef);}catch(x){} renderCatalog(); });
   el("netEnergySel").addEventListener("change",e=>{ state.netEnergyRef=e.target.value; try{localStorage.setItem("drydock-netenergy",state.netEnergyRef);}catch(x){} renderCatalog(); });
   el("viewShip").addEventListener("click",()=>setView("ship"));

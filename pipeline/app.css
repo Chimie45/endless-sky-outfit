@@ -1064,3 +1064,8 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
 .hm-refs{display:flex;flex-direction:column;gap:7px}
 .hm-refs .fleet-select{height:32px}
 .hm-hint{font-size:9px;letter-spacing:0;text-transform:none;color:var(--dim);font-weight:400}
+
+/* ---- v0.6.0: reverse-sort direction button ---- */
+.sp-gridwrap .grid-sortdir{flex:none;width:34px;height:34px;border:1px solid var(--line2);background:var(--panel2);color:var(--bright);border-radius:8px;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sp-gridwrap .grid-sortdir:hover{border-color:var(--accent2);color:var(--accent2)}
+.sp-gridwrap .grid-sortdir:active{transform:translateY(1px)}
