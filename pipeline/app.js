@@ -36,7 +36,7 @@ const CAT_COLOR = {
   "Unique":"#ffd76b","Licenses":"#8fa0bb"
 };
 
-let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0, partsList:false, shipList:false, partsSort:"cat", shipSort:"cat" };
+let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0, partsList:false, shipList:false, partsSort:"cat", shipSort:"cat", netCoolRef:"Small Heat Shunt", netEnergyRef:"Boulder Reactor" };
 
 // ---- patch notes (newest first); each +0.0.1 bundles ~7-10 changes ----
 const PATCH_NOTES=[
@@ -51,14 +51,19 @@ const PATCH_NOTES=[
       "<b>Information Deck</b> — galaxy map, planet pages and outfitter / shipyard browsers, all spoiler-gated.",
       "<b>Deeper stats</b> — weapons now show split shield / hull / combined DPS, shots-per-second, extra damage types, and energy &amp; heat <i>per second</i>; generators show in-game per-second output; space costs show as absolute values.",
       "<b>Smarter sorting</b> — direction-aware (“less is better” stats sort low→high), plus new keys: split DPS, shots/sec, energy &amp; heat/sec, energy gen, cooling, and ship gun ports / turret mounts / fighter &amp; drone bays.",
+      "<b>Net outfit space &amp; efficiency</b> — a weapon’s heat &amp; energy cost folded into its effective outfit space (matching the game’s heat math, with reference outfits adjustable in Settings), plus per-space ratios: DPS / space, DPS / net space, thrust &amp; turn / space, cooling &amp; energy-gen / space — all sortable.",
       "<b>Fixes</b> — quote-named outfits (Hai atomic engines, etc.) now show up; list photos centered; missing outfit sprites bundled.",
       "<b>Patch notes</b> — this panel.",
-    ],
-    soon:[
-      "<b>Net outfit space</b> — fold a weapon’s heat &amp; energy cost into its effective outfit space (heat-weighted, with adjustable reference outfits in Settings), plus efficiency ratios (DPS per net space, thrust per space, etc.).",
     ] },
 ];
 const LATEST_PATCH = PATCH_NOTES[0].v;
+function fillRefSelects(){
+  const opt=(o,sel)=>`<option value="${o.name.replace(/"/g,'&quot;')}"${o.name===sel?' selected':''}>${esc(o.name)}</option>`;
+  const cool=Object.values(DATA.outfits).filter(o=>(num(o.attributes.cooling)+num(o.attributes["active cooling"]))>0 && num(o.attributes["outfit space"])<0).sort((a,b)=>a.name.localeCompare(b.name));
+  const en=Object.values(DATA.outfits).filter(o=>num(o.attributes["energy generation"])>0 && num(o.attributes["outfit space"])<0).sort((a,b)=>a.name.localeCompare(b.name));
+  if(el("netCoolSel")) el("netCoolSel").innerHTML=cool.map(o=>opt(o,state.netCoolRef)).join("");
+  if(el("netEnergySel")) el("netEnergySel").innerHTML=en.map(o=>opt(o,state.netEnergyRef)).join("");
+}
 function renderPatchNotes(){
   el("patchBody").innerHTML = PATCH_NOTES.map(p=>{
     let h='<div class="pn-rel"><div class="pn-head"><span class="pn-v">v'+p.v+'</span>'+(p.title?'<span class="pn-title">'+esc(p.title)+'</span>':'')+'<span class="pn-date">'+esc(p.date)+'</span></div>';
@@ -522,6 +527,19 @@ const SPACEKEYS=new Set(["outfit space","weapon capacity","engine capacity","gun
 const SKIP_ATTR=new Set(["index","unplunderable","installable","map","minable"]);
 function shotsPerSec(w){ return (w&&w.reload)? 60/w.reload : 0; }
 function weaponDPS(o){ const w=o&&o.weapon; if(!w) return {c:0,s:0,h:0}; const sps=shotsPerSec(w); const s=num(w["shield damage"])*sps, h=num(w["hull damage"])*sps; return {c:s+h, s, h, sps}; }
+// net outfit space: base space + space needed to offset a weapon's heat & energy (consistent units),
+// using settings-chosen reference outfits as the cooling/energy-per-space yardstick.
+function _refPerSpace(name, keys){ const o=DATA.outfits[name]; if(!o) return 0; const sp=Math.abs(num(o.attributes["outfit space"])); if(!sp) return 0; let v=0; for(const k of keys) v+=num(o.attributes[k]); return v/sp; }
+function coolPerSpace(){ return _refPerSpace(state.netCoolRef||"Small Heat Shunt",["cooling","active cooling"]); }
+function enPerSpace(){ return _refPerSpace(state.netEnergyRef||"Boulder Reactor",["energy generation"]); }
+function netOutfitSpace(o){
+  const a=o.attributes||{}, w=o.weapon, base=Math.abs(num(a["outfit space"]));
+  if(!w||!w.reload) return base;
+  const heatPF=num(w["firing heat"])/w.reload, enPF=num(w["firing energy"])/w.reload;
+  const cps=coolPerSpace(), eps=enPerSpace();
+  const cool=(cps>0&&heatPF>0)?heatPF/cps:0, en=(eps>0&&enPF>0)?enPF/eps:0;
+  return base+cool+en;
+}
 function outfitStatPairs(o){
   const a=o.attributes||{}, w=o.weapon, lead=[], wp=[], gen=[], attrs=[];
   if(o.mass) lead.push(["mass", FMT(o.mass)+" t"]);
@@ -545,7 +563,19 @@ function outfitStatPairs(o){
     else attrs.push([k, FMT(v)]);
   }
   attrs.sort((x,y)=>x[0].localeCompare(y[0]));
-  return lead.concat(wp, gen, attrs);
+  // efficiency ratios (per outfit space) + net space
+  const sp=Math.abs(num(a["outfit space"])), eff=[];
+  if(w&&w.reload&&sp){
+    const sps=shotsPerSec(w), cdps=(num(w["shield damage"])+num(w["hull damage"]))*sps, net=netOutfitSpace(o);
+    eff.push(["net space", FMT(net)]);
+    if(cdps){ eff.push(["dps/space", FMT(cdps/sp)]); if(net) eff.push(["dps/net sp", FMT(cdps/net)]); }
+  } else if(sp){
+    if(a.thrust) eff.push(["thrust/space", FMT(num(a.thrust)/sp)]);
+    if(a.turn) eff.push(["turn/space", FMT(num(a.turn)/sp)]);
+    if(a.cooling||a["active cooling"]) eff.push(["cooling/space", FMT((num(a.cooling)+num(a["active cooling"]))*60/sp)]);
+    if(a["energy generation"]) eff.push(["energy gen/space", FMT(num(a["energy generation"])*60/sp)]);
+  }
+  return lead.concat(wp, eff, gen, attrs);
 }
 function shipStatPairs(s){
   const a=s.attributes||{}, hp=s.hardpoints||{}, out=[];
@@ -595,13 +625,18 @@ function outfitSortVal(o,key){
     case "fheat": return num(w&&w["firing heat"])*sps;
     case "egen": return num(a["energy generation"])*60;
     case "cool": return (num(a["cooling"])+num(a["active cooling"]))*60;
+    case "netspace": return netOutfitSpace(o);
+    case "dpsspace": { const sp=Math.abs(num(a["outfit space"])); return sp?(num(w&&w["shield damage"])+num(w&&w["hull damage"]))*sps/sp:0; }
+    case "dpsnet": { const net=netOutfitSpace(o); return net?(num(w&&w["shield damage"])+num(w&&w["hull damage"]))*sps/net:0; }
+    case "thrustspace": { const sp=Math.abs(num(a["outfit space"])); return sp?num(a.thrust)/sp:0; }
+    case "turnspace": { const sp=Math.abs(num(a["outfit space"])); return sp?num(a.turn)/sp:0; }
     case "mass": return o.mass||0;
     case "price": return o.cost||0;
     default: return 0;
   }
 }
 // keys where smaller is better -> ascending
-const ASC_OUTFIT=new Set(["space","weapon","engine","fenergy","fheat","mass","price"]);
+const ASC_OUTFIT=new Set(["space","weapon","engine","fenergy","fheat","mass","price","netspace"]);
 function sortOutfits(list){
   const k=state.partsSort||"cat";
   if(k==="name") return list.sort((a,b)=>a.name.localeCompare(b.name));
@@ -1310,6 +1345,10 @@ function init(){
   let ps=null,ss=null; try{ ps=localStorage.getItem("drydock-partssort"); ss=localStorage.getItem("drydock-shipsort"); }catch(e){}
   state.partsSort=ps||"cat"; state.shipSort=ss||"cat";
   el("partsSort").value=state.partsSort; el("shipSort").value=state.shipSort;
+  let ncr=null,ner=null; try{ ncr=localStorage.getItem("drydock-netcool"); ner=localStorage.getItem("drydock-netenergy"); }catch(e){}
+  if(ncr&&DATA.outfits[ncr]) state.netCoolRef=ncr;
+  if(ner&&DATA.outfits[ner]) state.netEnergyRef=ner;
+  fillRefSelects();
   renderCatbar(); renderPartsFac();
   loadFleet();
   const def = DATA.ships["Bactrian"]||DATA.ships["Falcon"]||DATA.ships["Leviathan"]||Object.values(DATA.ships)[0];
@@ -1378,6 +1417,8 @@ function init(){
   el("shipListChk").addEventListener("change",e=>{ state.shipList=e.target.checked; try{localStorage.setItem("drydock-shiplist",state.shipList?"1":"0");}catch(x){} state.pickPage=0; renderPickerGrid(); });
   el("partsSort").addEventListener("change",e=>{ state.partsSort=e.target.value; try{localStorage.setItem("drydock-partssort",state.partsSort);}catch(x){} state.catPage=0; renderCatalog(); });
   el("shipSort").addEventListener("change",e=>{ state.shipSort=e.target.value; try{localStorage.setItem("drydock-shipsort",state.shipSort);}catch(x){} state.pickPage=0; renderPickerGrid(); });
+  el("netCoolSel").addEventListener("change",e=>{ state.netCoolRef=e.target.value; try{localStorage.setItem("drydock-netcool",state.netCoolRef);}catch(x){} renderCatalog(); });
+  el("netEnergySel").addEventListener("change",e=>{ state.netEnergyRef=e.target.value; try{localStorage.setItem("drydock-netenergy",state.netEnergyRef);}catch(x){} renderCatalog(); });
   el("viewShip").addEventListener("click",()=>setView("ship"));
   el("viewFleet").addEventListener("click",()=>setView("fleet"));
   el("viewInfo").addEventListener("click",()=>setView("info"));

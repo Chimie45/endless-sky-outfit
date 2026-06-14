@@ -149,19 +149,32 @@
                   <option value="cat">⇅ Category</option>
                   <option value="name">⇅ Alphabetical</option>
                   <option value="race">⇅ Race</option>
-                  <option value="space">⇅ Outfit space (low→high)</option>
-                  <option value="weapon">⇅ Weapon capacity (low→high)</option>
-                  <option value="engine">⇅ Engine capacity (low→high)</option>
-                  <option value="cdps">⇅ Combined DPS</option>
-                  <option value="sdps">⇅ Shield DPS</option>
-                  <option value="hdps">⇅ Hull DPS</option>
-                  <option value="shots">⇅ Shots / sec</option>
-                  <option value="range">⇅ Range</option>
-                  <option value="fenergy">⇅ Energy use / sec (low→high)</option>
-                  <option value="fheat">⇅ Heat / sec (low→high)</option>
-                  <option value="egen">⇅ Energy gen / sec</option>
-                  <option value="cool">⇅ Cooling / sec</option>
-                  <option value="mass">⇅ Mass (low→high)</option>
+                  <optgroup label="Size">
+                    <option value="space">Outfit space (low→high)</option>
+                    <option value="netspace">Net outfit space (low→high)</option>
+                    <option value="weapon">Weapon capacity (low→high)</option>
+                    <option value="engine">Engine capacity (low→high)</option>
+                    <option value="mass">Mass (low→high)</option>
+                  </optgroup>
+                  <optgroup label="Damage">
+                    <option value="cdps">Combined DPS</option>
+                    <option value="sdps">Shield DPS</option>
+                    <option value="hdps">Hull DPS</option>
+                    <option value="shots">Shots / sec</option>
+                    <option value="range">Range</option>
+                  </optgroup>
+                  <optgroup label="Cost / output (per sec)">
+                    <option value="fenergy">Energy use / sec (low→high)</option>
+                    <option value="fheat">Heat / sec (low→high)</option>
+                    <option value="egen">Energy gen / sec</option>
+                    <option value="cool">Cooling / sec</option>
+                  </optgroup>
+                  <optgroup label="Efficiency (per space)">
+                    <option value="dpsspace">DPS / outfit space</option>
+                    <option value="dpsnet">DPS / net space</option>
+                    <option value="thrustspace">Thrust / space</option>
+                    <option value="turnspace">Turn / space</option>
+                  </optgroup>
                   <option value="price">⇅ Price (low→high)</option>
                 </select>
               </div>
@@ -374,6 +387,13 @@
     <div class="hm-checks">
       <label class="hm-check"><input type="checkbox" id="partsListChk"><span>Add Parts as a list</span></label>
       <label class="hm-check"><input type="checkbox" id="shipListChk"><span>New Ship as a list</span></label>
+    </div>
+  </div>
+  <div class="setrow">
+    <label>Net-space references <span class="hm-hint">(cooling / energy yardstick for "net outfit space")</span></label>
+    <div class="hm-refs">
+      <select id="netCoolSel" class="fleet-select" title="Cooling reference outfit" aria-label="Cooling reference outfit"></select>
+      <select id="netEnergySel" class="fleet-select" title="Energy reference outfit" aria-label="Energy reference outfit"></select>
     </div>
   </div>
   <div class="setrow">

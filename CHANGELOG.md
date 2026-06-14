@@ -22,11 +22,15 @@ lives in the in-app Patch notes (Settings → What's new). Shipped so far in thi
 - **Add multiples** with modifier keys (Shift ×5 / Ctrl ×20 / Alt ×500 / combos), limit-aware.
 - **Information Deck** — galaxy map, planet pages, outfitter/shipyard browsers (spoiler-gated).
 - **Fixes** — quote-named outfits now appear; list photos centered; missing sprites bundled.
+- **Deeper stats** — weapons show split shield/hull/combined DPS, shots/sec, extra damage types, and
+  firing energy & heat per second; generators show in-game per-second values; space costs absolute.
+- **Smarter sorting** — direction-aware (less-is-better → low→high) + new keys incl. split DPS,
+  shots/sec, energy & heat/sec, energy gen, cooling, efficiency ratios, and ship hardpoint/bay counts.
+- **Net outfit space & efficiency** — a weapon's heat & energy cost folded into its effective outfit
+  space (consistent units, matching the game's heat math; reference outfits adjustable in Settings →
+  Net-space references), plus per-space ratios (DPS/space, DPS/net space, thrust & turn/space,
+  cooling & energy-gen/space), all sortable.
 - **Patch-notes tracker** (this).
-
-Roadmap still to land in this batch (the Thorndeux stat-analysis work): weapons hull/shield/combined
-DPS + shots/energy/heat per second; generators shown per-second; sort-direction fixes + sort by
-hardpoint/bay counts; and the **net outfit space** metric with efficiency ratios.
 
 ## v0.5 — Scale-to-fit layout
 

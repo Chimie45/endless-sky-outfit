@@ -1059,3 +1059,8 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 body.has-newpatch #patchDot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:5px;vertical-align:middle}
 .headact .actbtn.icon{position:relative}
 body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--panel)}
+
+/* ---- v0.6.0: net-space reference selects in settings ---- */
+.hm-refs{display:flex;flex-direction:column;gap:7px}
+.hm-refs .fleet-select{height:32px}
+.hm-hint{font-size:9px;letter-spacing:0;text-transform:none;color:var(--dim);font-weight:400}
