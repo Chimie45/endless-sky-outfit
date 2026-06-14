@@ -11,6 +11,10 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ## v0.5 — Scale-to-fit layout
 
+### v0.5.64 — 2026-06-13
+- Moved the save ship-renamer out of the header: removed the "Edit Save" header button and added an
+  "Edit Ship Names" button to the Fleet Editor menu, which opens the same renamer.
+
 ### v0.5.63 — 2026-06-13
 - Added Edit Save: a new header button opens a save file (.txt), lists every ship with an editable
   name field, and writes the renames back. In Chrome/Edge it overwrites the file in place (with a

@@ -1266,7 +1266,7 @@ function init(){
     rd.onerror=()=>{ el("impSummary").textContent="Couldn't read that file."; el("impGo").disabled=true; };
     rd.readAsText(f); });
   el("impGo").addEventListener("click",()=>{ const r=document.querySelector('input[name=impMode]:checked'); _impDo(r?r.value:"flagship"); });
-  el("editSaveBtn").addEventListener("click",()=>{ state._esLines=null; state._esHandle=null; el("esOpenInfo").textContent=""; el("esList").innerHTML=""; el("esSaveBtn").disabled=true; el("esSaveBtn").textContent="Save to file"; el("settings").classList.remove("open"); el("editSaveModal").classList.add("open"); });
+  el("fleetEditNames").addEventListener("click",()=>{ state._esLines=null; state._esHandle=null; el("esOpenInfo").textContent=""; el("esList").innerHTML=""; el("esSaveBtn").disabled=true; el("esSaveBtn").textContent="Save to file"; el("settings").classList.remove("open"); el("editSaveModal").classList.add("open"); });
   el("editSaveClose").addEventListener("click",()=>el("editSaveModal").classList.remove("open"));
   el("editSaveModal").addEventListener("click",e=>{ if(e.target===el("editSaveModal")) el("editSaveModal").classList.remove("open"); });
   el("esOpenBtn").addEventListener("click",esOpen);
