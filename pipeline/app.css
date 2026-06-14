@@ -968,7 +968,8 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 /* ---- v0.5.56: race filter dropdown beside the parts search ---- */
 .sp-gridwrap .grid-searchrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;flex:none}
 .sp-gridwrap .grid-searchrow .grid-search{flex:1 1 100%;width:auto;margin-bottom:0;min-width:0}
-.sp-gridwrap .grid-facsel,.sp-gridwrap .grid-sortsel{flex:1 1 0;width:auto;height:34px;min-width:0}
+.sp-gridwrap .grid-facsel{flex:0 0 116px;width:auto;height:34px;min-width:0}
+.sp-gridwrap .grid-sortsel{flex:1 1 0;width:auto;height:34px;min-width:0}
 
 /* ---- v0.5.58: import-from-save modal ---- */
 .cm-panel code{background:var(--panel2);border:1px solid var(--line2);border-radius:5px;padding:1px 5px;font-size:11.5px;color:var(--bright)}
