@@ -1038,3 +1038,24 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 .es-actions{margin-top:16px;display:flex;justify-content:flex-end}
 .es-actions .pbtn{height:38px;padding:0 22px;font-weight:700}
 .es-actions .pbtn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---- v0.6.0: patch-notes tracker ---- */
+.pn-panel{width:min(620px,96vw)}
+#patchBody{max-height:64vh;overflow-y:auto;padding-right:6px}
+.pn-rel{margin-top:18px}
+.pn-rel:first-child{margin-top:6px}
+.pn-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line2);padding-bottom:7px;margin-bottom:9px}
+.pn-v{font-size:15px;font-weight:700;color:var(--bright)}
+.pn-title{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent2);font-weight:700}
+.pn-date{margin-left:auto;font-size:11px;color:var(--dim)}
+.pn-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.pn-list li{font-size:12.5px;color:var(--txt);line-height:1.5}
+.pn-list li b{color:var(--bright)}
+.pn-list li.soon{color:var(--dim)}
+.pn-list li.soon::marker{color:var(--accent2)}
+.pn-sub{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;margin:14px 0 4px}
+/* "new patch" indicator */
+.pn-dot{display:none}
+body.has-newpatch #patchDot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:5px;vertical-align:middle}
+.headact .actbtn.icon{position:relative}
+body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--panel)}

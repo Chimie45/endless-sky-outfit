@@ -38,6 +38,37 @@ const CAT_COLOR = {
 
 let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0, partsList:false, shipList:false, partsSort:"cat", shipSort:"cat" };
 
+// ---- patch notes (newest first); each +0.0.1 bundles ~7-10 changes ----
+const PATCH_NOTES=[
+  { v:"0.6.0", title:"Thorndeux update", date:"2026-06-14",
+    notes:[
+      "<b>Edit Ship Names</b> — open a save file and rename any ship; the change is written back to the file (in place in Chrome/Edge, or as a downloaded copy elsewhere). Find it in the Fleet Editor.",
+      "<b>Import from save</b> — load a single ship or your whole fleet straight from an Endless Sky save file.",
+      "<b>List view</b> for Add Parts and New Ship — a detailed, continuously-scrolling list with full stats per row (toggle in Settings).",
+      "<b>Sort by</b> for parts and ships — alphabetical, race, space, capacity, range, DPS, fuel, bays, hull, shields, cargo, crew, price and more.",
+      "<b>Race filter</b> in Add Parts, spoiler-aware.",
+      "<b>Add multiples</b> with modifier keys (Shift ×5, Ctrl ×20, Alt ×500, and combos), respecting ship limits.",
+      "<b>Information Deck</b> — galaxy map, planet pages and outfitter / shipyard browsers, all spoiler-gated.",
+      "<b>Fixes</b> — quote-named outfits (Hai atomic engines, etc.) now show up; list photos centered; missing outfit sprites bundled.",
+      "<b>Patch notes</b> — this panel.",
+    ],
+    soon:[
+      "Weapons: separate hull / shield / combined DPS, plus shots-per-second and energy &amp; heat <i>per second</i> (incl. heat &amp; energy damage).",
+      "Generators: show the in-game energy &amp; heat <i>per second</i> values.",
+      "Sorting: reverse direction for “less is better” stats, and sort by gun ports / turret mounts / fighter &amp; drone bays.",
+      "<b>Net outfit space</b> — fold a weapon’s heat &amp; energy cost into its effective outfit space, plus efficiency ratios (DPS per net space, thrust per space, etc.).",
+    ] },
+];
+const LATEST_PATCH = PATCH_NOTES[0].v;
+function renderPatchNotes(){
+  el("patchBody").innerHTML = PATCH_NOTES.map(p=>{
+    let h='<div class="pn-rel"><div class="pn-head"><span class="pn-v">v'+p.v+'</span>'+(p.title?'<span class="pn-title">'+esc(p.title)+'</span>':'')+'<span class="pn-date">'+esc(p.date)+'</span></div>';
+    h+='<ul class="pn-list">'+p.notes.map(n=>'<li>'+n+'</li>').join("")+'</ul>';
+    if(p.soon&&p.soon.length) h+='<div class="pn-sub">Coming next in this update</div><ul class="pn-list">'+p.soon.map(n=>'<li class="soon">'+n+'</li>').join("")+'</ul>';
+    return h+'</div>';
+  }).join("");
+}
+
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
 function mono2(nm){ const p=nm.replace(/[^A-Za-z0-9]/g,'').slice(0,2).toUpperCase(); return p||'··'; }
@@ -1253,10 +1284,14 @@ function init(){
   el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; state.pickPage=0; renderPickerGrid(); });
   el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;state.pickPage=0;renderPickerFac();renderPickerGrid();});
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);});
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); el("editSaveModal").classList.remove("open"); } });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); el("editSaveModal").classList.remove("open"); el("patchModal").classList.remove("open"); } });
   el("creditsBtn").addEventListener("click",()=>{ el("settings").classList.remove("open"); el("creditsModal").classList.add("open"); });
   el("creditsClose").addEventListener("click",()=>el("creditsModal").classList.remove("open"));
   el("creditsModal").addEventListener("click",e=>{ if(e.target===el("creditsModal")) el("creditsModal").classList.remove("open"); });
+  { let seen=null; try{ seen=localStorage.getItem("drydock-seen-patch"); }catch(e){} if(seen!==LATEST_PATCH) document.body.classList.add("has-newpatch"); }
+  el("patchBtn").addEventListener("click",()=>{ renderPatchNotes(); try{ localStorage.setItem("drydock-seen-patch",LATEST_PATCH); }catch(e){} document.body.classList.remove("has-newpatch"); el("settings").classList.remove("open"); el("patchModal").classList.add("open"); });
+  el("patchClose").addEventListener("click",()=>el("patchModal").classList.remove("open"));
+  el("patchModal").addEventListener("click",e=>{ if(e.target===el("patchModal")) el("patchModal").classList.remove("open"); });
   el("importSaveBtn").addEventListener("click",()=>{ state._impParsed=null; el("impFile").value=""; el("impFileText").innerHTML="Choose a save file&hellip;"; el("impSummary").innerHTML=""; el("impGo").disabled=true; el("settings").classList.remove("open"); el("importModal").classList.add("open"); });
   el("importClose").addEventListener("click",()=>el("importModal").classList.remove("open"));
   el("importModal").addEventListener("click",e=>{ if(e.target===el("importModal")) el("importModal").classList.remove("open"); });

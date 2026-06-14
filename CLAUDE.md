@@ -75,11 +75,19 @@ the game's `images/` tree). They are NOT injected into index.html — the app re
 download images. To refresh art for a new release, re-pull the thumbnails referenced by the data.
 Art stays under CC-BY-SA-4.0 — keep `images/CREDITS.md` and attribution.
 
-## Versioning / changelog
-Keep `CHANGELOG.md` current. Scheme: v1.0.0 = first public release. The SECOND number groups
-one update (a batch of related work); the THIRD number is an individual change within that
-update (e.g. v0.3.1, v0.3.2 ... all belong to the v0.3 update). The app version is shown in the
-header; bump it there (in `pipeline/template.html`) and add a CHANGELOG entry with the date.
+## Versioning / patch notes
+v1.0.0 = first public release. **Bundle work into batches: each +0.0.1 release should carry ~7–10
+related changes — don't bump the version for every small change.** While a batch is in progress,
+keep accumulating it under the current version (append to its notes); only roll to the next +0.0.1
+once the batch is full / shipped. Named updates (e.g. v0.6.0 "Thorndeux update") group a theme.
+
+The user-facing changelog is the **in-app patch-notes tracker**: `PATCH_NOTES` at the top of
+`pipeline/app.js` (newest entry first; `notes` = shipped items, optional `soon` = roadmap for the
+current batch). Add/append there. A "new" dot shows on the gear + Patch notes button until the user
+opens it (keyed on `LATEST_PATCH` vs `localStorage drydock-seen-patch`).
+
+Also: bump the header version string in `pipeline/template.html` and keep `CHANGELOG.md` (the
+dev-facing log) in sync with the same batch.
 
 ## Git workflow
 This is a public GitHub repo. After a change, from the repo root:

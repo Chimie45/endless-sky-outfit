@@ -9,6 +9,25 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ---
 
+## v0.6.0 — Thorndeux update — 2026-06-14
+A bundled release (going forward, each +0.0.1 carries ~7–10 related changes). The user-facing list
+lives in the in-app Patch notes (Settings → What's new). Shipped so far in this batch:
+- **Edit Ship Names** — open a save file and rename any ship; writes back in place (Chrome/Edge) or
+  as a downloaded copy. Lives in the Fleet Editor.
+- **Import from save** — load a single ship or whole fleet from an Endless Sky save.
+- **List view** for Add Parts and New Ship, continuous scroll, full per-row stats (Settings toggle).
+- **Sort by** for parts and ships (alphabetical, race, space, capacity, range, DPS, fuel, bays,
+  hull, shields, cargo, crew, price, …).
+- **Race filter** in Add Parts (spoiler-aware).
+- **Add multiples** with modifier keys (Shift ×5 / Ctrl ×20 / Alt ×500 / combos), limit-aware.
+- **Information Deck** — galaxy map, planet pages, outfitter/shipyard browsers (spoiler-gated).
+- **Fixes** — quote-named outfits now appear; list photos centered; missing sprites bundled.
+- **Patch-notes tracker** (this).
+
+Roadmap still to land in this batch (the Thorndeux stat-analysis work): weapons hull/shield/combined
+DPS + shots/energy/heat per second; generators shown per-second; sort-direction fixes + sort by
+hardpoint/bay counts; and the **net outfit space** metric with efficiency ratios.
+
 ## v0.5 — Scale-to-fit layout
 
 ### v0.5.64 — 2026-06-13

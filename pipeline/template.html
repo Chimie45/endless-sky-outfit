@@ -366,12 +366,16 @@
       <label class="hm-check"><input type="checkbox" id="shipListChk"><span>New Ship as a list</span></label>
     </div>
   </div>
+  <div class="setrow">
+    <label>What's new</label>
+    <button class="toggle" id="patchBtn" type="button">Patch notes <span class="pn-dot" id="patchDot"></span></button>
+  </div>
   <div class="hm-credits">
     <div class="hm-clabel">Credits</div>
     <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
     <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.64 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.6.0 · ES data v<span id="ver"></span></div>
 </div>
 
 <div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
@@ -415,6 +419,14 @@
     <div class="imp-actions">
       <button class="pbtn act" id="impGo" type="button" disabled>Import</button>
     </div>
+  </div>
+</div>
+
+<div class="creditsmodal" id="patchModal" role="dialog" aria-label="Patch notes">
+  <div class="cm-panel pn-panel">
+    <button class="linkbtn cm-x" id="patchClose" type="button">Close</button>
+    <h2>Patch Notes</h2>
+    <div id="patchBody"></div>
   </div>
 </div>
 

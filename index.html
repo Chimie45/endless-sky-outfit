@@ -1041,6 +1041,27 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
 .es-actions{margin-top:16px;display:flex;justify-content:flex-end}
 .es-actions .pbtn{height:38px;padding:0 22px;font-weight:700}
 .es-actions .pbtn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---- v0.6.0: patch-notes tracker ---- */
+.pn-panel{width:min(620px,96vw)}
+#patchBody{max-height:64vh;overflow-y:auto;padding-right:6px}
+.pn-rel{margin-top:18px}
+.pn-rel:first-child{margin-top:6px}
+.pn-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line2);padding-bottom:7px;margin-bottom:9px}
+.pn-v{font-size:15px;font-weight:700;color:var(--bright)}
+.pn-title{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent2);font-weight:700}
+.pn-date{margin-left:auto;font-size:11px;color:var(--dim)}
+.pn-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.pn-list li{font-size:12.5px;color:var(--txt);line-height:1.5}
+.pn-list li b{color:var(--bright)}
+.pn-list li.soon{color:var(--dim)}
+.pn-list li.soon::marker{color:var(--accent2)}
+.pn-sub{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;margin:14px 0 4px}
+/* "new patch" indicator */
+.pn-dot{display:none}
+body.has-newpatch #patchDot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:5px;vertical-align:middle}
+.headact .actbtn.icon{position:relative}
+body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--panel)}
 </style>
 <div id="app">
 
@@ -1406,12 +1427,16 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
       <label class="hm-check"><input type="checkbox" id="shipListChk"><span>New Ship as a list</span></label>
     </div>
   </div>
+  <div class="setrow">
+    <label>What's new</label>
+    <button class="toggle" id="patchBtn" type="button">Patch notes <span class="pn-dot" id="patchDot"></span></button>
+  </div>
   <div class="hm-credits">
     <div class="hm-clabel">Credits</div>
     <p>Built on Endless Sky · code GPLv3 · art mostly CC-BY-SA-4.0.</p>
     <button class="toggle" id="creditsBtn" type="button">View full credits</button>
   </div>
-  <div class="hm-ver">Drydock v0.5.64 · ES data v<span id="ver"></span></div>
+  <div class="hm-ver">Drydock v0.6.0 · ES data v<span id="ver"></span></div>
 </div>
 
 <div class="creditsmodal" id="creditsModal" role="dialog" aria-label="Credits">
@@ -1455,6 +1480,14 @@ body.dnd .se-ship .shipcard,body.dnd .se-load .loadpanel{outline:2px dashed var(
     <div class="imp-actions">
       <button class="pbtn act" id="impGo" type="button" disabled>Import</button>
     </div>
+  </div>
+</div>
+
+<div class="creditsmodal" id="patchModal" role="dialog" aria-label="Patch notes">
+  <div class="cm-panel pn-panel">
+    <button class="linkbtn cm-x" id="patchClose" type="button">Close</button>
+    <h2>Patch Notes</h2>
+    <div id="patchBody"></div>
   </div>
 </div>
 
@@ -1518,6 +1551,37 @@ const CAT_COLOR = {
 };
 
 let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0, partsList:false, shipList:false, partsSort:"cat", shipSort:"cat" };
+
+// ---- patch notes (newest first); each +0.0.1 bundles ~7-10 changes ----
+const PATCH_NOTES=[
+  { v:"0.6.0", title:"Thorndeux update", date:"2026-06-14",
+    notes:[
+      "<b>Edit Ship Names</b> — open a save file and rename any ship; the change is written back to the file (in place in Chrome/Edge, or as a downloaded copy elsewhere). Find it in the Fleet Editor.",
+      "<b>Import from save</b> — load a single ship or your whole fleet straight from an Endless Sky save file.",
+      "<b>List view</b> for Add Parts and New Ship — a detailed, continuously-scrolling list with full stats per row (toggle in Settings).",
+      "<b>Sort by</b> for parts and ships — alphabetical, race, space, capacity, range, DPS, fuel, bays, hull, shields, cargo, crew, price and more.",
+      "<b>Race filter</b> in Add Parts, spoiler-aware.",
+      "<b>Add multiples</b> with modifier keys (Shift ×5, Ctrl ×20, Alt ×500, and combos), respecting ship limits.",
+      "<b>Information Deck</b> — galaxy map, planet pages and outfitter / shipyard browsers, all spoiler-gated.",
+      "<b>Fixes</b> — quote-named outfits (Hai atomic engines, etc.) now show up; list photos centered; missing outfit sprites bundled.",
+      "<b>Patch notes</b> — this panel.",
+    ],
+    soon:[
+      "Weapons: separate hull / shield / combined DPS, plus shots-per-second and energy &amp; heat <i>per second</i> (incl. heat &amp; energy damage).",
+      "Generators: show the in-game energy &amp; heat <i>per second</i> values.",
+      "Sorting: reverse direction for “less is better” stats, and sort by gun ports / turret mounts / fighter &amp; drone bays.",
+      "<b>Net outfit space</b> — fold a weapon’s heat &amp; energy cost into its effective outfit space, plus efficiency ratios (DPS per net space, thrust per space, etc.).",
+    ] },
+];
+const LATEST_PATCH = PATCH_NOTES[0].v;
+function renderPatchNotes(){
+  el("patchBody").innerHTML = PATCH_NOTES.map(p=>{
+    let h='<div class="pn-rel"><div class="pn-head"><span class="pn-v">v'+p.v+'</span>'+(p.title?'<span class="pn-title">'+esc(p.title)+'</span>':'')+'<span class="pn-date">'+esc(p.date)+'</span></div>';
+    h+='<ul class="pn-list">'+p.notes.map(n=>'<li>'+n+'</li>').join("")+'</ul>';
+    if(p.soon&&p.soon.length) h+='<div class="pn-sub">Coming next in this update</div><ul class="pn-list">'+p.soon.map(n=>'<li class="soon">'+n+'</li>').join("")+'</ul>';
+    return h+'</div>';
+  }).join("");
+}
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -2734,10 +2798,14 @@ function init(){
   el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; state.pickPage=0; renderPickerGrid(); });
   el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;state.pickPage=0;renderPickerFac();renderPickerGrid();});
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);});
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); el("editSaveModal").classList.remove("open"); } });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); el("editSaveModal").classList.remove("open"); el("patchModal").classList.remove("open"); } });
   el("creditsBtn").addEventListener("click",()=>{ el("settings").classList.remove("open"); el("creditsModal").classList.add("open"); });
   el("creditsClose").addEventListener("click",()=>el("creditsModal").classList.remove("open"));
   el("creditsModal").addEventListener("click",e=>{ if(e.target===el("creditsModal")) el("creditsModal").classList.remove("open"); });
+  { let seen=null; try{ seen=localStorage.getItem("drydock-seen-patch"); }catch(e){} if(seen!==LATEST_PATCH) document.body.classList.add("has-newpatch"); }
+  el("patchBtn").addEventListener("click",()=>{ renderPatchNotes(); try{ localStorage.setItem("drydock-seen-patch",LATEST_PATCH); }catch(e){} document.body.classList.remove("has-newpatch"); el("settings").classList.remove("open"); el("patchModal").classList.add("open"); });
+  el("patchClose").addEventListener("click",()=>el("patchModal").classList.remove("open"));
+  el("patchModal").addEventListener("click",e=>{ if(e.target===el("patchModal")) el("patchModal").classList.remove("open"); });
   el("importSaveBtn").addEventListener("click",()=>{ state._impParsed=null; el("impFile").value=""; el("impFileText").innerHTML="Choose a save file&hellip;"; el("impSummary").innerHTML=""; el("impGo").disabled=true; el("settings").classList.remove("open"); el("importModal").classList.add("open"); });
   el("importClose").addEventListener("click",()=>el("importModal").classList.remove("open"));
   el("importModal").addEventListener("click",e=>{ if(e.target===el("importModal")) el("importModal").classList.remove("open"); });
