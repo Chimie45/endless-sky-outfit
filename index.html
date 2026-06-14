@@ -1151,7 +1151,7 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
                 </div>
               </div>
               <div class="statgroup"><div class="eyebrow"><span>Overview</span></div><div class="quickstats" id="quickStats"></div></div>
-              <div class="statgroup"><div class="eyebrow"><span>Capacity</span></div><div class="statpills" id="capPills"></div></div>
+              <div class="statgroup"><div class="eyebrow"><span>Movement</span></div><div class="statpills" id="movePills"></div></div>
             </div>
             <div class="sc-disp">
               <div class="stagewrap">
@@ -1170,7 +1170,7 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
             </div>
           </div>
           <div class="sc-bot">
-            <div class="statgroup"><div class="eyebrow"><span>Movement &amp; defense</span></div><div class="statpills" id="movePills"></div></div>
+            <div class="statgroup"><div class="eyebrow"><span>Capacity</span></div><div class="statpills" id="capPills"></div></div>
             <div class="statgroup"><div class="eyebrow"><span>Energy &amp; heat</span><span class="ehhdr"><b class="val en">E</b><b class="val ht">H</b></span></div><div class="statpills" id="ehPills"></div></div>
           </div>
           <div class="presetgrid" id="presetGrid">
@@ -1611,7 +1611,7 @@ const PATCH_NOTES=[
       "<b>Race filter</b> in Add Parts, spoiler-aware.",
       "<b>Add multiples</b> with modifier keys (Shift ×5, Ctrl ×20, Alt ×500, and combos), respecting ship limits.",
       "<b>Information Deck</b> — galaxy map, planet pages and outfitter / shipyard browsers, all spoiler-gated.",
-      "<b>Deeper stats</b> — weapons now show split shield / hull / combined DPS, shots-per-second, extra damage types, and energy &amp; heat <i>per second</i>; generators show in-game per-second output; space costs show as absolute values. An outfit’s full info page now lists every stat.",
+      "<b>Deeper stats</b> — weapons now show split shield / hull / combined DPS, shots-per-second, extra damage types, and energy &amp; heat <i>per second</i>; generators show in-game per-second output; space costs show as absolute values. An outfit’s full info page now lists every stat, and ship stat panels are reordered to match the in-game layout (shields/hull lead, then movement, then capacity).",
       "<b>Smarter sorting</b> — a reverse-direction button next to the sort menu, sensible defaults (“less is better” stats start low→high), plus new keys: split DPS, shots/sec, energy &amp; heat/sec, energy gen, cooling, and ship gun ports / turret mounts / fighter &amp; drone bays.",
       "<b>Net outfit space &amp; efficiency</b> — a weapon’s heat &amp; energy cost folded into its effective outfit space (matching the game’s heat math, with reference outfits adjustable in Settings), plus per-space ratios: DPS / space, DPS / net space, thrust &amp; turn / space, cooling &amp; energy-gen / space — all sortable.",
       "<b>Fixes</b> — quote-named outfits (Hai atomic engines, etc.) now show up; list photos centered; missing outfit sprites bundled.",
@@ -1773,9 +1773,7 @@ function renderMeters(){
   el("movePills").innerHTML =
     row("Max speed",v(FMT(s.maxSpeed)))+
     row("Acceleration",v(`${FMT(s.accel[0])}–${FMT(s.accel[1])}`))+
-    row("Turning",v(`${FMT(s.turn[0])}–${FMT(s.turn[1])}`))+
-    row("Shields",v(`${FMT(s.shields)}${s.hasSR?" +"+FMT(s.shieldRegen):""}`))+
-    row("Hull",v(`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair):""}`));
+    row("Turning",v(`${FMT(s.turn[0])}–${FMT(s.turn[1])}`));
 
   el("ehPills").innerHTML =
     row("Idle",v(FMT(s.eh.idle[0]),"en"),v(FMT(s.eh.idle[1]),"ht"))+
@@ -1801,7 +1799,10 @@ function flag(ok, goodText, badText){
 function renderQuickStats(s){
   const crew=requiredCrew(), bunks=eff("bunks"), mass=eff("mass");
   const row=(l,val)=>`<div class="strow"><span class="lbl">${l}</span><span class="vals"><b class="val mono">${val}</b></span></div>`;
-  el("quickStats").innerHTML = row("Cost",MONEY(s.cost))+row("Crew",FMT(crew))+row("Bunks",FMT(bunks))+row("Cargo",FMT(s.cargo)+" t")+row("Fuel",FMT(s.fuel))+row("Mass",FMT(mass)+" t");
+  el("quickStats").innerHTML = row("Cost",MONEY(s.cost))+
+    row("Shields",`${FMT(s.shields)}${s.hasSR?" +"+FMT(s.shieldRegen):""}`)+
+    row("Hull",`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair):""}`)+
+    row("Mass",FMT(mass)+" t")+row("Cargo",FMT(s.cargo)+" t")+row("Crew",FMT(crew))+row("Bunks",FMT(bunks))+row("Fuel",FMT(s.fuel));
 }
 function renderAlerts(s){
   const hasThrust=eff("thrust")>0, hasTurn=eff("turn")>0;
@@ -2499,10 +2500,11 @@ function renderFleetDetail(){ const box=el("fleetDetail"); if(!box) return;
         `<button class="fd-rename" data-rename-ship title="Rename this ship in the fleet">Rename</button></div>`+
       `<div class="fd-cols"><div class="fd-sect">`+
         `<div class="eyebrow">Overview</div>`+
-        row("Cost",MONEY(s.cost))+row("Crew",FMT(crew))+row("Bunks",FMT(bunks))+row("Cargo",FMT(s.cargo)+" t")+row("Fuel",FMT(s.fuel))+row("Mass",FMT(mass)+" t")+
-        `<div class="eyebrow eb2">Movement &amp; Defense</div>`+
-        row("Max speed",FMT(s.maxSpeed))+row("Acceleration",`${FMT(s.accel[0])}${DS}${FMT(s.accel[1])}`)+row("Turning",`${FMT(s.turn[0])}${DS}${FMT(s.turn[1])}`)+
+        row("Cost",MONEY(s.cost))+
         row("Shields",`${FMT(s.shields)}${s.hasSR?" +"+FMT(s.shieldRegen):""}`)+row("Hull",`${FMT(s.hull)}${s.hasHR?" +"+FMT(s.hullRepair):""}`)+
+        row("Mass",FMT(mass)+" t")+row("Cargo",FMT(s.cargo)+" t")+row("Crew",FMT(crew))+row("Bunks",FMT(bunks))+row("Fuel",FMT(s.fuel))+
+        `<div class="eyebrow eb2">Movement</div>`+
+        row("Max speed",FMT(s.maxSpeed))+row("Acceleration",`${FMT(s.accel[0])}${DS}${FMT(s.accel[1])}`)+row("Turning",`${FMT(s.turn[0])}${DS}${FMT(s.turn[1])}`)+
       `</div><div class="fd-sect">`+
         `<div class="eyebrow">Capacity</div>`+
         cap("Outfit","outfit space"," t")+cap("Weapon","weapon capacity"," t")+cap("Engine","engine capacity"," t")+
@@ -3161,7 +3163,7 @@ function openShipInfo(name){ const sh=DATA.ships[name]; if(!sh) return; const ba
     const load=outs.length?outs.map(([n,c])=>'<div class="fd-out"><span>'+esc(DATA.outfits[n]?.displayName||n)+'</span><b>'+X+c+'</b></div>').join(""):'<div class="fd-out fd-out-none">No default outfits</div>';
     html='<div class="fd-head"><div class="fd-art">'+artTile(sh.thumbnail||sh.sprite, mono2(base), "var(--accent)")+'</div>'+
       '<div class="fd-id"><div class="fd-fac">'+esc(FACLABEL(sh.faction))+'</div><div class="fd-nm">'+esc(base)+'</div><div class="fd-cat">'+esc(sh.category)+'</div></div></div>'+
-      '<div class="fd-grid">'+stat("Cost",MONEY(s.cost))+stat("Crew",FMT(crew))+stat("Bunks",FMT(bunks))+stat("Cargo",FMT(s.cargo)+" t")+stat("Fuel",FMT(s.fuel))+stat("Mass",FMT(mass)+" t")+stat("Shields",FMT(s.shields))+stat("Hull",FMT(s.hull))+stat("Speed",FMT(s.maxSpeed))+'</div>'+
+      '<div class="fd-grid">'+stat("Cost",MONEY(s.cost))+stat("Shields",FMT(s.shields))+stat("Hull",FMT(s.hull))+stat("Mass",FMT(mass)+" t")+stat("Cargo",FMT(s.cargo)+" t")+stat("Crew",FMT(crew))+stat("Bunks",FMT(bunks))+stat("Fuel",FMT(s.fuel))+stat("Speed",FMT(s.maxSpeed))+'</div>'+
       '<div class="fd-loadtitle">Default loadout</div><div class="fd-load">'+load+'</div>';
   });
   el("drawerBody").innerHTML=html; el("drawer").classList.add("open"); }
