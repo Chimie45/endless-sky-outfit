@@ -1210,14 +1210,20 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
                   <option value="cat">⇅ Category</option>
                   <option value="name">⇅ Alphabetical</option>
                   <option value="race">⇅ Race</option>
-                  <option value="space">⇅ Outfit space</option>
-                  <option value="weapon">⇅ Weapon capacity</option>
+                  <option value="space">⇅ Outfit space (low→high)</option>
+                  <option value="weapon">⇅ Weapon capacity (low→high)</option>
+                  <option value="engine">⇅ Engine capacity (low→high)</option>
+                  <option value="cdps">⇅ Combined DPS</option>
+                  <option value="sdps">⇅ Shield DPS</option>
+                  <option value="hdps">⇅ Hull DPS</option>
+                  <option value="shots">⇅ Shots / sec</option>
                   <option value="range">⇅ Range</option>
-                  <option value="dps">⇅ DPS</option>
-                  <option value="heat">⇅ Heat</option>
-                  <option value="energy">⇅ Energy use</option>
-                  <option value="mass">⇅ Mass</option>
-                  <option value="price">⇅ Price</option>
+                  <option value="fenergy">⇅ Energy use / sec (low→high)</option>
+                  <option value="fheat">⇅ Heat / sec (low→high)</option>
+                  <option value="egen">⇅ Energy gen / sec</option>
+                  <option value="cool">⇅ Cooling / sec</option>
+                  <option value="mass">⇅ Mass (low→high)</option>
+                  <option value="price">⇅ Price (low→high)</option>
                 </select>
               </div>
               <div class="ogrid sp-grid" id="catalog"></div>
@@ -1241,13 +1247,17 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
                   <option value="space">⇅ Outfit space</option>
                   <option value="weapon">⇅ Weapon capacity</option>
                   <option value="fuel">⇅ Fuel</option>
-                  <option value="bays">⇅ Bays</option>
+                  <option value="bays">⇅ Bays (total)</option>
+                  <option value="guns">⇅ Gun ports</option>
+                  <option value="turrets">⇅ Turret mounts</option>
+                  <option value="fighters">⇅ Fighter bays</option>
+                  <option value="drones">⇅ Drone bays</option>
                   <option value="hull">⇅ Hull</option>
                   <option value="shields">⇅ Shields</option>
                   <option value="cargo">⇅ Cargo</option>
                   <option value="crew">⇅ Crew</option>
-                  <option value="mass">⇅ Mass</option>
-                  <option value="price">⇅ Price</option>
+                  <option value="mass">⇅ Mass (low→high)</option>
+                  <option value="price">⇅ Price (low→high)</option>
                 </select>
               </div>
               <div class="shipgrid sp-grid" id="pickerGrid"></div>
@@ -1563,14 +1573,13 @@ const PATCH_NOTES=[
       "<b>Race filter</b> in Add Parts, spoiler-aware.",
       "<b>Add multiples</b> with modifier keys (Shift ×5, Ctrl ×20, Alt ×500, and combos), respecting ship limits.",
       "<b>Information Deck</b> — galaxy map, planet pages and outfitter / shipyard browsers, all spoiler-gated.",
+      "<b>Deeper stats</b> — weapons now show split shield / hull / combined DPS, shots-per-second, extra damage types, and energy &amp; heat <i>per second</i>; generators show in-game per-second output; space costs show as absolute values.",
+      "<b>Smarter sorting</b> — direction-aware (“less is better” stats sort low→high), plus new keys: split DPS, shots/sec, energy &amp; heat/sec, energy gen, cooling, and ship gun ports / turret mounts / fighter &amp; drone bays.",
       "<b>Fixes</b> — quote-named outfits (Hai atomic engines, etc.) now show up; list photos centered; missing outfit sprites bundled.",
       "<b>Patch notes</b> — this panel.",
     ],
     soon:[
-      "Weapons: separate hull / shield / combined DPS, plus shots-per-second and energy &amp; heat <i>per second</i> (incl. heat &amp; energy damage).",
-      "Generators: show the in-game energy &amp; heat <i>per second</i> values.",
-      "Sorting: reverse direction for “less is better” stats, and sort by gun ports / turret mounts / fighter &amp; drone bays.",
-      "<b>Net outfit space</b> — fold a weapon’s heat &amp; energy cost into its effective outfit space, plus efficiency ratios (DPS per net space, thrust per space, etc.).",
+      "<b>Net outfit space</b> — fold a weapon’s heat &amp; energy cost into its effective outfit space (heat-weighted, with adjustable reference outfits in Settings), plus efficiency ratios (DPS per net space, thrust per space, etc.).",
     ] },
 ];
 const LATEST_PATCH = PATCH_NOTES[0].v;
@@ -2031,18 +2040,36 @@ function ocardHTML(o, browse){
 // ---- list-view rows for Add Parts / New Ship (v0.5.59) ----
 function priceK(n){ n=n||0; return n>=1e6?(n/1e6).toFixed(n>=1e7?0:1).replace(/\.0$/,"")+"M":n>=1e3?Math.round(n/1e3)+"K":String(Math.round(n)); }
 function _rowCount(id,rh,gap){ const b=el(id); if(!b||!b.clientHeight) return 6; return Math.max(1,Math.floor((b.clientHeight+gap)/(rh+gap))); }
+// per-frame rate attributes shown as in-game per-second (x60)
+const RATE60={"energy generation":"energy/s","heat generation":"heat/s","cooling":"cooling/s","active cooling":"active cool/s","energy consumption":"energy drain/s","solar collection":"solar/s","fuel generation":"fuel/s"};
+const SPACEKEYS=new Set(["outfit space","weapon capacity","engine capacity","gun ports","turret mounts"]);
+const SKIP_ATTR=new Set(["index","unplunderable","installable","map","minable"]);
+function shotsPerSec(w){ return (w&&w.reload)? 60/w.reload : 0; }
+function weaponDPS(o){ const w=o&&o.weapon; if(!w) return {c:0,s:0,h:0}; const sps=shotsPerSec(w); const s=num(w["shield damage"])*sps, h=num(w["hull damage"])*sps; return {c:s+h, s, h, sps}; }
 function outfitStatPairs(o){
-  const a=o.attributes||{}, w=o.weapon, lead=[], attrs=[];
+  const a=o.attributes||{}, w=o.weapon, lead=[], wp=[], gen=[], attrs=[];
   if(o.mass) lead.push(["mass", FMT(o.mass)+" t"]);
-  for(const k in a){ const v=a[k]; if(typeof v==="number"&&v!==0&&k!=="mass") attrs.push([k, FMT(v)]); }
-  attrs.sort((x,y)=>x[0].localeCompare(y[0]));
-  const wp=[];
-  if(w){ const dps=w.reload?(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload:0;
-    if(dps) wp.push(["dps", String(Math.round(dps))]);
-    [["shield damage","shield dmg"],["hull damage","hull dmg"],["reload","reload"],["firing energy","firing E"],["firing heat","firing H"],["velocity","velocity"]].forEach(p=>{ if(w[p[0]]) wp.push([p[1], FMT(w[p[0]])]); });
+  if(w){
+    const sps=shotsPerSec(w), sd=num(w["shield damage"]), hd=num(w["hull damage"]);
+    if(sps){
+      wp.push(["combined dps", FMT((sd+hd)*sps)]);
+      if(sd) wp.push(["shield dps", FMT(sd*sps)]);
+      if(hd) wp.push(["hull dps", FMT(hd*sps)]);
+      [["heat damage","heat dmg/s"],["ion damage","ion/s"],["scrambling damage","scramble/s"],["disruption damage","disrupt/s"],["slowing damage","slow/s"],["discharge damage","discharge/s"],["corrosion damage","corrode/s"],["leak damage","leak/s"],["burn damage","burn/s"]].forEach(p=>{ if(w[p[0]]) wp.push([p[1], FMT(num(w[p[0]])*sps)]); });
+      wp.push(["shots/s", FMT(sps)]);
+      if(w["firing energy"]) wp.push(["energy/s", FMT(num(w["firing energy"])*sps)]);
+      if(w["firing heat"]) wp.push(["heat/s", FMT(num(w["firing heat"])*sps)]);
+    }
     if(w.velocity&&w.lifetime) wp.push(["range", FMT(w.velocity*w.lifetime)]);
   }
-  return lead.concat(wp, attrs);
+  for(const k in a){
+    const v=a[k]; if(typeof v!=="number"||v===0||k==="mass"||SKIP_ATTR.has(k)) continue;
+    if(RATE60[k]) gen.push([RATE60[k], FMT(v*60)]);
+    else if(SPACEKEYS.has(k)) attrs.push([k+(v<0?" used":" +"), FMT(Math.abs(v))]);
+    else attrs.push([k, FMT(v)]);
+  }
+  attrs.sort((x,y)=>x[0].localeCompare(y[0]));
+  return lead.concat(wp, gen, attrs);
 }
 function shipStatPairs(s){
   const a=s.attributes||{}, hp=s.hardpoints||{}, out=[];
@@ -2078,25 +2105,37 @@ function shiplistHTML(s, browse){
     </div>`;
 }
 function outfitSortVal(o,key){
-  const a=o.attributes||{}, w=o.weapon;
+  const a=o.attributes||{}, w=o.weapon, sps=shotsPerSec(w);
   switch(key){
     case "space": return Math.abs(num(a["outfit space"]));
     case "weapon": return Math.abs(num(a["weapon capacity"]));
+    case "engine": return Math.abs(num(a["engine capacity"]));
     case "range": return (w&&w.velocity&&w.lifetime)?w.velocity*w.lifetime:0;
-    case "dps": return (w&&w.reload)?(num(w["shield damage"])+num(w["hull damage"]))*60/w.reload:0;
-    case "heat": return w?num(w["firing heat"]):num(a["heat generation"]);
-    case "energy": return w?num(w["firing energy"]):(num(a["energy generation"])||num(a["energy capacity"]));
+    case "cdps": return (num(w&&w["shield damage"])+num(w&&w["hull damage"]))*sps;
+    case "sdps": return num(w&&w["shield damage"])*sps;
+    case "hdps": return num(w&&w["hull damage"])*sps;
+    case "shots": return sps;
+    case "fenergy": return num(w&&w["firing energy"])*sps;
+    case "fheat": return num(w&&w["firing heat"])*sps;
+    case "egen": return num(a["energy generation"])*60;
+    case "cool": return (num(a["cooling"])+num(a["active cooling"]))*60;
     case "mass": return o.mass||0;
     case "price": return o.cost||0;
     default: return 0;
   }
 }
+// keys where smaller is better -> ascending
+const ASC_OUTFIT=new Set(["space","weapon","engine","fenergy","fheat","mass","price"]);
 function sortOutfits(list){
   const k=state.partsSort||"cat";
   if(k==="name") return list.sort((a,b)=>a.name.localeCompare(b.name));
   if(k==="race") return list.sort((a,b)=>(a.faction||"").localeCompare(b.faction||"")||a.name.localeCompare(b.name));
   if(k==="cat") return list.sort((a,b)=>{ const ai=DATA.categoryOrder.indexOf(a.category),bi=DATA.categoryOrder.indexOf(b.category); return ai-bi||a.cost-b.cost||a.name.localeCompare(b.name); });
-  return list.sort((a,b)=> outfitSortVal(b,k)-outfitSortVal(a,k) || a.name.localeCompare(b.name));
+  const dir=ASC_OUTFIT.has(k)?1:-1;
+  return list.sort((a,b)=>{ const av=outfitSortVal(a,k), bv=outfitSortVal(b,k);
+    // zero-value items (e.g. non-weapons under a weapon sort) sink to the bottom
+    if(!av&&bv) return 1; if(av&&!bv) return -1;
+    return dir*(av-bv) || a.name.localeCompare(b.name); });
 }
 function renderCatalog(){
   const list=sortOutfits(visibleOutfits());
@@ -2667,6 +2706,10 @@ function shipSortVal(s,key){
     case "weapon": return num(a["weapon capacity"]);
     case "fuel": return num(a["fuel capacity"]);
     case "bays": return Object.values(hp.bays||{}).reduce((x,y)=>x+y,0);
+    case "guns": return num(hp.guns);
+    case "turrets": return num(hp.turrets);
+    case "fighters": return num((hp.bays||{}).Fighter);
+    case "drones": return num((hp.bays||{}).Drone);
     case "hull": return num(a.hull);
     case "shields": return num(a.shields);
     case "cargo": return num(a["cargo space"]);
@@ -2676,12 +2719,16 @@ function shipSortVal(s,key){
     default: return 0;
   }
 }
+const ASC_SHIP=new Set(["mass","price"]);
 function sortShips(list){
   const k=state.shipSort||"cat", nm=s=>s.displayName||s.name;
   if(k==="name") return list.sort((a,b)=>nm(a).localeCompare(nm(b)));
   if(k==="race") return list.sort((a,b)=>(a.faction||"").localeCompare(b.faction||"")||nm(a).localeCompare(nm(b)));
   if(k==="cat") return list.sort((a,b)=>a.category.localeCompare(b.category)||nm(a).localeCompare(nm(b)));
-  return list.sort((a,b)=> shipSortVal(b,k)-shipSortVal(a,k) || nm(a).localeCompare(nm(b)));
+  const dir=ASC_SHIP.has(k)?1:-1;
+  return list.sort((a,b)=>{ const av=shipSortVal(a,k), bv=shipSortVal(b,k);
+    if(!av&&bv) return 1; if(av&&!bv) return -1;
+    return dir*(av-bv) || nm(a).localeCompare(nm(b)); });
 }
 function renderPickerGrid(){
   const byFac=shipsByFaction();
