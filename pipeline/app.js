@@ -49,7 +49,7 @@ const PATCH_NOTES=[
       "<b>Race filter</b> in Add Parts, spoiler-aware.",
       "<b>Add multiples</b> with modifier keys (Shift ×5, Ctrl ×20, Alt ×500, and combos), respecting ship limits.",
       "<b>Information Deck</b> — galaxy map, planet pages and outfitter / shipyard browsers, all spoiler-gated.",
-      "<b>Deeper stats</b> — weapons now show split shield / hull / combined DPS, shots-per-second, extra damage types, and energy &amp; heat <i>per second</i>; generators show in-game per-second output; space costs show as absolute values. An outfit’s full info page now lists every stat, and ship stat panels are reordered to match the in-game layout (shields/hull lead, then movement, then capacity).",
+      "<b>Deeper stats</b> — weapons now show split shield / hull / combined DPS, shots-per-second, extra damage types, and energy &amp; heat <i>per second</i>; generators and engines show the in-game per-second values (energy/heat generation, cooling, thrust, turn, and their energy/heat/fuel costs are all shown ×60, matching the game); space costs show as absolute values. An outfit’s full info page now lists every stat, and ship stat panels are reordered to match the in-game layout (shields/hull lead, then movement, then capacity).",
       "<b>Smarter sorting</b> — a reverse-direction button next to the sort menu, sensible defaults (“less is better” stats start low→high), plus new keys: split DPS, shots/sec, energy &amp; heat/sec, energy gen, cooling, and ship gun ports / turret mounts / fighter &amp; drone bays.",
       "<b>Net outfit space &amp; efficiency</b> — a weapon’s heat &amp; energy cost folded into its effective outfit space (matching the game’s heat math, with reference outfits adjustable in Settings), plus per-space ratios: DPS / space, DPS / net space, thrust &amp; turn / space, cooling &amp; energy-gen / space — all sortable.",
       "<b>Fixes</b> — quote-named outfits (Hai atomic engines, etc.) now show up; list photos centered; missing outfit sprites bundled.",
@@ -522,8 +522,19 @@ function ocardHTML(o, browse){
 // ---- list-view rows for Add Parts / New Ship (v0.5.59) ----
 function priceK(n){ n=n||0; return n>=1e6?(n/1e6).toFixed(n>=1e7?0:1).replace(/\.0$/,"")+"M":n>=1e3?Math.round(n/1e3)+"K":String(Math.round(n)); }
 function _rowCount(id,rh,gap){ const b=el(id); if(!b||!b.clientHeight) return 6; return Math.max(1,Math.floor((b.clientHeight+gap)/(rh+gap))); }
-// per-frame rate attributes shown as in-game per-second (x60)
-const RATE60={"energy generation":"energy/s","heat generation":"heat/s","cooling":"cooling/s","active cooling":"active cool/s","energy consumption":"energy drain/s","solar collection":"solar/s","fuel generation":"fuel/s"};
+// per-frame rate attributes the game shows as per-second (x60), under their plain in-game labels
+const SCALE60=new Set([
+  "energy generation","energy consumption","heat generation","cooling","active cooling","cooling energy",
+  "solar collection","solar heat","fuel generation","fuel consumption","fuel energy","fuel heat",
+  "thrust","reverse thrust","afterburner thrust","turn",
+  "thrusting energy","thrusting heat","thrusting fuel","thrusting shields","thrusting hull",
+  "turning energy","turning heat","turning fuel",
+  "reverse thrusting energy","reverse thrusting heat","reverse thrusting fuel",
+  "afterburner energy","afterburner heat","afterburner fuel","afterburner shields","afterburner hull",
+  "shield generation","shield energy","shield heat","shield fuel",
+  "hull repair rate","hull energy","hull heat","hull fuel",
+  "cloak","cloaking energy","cloaking fuel","cloaking heat"
+]);
 const SPACEKEYS=new Set(["outfit space","weapon capacity","engine capacity","gun ports","turret mounts"]);
 const SKIP_ATTR=new Set(["index","unplunderable","installable","map","minable"]);
 function shotsPerSec(w){ return (w&&w.reload)? 60/w.reload : 0; }
@@ -561,7 +572,7 @@ function outfitStatPairs(o){
   }
   for(const k in a){
     const v=a[k]; if(typeof v!=="number"||v===0||k==="mass"||SKIP_ATTR.has(k)) continue;
-    if(RATE60[k]) gen.push([RATE60[k], FMT(v*60)]);
+    if(SCALE60.has(k)) gen.push([k, FMT(v*60)]);
     else if(SPACEKEYS.has(k)) attrs.push([k+(v<0?" used":" +"), FMT(Math.abs(v))]);
     else attrs.push([k, FMT(v)]);
   }
@@ -573,8 +584,8 @@ function outfitStatPairs(o){
     eff.push(["net space", FMT(net)]);
     if(cdps){ eff.push(["dps/space", FMT(cdps/sp)]); if(net) eff.push(["dps/net sp", FMT(cdps/net)]); }
   } else if(sp){
-    if(a.thrust) eff.push(["thrust/space", FMT(num(a.thrust)/sp)]);
-    if(a.turn) eff.push(["turn/space", FMT(num(a.turn)/sp)]);
+    if(a.thrust) eff.push(["thrust/space", FMT(num(a.thrust)*60/sp)]);
+    if(a.turn) eff.push(["turn/space", FMT(num(a.turn)*60/sp)]);
     if(a.cooling||a["active cooling"]) eff.push(["cooling/space", FMT((num(a.cooling)+num(a["active cooling"]))*60/sp)]);
     if(a["energy generation"]) eff.push(["energy gen/space", FMT(num(a["energy generation"])*60/sp)]);
   }
@@ -631,8 +642,8 @@ function outfitSortVal(o,key){
     case "netspace": return netOutfitSpace(o);
     case "dpsspace": { const sp=Math.abs(num(a["outfit space"])); return sp?(num(w&&w["shield damage"])+num(w&&w["hull damage"]))*sps/sp:0; }
     case "dpsnet": { const net=netOutfitSpace(o); return net?(num(w&&w["shield damage"])+num(w&&w["hull damage"]))*sps/net:0; }
-    case "thrustspace": { const sp=Math.abs(num(a["outfit space"])); return sp?num(a.thrust)/sp:0; }
-    case "turnspace": { const sp=Math.abs(num(a["outfit space"])); return sp?num(a.turn)/sp:0; }
+    case "thrustspace": { const sp=Math.abs(num(a["outfit space"])); return sp?num(a.thrust)*60/sp:0; }
+    case "turnspace": { const sp=Math.abs(num(a["outfit space"])); return sp?num(a.turn)*60/sp:0; }
     case "mass": return o.mass||0;
     case "price": return o.cost||0;
     default: return 0;
