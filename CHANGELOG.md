@@ -39,6 +39,27 @@ UI, self-contained shares, plugin versioning/update checks.
 
 Each subsequent plugin update is the next +0.0.1 (v0.7.1, v0.7.2 …).
 
+### Proof-of-concept findings (pipeline/build_plugin_packs.py)
+Validated the parse pipeline on Asteroid-Expansion (basic) and Zuckung's list (45 sub-plugins). The
+existing `parse_endless_sky.py` parses plugins unchanged; the new `build_plugin_packs.py` wraps it
+(subprocess), tags every record with its plugin `source`, and reports buildable content + cross-refs
++ name clashes. Key learnings that shape v0.7.0:
+- **Most plugins add no buildable content.** 27 of Zuckung's 45 are gameplay/UI/mission/AI tweaks
+  (0 ships/outfits). The manager must detect this and hide or mark them "gameplay-only" — a ship/
+  outfit builder only cares about plugins that add ships/installable outfits.
+- **Some are pathological for a builder and need exclusion/caps:** `ship.merging` generates **2880
+  ships**, `boss.loot` **1034 outfits**, `flare.play` **292**. Bundling these wholesale would bloat
+  the DB/UI; curate per-plugin.
+- **Override/rebalance mods** redefine base items (e.g. `automata.destruction` clashes with 14 base
+  ships) → confirms the override-with-badge policy and a clear "modifies vanilla" flag.
+- **Cross-references resolve by name** (loadouts → base or in-plugin outfits), validating the
+  name-keyed live-merge approach; a few unresolved refs (better.starts, ship.merging) must degrade to
+  placeholders.
+- **System edits are mostly spawn-rule modifications** (too.many.asteroids 685, space.fauna 694
+  modified systems) — irrelevant to a builder; the pack keeps only *new* systems.
+=> The curated list needs a per-plugin review pass (buildable-content gate + exclude generators), not
+a blind bundle of all 32.
+
 ---
 
 ## v0.6.0 — Thorndeux update — 2026-06-14
