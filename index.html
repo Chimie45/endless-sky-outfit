@@ -1499,7 +1499,10 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
   </div>
   <div class="setrow">
     <label>What's new</label>
-    <button class="toggle" id="patchBtn" type="button">Patch notes <span class="pn-dot" id="patchDot"></span></button>
+    <div class="hm-checks">
+      <button class="toggle" id="patchBtn" type="button">Patch notes <span class="pn-dot" id="patchDot"></span></button>
+      <button class="toggle" id="contribBtn" type="button">Contributors &amp; thanks</button>
+    </div>
   </div>
   <div class="hm-credits">
     <div class="hm-clabel">Credits</div>
@@ -1558,6 +1561,15 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
     <button class="linkbtn cm-x" id="patchClose" type="button">Close</button>
     <h2>Patch Notes</h2>
     <div id="patchBody"></div>
+  </div>
+</div>
+
+<div class="creditsmodal" id="contribModal" role="dialog" aria-label="Contributors">
+  <div class="cm-panel pn-panel">
+    <button class="linkbtn cm-x" id="contribClose" type="button">Close</button>
+    <h2>Contributors &amp; Thanks</h2>
+    <p>Drydock is shaped by the Endless Sky community. Huge thanks to everyone who reported bugs, suggested features, and helped test &mdash; named here per release.</p>
+    <div id="contribBody"></div>
   </div>
 </div>
 
@@ -1654,6 +1666,21 @@ function renderPatchNotes(){
     let h='<div class="pn-rel"><div class="pn-head"><span class="pn-v">v'+p.v+'</span>'+(p.title?'<span class="pn-title">'+esc(p.title)+'</span>':'')+'<span class="pn-date">'+esc(p.date)+'</span></div>';
     h+='<ul class="pn-list">'+p.notes.map(n=>'<li>'+n+'</li>').join("")+'</ul>';
     if(p.soon&&p.soon.length) h+='<div class="pn-sub">Coming next in this update</div><ul class="pn-list">'+p.soon.map(n=>'<li class="soon">'+n+'</li>').join("")+'</ul>';
+    return h+'</div>';
+  }).join("");
+}
+// ---- contributors / thanks (per release) ----
+const CONTRIBUTORS=[
+  { v:"0.7.0", title:"Lunella & Tau update", note:"in development",
+    thanks:[
+      "<b>Lunella</b> &amp; <b>Tau</b> (Discord) — for proposing the Plug-in Manager and helping shape its design, plus a steady stream of thoughtful feedback.",
+      "Everyone on the Endless Sky Discord who tested builds and suggested plugins to support.",
+    ] },
+];
+function renderContributors(){
+  el("contribBody").innerHTML = CONTRIBUTORS.map(c=>{
+    let h='<div class="pn-rel"><div class="pn-head"><span class="pn-v">v'+c.v+'</span>'+(c.title?'<span class="pn-title">'+esc(c.title)+'</span>':'')+(c.note?'<span class="pn-date">'+esc(c.note)+'</span>':'')+'</div>';
+    h+='<ul class="pn-list">'+c.thanks.map(t=>'<li>'+t+'</li>').join("")+'</ul>';
     return h+'</div>';
   }).join("");
 }
@@ -2993,7 +3020,7 @@ function init(){
   el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; state.pickPage=0; renderPickerGrid(); });
   el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;state.pickPage=0;renderPickerFac();renderPickerGrid();});
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);});
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); el("editSaveModal").classList.remove("open"); el("patchModal").classList.remove("open"); } });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); el("editSaveModal").classList.remove("open"); el("patchModal").classList.remove("open"); el("contribModal").classList.remove("open"); } });
   el("creditsBtn").addEventListener("click",()=>{ el("settings").classList.remove("open"); el("creditsModal").classList.add("open"); });
   el("creditsClose").addEventListener("click",()=>el("creditsModal").classList.remove("open"));
   el("creditsModal").addEventListener("click",e=>{ if(e.target===el("creditsModal")) el("creditsModal").classList.remove("open"); });
@@ -3001,6 +3028,9 @@ function init(){
   el("patchBtn").addEventListener("click",()=>{ renderPatchNotes(); try{ localStorage.setItem("drydock-seen-patch",LATEST_PATCH); }catch(e){} document.body.classList.remove("has-newpatch"); el("settings").classList.remove("open"); el("patchModal").classList.add("open"); });
   el("patchClose").addEventListener("click",()=>el("patchModal").classList.remove("open"));
   el("patchModal").addEventListener("click",e=>{ if(e.target===el("patchModal")) el("patchModal").classList.remove("open"); });
+  el("contribBtn").addEventListener("click",()=>{ renderContributors(); el("settings").classList.remove("open"); el("contribModal").classList.add("open"); });
+  el("contribClose").addEventListener("click",()=>el("contribModal").classList.remove("open"));
+  el("contribModal").addEventListener("click",e=>{ if(e.target===el("contribModal")) el("contribModal").classList.remove("open"); });
   el("importSaveBtn").addEventListener("click",()=>{ state._impParsed=null; el("impFile").value=""; el("impFileText").innerHTML="Choose a save file&hellip;"; el("impSummary").innerHTML=""; el("impGo").disabled=true; el("settings").classList.remove("open"); el("importModal").classList.add("open"); });
   el("importClose").addEventListener("click",()=>el("importModal").classList.remove("open"));
   el("importModal").addEventListener("click",e=>{ if(e.target===el("importModal")) el("importModal").classList.remove("open"); });

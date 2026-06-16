@@ -73,6 +73,21 @@ function renderPatchNotes(){
     return h+'</div>';
   }).join("");
 }
+// ---- contributors / thanks (per release) ----
+const CONTRIBUTORS=[
+  { v:"0.7.0", title:"Lunella & Tau update", note:"in development",
+    thanks:[
+      "<b>Lunella</b> &amp; <b>Tau</b> (Discord) — for proposing the Plug-in Manager and helping shape its design, plus a steady stream of thoughtful feedback.",
+      "Everyone on the Endless Sky Discord who tested builds and suggested plugins to support.",
+    ] },
+];
+function renderContributors(){
+  el("contribBody").innerHTML = CONTRIBUTORS.map(c=>{
+    let h='<div class="pn-rel"><div class="pn-head"><span class="pn-v">v'+c.v+'</span>'+(c.title?'<span class="pn-title">'+esc(c.title)+'</span>':'')+(c.note?'<span class="pn-date">'+esc(c.note)+'</span>':'')+'</div>';
+    h+='<ul class="pn-list">'+c.thanks.map(t=>'<li>'+t+'</li>').join("")+'</ul>';
+    return h+'</div>';
+  }).join("");
+}
 
 /* ---------- art helpers ---------- */
 function imgURL(path){ return path ? "images/"+encodeURI(path)+".png" : null; }
@@ -1409,7 +1424,7 @@ function init(){
   el("pickerSearch").addEventListener("input",e=>{ state.pickerQ=e.target.value; state.pickPage=0; renderPickerGrid(); });
   el("pickerFac").addEventListener("click",e=>{const b=e.target.closest("[data-fac]");if(!b)return;state.pickerFac=b.dataset.fac;state.pickPage=0;renderPickerFac();renderPickerGrid();});
   el("pickerGrid").addEventListener("click",e=>{const b=e.target.closest("[data-ship]");if(!b)return;setShip(b.dataset.ship);});
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); el("editSaveModal").classList.remove("open"); el("patchModal").classList.remove("open"); } });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closePanels(); el("settings").classList.remove("open"); el("drawer").classList.remove("open"); el("creditsModal").classList.remove("open"); el("importModal").classList.remove("open"); el("editSaveModal").classList.remove("open"); el("patchModal").classList.remove("open"); el("contribModal").classList.remove("open"); } });
   el("creditsBtn").addEventListener("click",()=>{ el("settings").classList.remove("open"); el("creditsModal").classList.add("open"); });
   el("creditsClose").addEventListener("click",()=>el("creditsModal").classList.remove("open"));
   el("creditsModal").addEventListener("click",e=>{ if(e.target===el("creditsModal")) el("creditsModal").classList.remove("open"); });
@@ -1417,6 +1432,9 @@ function init(){
   el("patchBtn").addEventListener("click",()=>{ renderPatchNotes(); try{ localStorage.setItem("drydock-seen-patch",LATEST_PATCH); }catch(e){} document.body.classList.remove("has-newpatch"); el("settings").classList.remove("open"); el("patchModal").classList.add("open"); });
   el("patchClose").addEventListener("click",()=>el("patchModal").classList.remove("open"));
   el("patchModal").addEventListener("click",e=>{ if(e.target===el("patchModal")) el("patchModal").classList.remove("open"); });
+  el("contribBtn").addEventListener("click",()=>{ renderContributors(); el("settings").classList.remove("open"); el("contribModal").classList.add("open"); });
+  el("contribClose").addEventListener("click",()=>el("contribModal").classList.remove("open"));
+  el("contribModal").addEventListener("click",e=>{ if(e.target===el("contribModal")) el("contribModal").classList.remove("open"); });
   el("importSaveBtn").addEventListener("click",()=>{ state._impParsed=null; el("impFile").value=""; el("impFileText").innerHTML="Choose a save file&hellip;"; el("impSummary").innerHTML=""; el("impGo").disabled=true; el("settings").classList.remove("open"); el("importModal").classList.add("open"); });
   el("importClose").addEventListener("click",()=>el("importModal").classList.remove("open"));
   el("importModal").addEventListener("click",e=>{ if(e.target===el("importModal")) el("importModal").classList.remove("open"); });
