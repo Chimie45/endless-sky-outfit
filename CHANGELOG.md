@@ -986,7 +986,7 @@ lives in the in-app Patch notes (Settings → What's new). Shipped so far in thi
 ### v0.2.1 — 2026-06-11
 - Repo restructure: moved the project from the nested `Endless_Sky_Outfit/`
   subfolder to the repository root so GitHub Pages (deploy-from-branch `main`,
-  `/ (root)`) serves the site correctly. Added `CLAUDE.md`.
+  `/ (root)`) serves the site correctly. Added `AGENTS.md`.
 
 ### v0.2.0 — initial prototype (baseline)
 - Client-side outfit builder: validated stat engine (heat/energy/thrust/

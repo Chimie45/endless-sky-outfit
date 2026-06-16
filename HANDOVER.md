@@ -4,7 +4,7 @@
 **Current version:** v0.3.74 (ES game data v0.11.0).
 **Last session focus:** UX overhaul — header tabs, side-drawer panels, Outfitters/Shipyards browse.
 
-> Read `CLAUDE.md` first — it is the source of truth for architecture and the build rule.
+> Read `AGENTS.md` first — it is the source of truth for architecture and the build rule.
 > This file is a snapshot of *where things stand* and *how to keep working*.
 
 ---
@@ -116,7 +116,7 @@ checking against the game first.
 ## Resume prompt (paste into a fresh session)
 
 > I'm continuing work on **Drydock**, my static Endless Sky outfit builder in
-> `C:\Users\Admin\Desktop\Endless Sky Outfits`. Read `CLAUDE.md` and `HANDOVER.md` first — they
+> `C:\Users\Admin\Desktop\Endless Sky Outfits`. Read `AGENTS.md` and `HANDOVER.md` first — they
 > explain the build pipeline and current state (we're at v0.3.74).
 >
 > Important working rules: edit only the `pipeline/` sources (never `index.html` directly) using

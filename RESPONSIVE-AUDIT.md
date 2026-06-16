@@ -4,7 +4,7 @@
 
 > Method note: this is a **static analysis** of the layout CSS (the live Chrome
 > session wasn't reachable, so widths below are computed, not screenshotted).
-> Once Claude-in-Chrome connects we should screenshot‑verify at the sizes in the
+> Once a browser preview connects we should screenshot‑verify at the sizes in the
 > testing checklist before calling anything done.
 
 ---

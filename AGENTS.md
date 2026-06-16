@@ -1,4 +1,4 @@
-# CLAUDE.md — Endless Sky Outfit Builder ("Drydock")
+# AGENTS.md — Endless Sky Outfit Builder ("Drydock")
 
 Read this before any task. It's the source of truth for what this project is and how to work on it.
 
