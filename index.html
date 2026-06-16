@@ -1073,6 +1073,27 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
 .sp-gridwrap .grid-sortdir{flex:none;width:34px;height:34px;border:1px solid var(--line2);background:var(--panel2);color:var(--bright);border-radius:8px;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .sp-gridwrap .grid-sortdir:hover{border-color:var(--accent2);color:var(--accent2)}
 .sp-gridwrap .grid-sortdir:active{transform:translateY(1px)}
+
+/* ---- v0.6.0: mobile & tablet reflow (app un-zooms below 1101px) ---- */
+@media(max-width:1100px){
+  /* Fleet Editor: scroll the whole view and stack roster over the ship-details panel */
+  .view-fleet{overflow-y:auto;overflow-x:hidden}
+  .view-fleet .fleetpanel{flex:none;min-height:0}
+  .view-fleet .fleet-body{grid-template-columns:1fr;height:auto}
+  .view-fleet .fleet-col-left,.view-fleet .fleet-col-right{overflow:visible;min-height:0}
+  .view-fleet .fleet-col-right{min-height:340px}
+  .view-fleet .fleet-col-right .fleet-list{overflow:visible}
+  /* Galaxy map: full-width map on top, system detail below */
+  .map-wrap{grid-template-columns:1fr;grid-auto-rows:auto}
+  .map-canvas{min-height:min(58vh,440px)}
+  .map-detail{max-height:none}
+}
+@media(max-width:640px){
+  /* fleet header + button/saved-list + flagship/stats rows go single-column */
+  .fl-manifesthead,.fl-managerow,.fl-row{grid-template-columns:1fr}
+  .fl-savedlist{max-height:104px}
+  header{flex-wrap:wrap}
+}
 </style>
 <div id="app">
 
@@ -1616,6 +1637,7 @@ const PATCH_NOTES=[
       "<b>Smarter sorting</b> — a reverse-direction button next to the sort menu, sensible defaults (“less is better” stats start low→high), plus new keys: split DPS, shots/sec, energy &amp; heat/sec, energy gen, cooling, and ship gun ports / turret mounts / fighter &amp; drone bays.",
       "<b>Net outfit space &amp; efficiency</b> — a weapon’s heat &amp; energy cost folded into its effective outfit space (matching the game’s heat math, with reference outfits adjustable in Settings), plus per-space ratios: DPS / space, DPS / net space, thrust &amp; turn / space, cooling &amp; energy-gen / space — all sortable.",
       "<b>Fixes</b> — quote-named outfits (Hai atomic engines, etc.) now show up; list photos centered; missing outfit sprites bundled.",
+      "<b>Mobile &amp; tablet</b> — the Fleet Editor and galaxy map now stack to a single readable column on narrow screens instead of squishing; phones and tablets get a clean reflowed layout.",
       "<b>Patch notes</b> — this panel.",
     ] },
 ];

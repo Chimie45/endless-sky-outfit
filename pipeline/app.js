@@ -53,6 +53,7 @@ const PATCH_NOTES=[
       "<b>Smarter sorting</b> — a reverse-direction button next to the sort menu, sensible defaults (“less is better” stats start low→high), plus new keys: split DPS, shots/sec, energy &amp; heat/sec, energy gen, cooling, and ship gun ports / turret mounts / fighter &amp; drone bays.",
       "<b>Net outfit space &amp; efficiency</b> — a weapon’s heat &amp; energy cost folded into its effective outfit space (matching the game’s heat math, with reference outfits adjustable in Settings), plus per-space ratios: DPS / space, DPS / net space, thrust &amp; turn / space, cooling &amp; energy-gen / space — all sortable.",
       "<b>Fixes</b> — quote-named outfits (Hai atomic engines, etc.) now show up; list photos centered; missing outfit sprites bundled.",
+      "<b>Mobile &amp; tablet</b> — the Fleet Editor and galaxy map now stack to a single readable column on narrow screens instead of squishing; phones and tablets get a clean reflowed layout.",
       "<b>Patch notes</b> — this panel.",
     ] },
 ];
