@@ -9,6 +9,38 @@ it was built against is shown next to it (currently ES data v0.11.0).
 
 ---
 
+## Roadmap — v0.7.0 "Lunella & Tau (Discord) update": Plug-in Manager (planned)
+New nav tab beside Information Deck to enable/disable plugins (merging their content into the live
+database) and, later, import arbitrary plugins. Credited to Lunella & Tau (Discord).
+
+Locked decisions:
+- **Import path:** v0.7.0 ships a *curated, pre-parsed bundled list* (toggle on/off) only. Arbitrary
+  user-folder/zip import (in-browser parser + File System Access image loading) is deferred to v0.7.1+.
+- **Sharing:** build/fleet share codes *record required plugin ids* and prompt the recipient to enable
+  them (one-click for curated plugins); unresolved items render as labeled placeholders. (Embedding
+  full item definitions is a later option.)
+
+v0.7.0 scope (~one batch):
+1. Source tagging on every record (`source: base | <plugin-id>`) across ships/outfits/systems/
+   planets/landscapes/sprites/galaxy art.
+2. Plugin registry + localStorage manifest of enabled plugins.
+3. Live merge/unmerge with cache invalidation (`_shopMap`/`_yardMap`, catbar `catMap`, faction sets,
+   `planetIndex`, galaxy bounds → re-render) and eviction safety for installed/fleet items.
+4. Curated bundled plugin packs (pre-parsed offline via `parse_endless_sky.py`, images bundled).
+5. Spoiler/tier integration — plugin factions gated in a separate "Plugins" tier band.
+6. Cross-reference handling (loadouts, soldAt, system links, planets) + dangling-ref placeholders;
+   conflict policy = override-with-badge (ES load-order semantics).
+7. Provenance badges on cards/list/roster/schematic; per-plugin entity counts.
+8. Plug-in Manager tab UI (list, toggles, search, detail view).
+9. Share codes record + prompt-to-enable required curated plugins.
+
+v0.7.1+: arbitrary plugin import (chosen mechanism), in-browser image resolution, conflict-resolution
+UI, self-contained shares, plugin versioning/update checks.
+
+Each subsequent plugin update is the next +0.0.1 (v0.7.1, v0.7.2 …).
+
+---
+
 ## v0.6.0 — Thorndeux update — 2026-06-14
 A bundled release (going forward, each +0.0.1 carries ~7–10 related changes). The user-facing list
 lives in the in-app Patch notes (Settings → What's new). Shipped so far in this batch:
