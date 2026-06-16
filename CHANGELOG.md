@@ -60,6 +60,28 @@ existing `parse_endless_sky.py` parses plugins unchanged; the new `build_plugin_
 => The curated list needs a per-plugin review pass (buildable-content gate + exclude generators), not
 a blind bundle of all 32.
 
+### Plugins route by content type (not just on/off)
+Every plugin should eventually be represented — but *how* depends on what it adds. A plugin feeds
+whichever surfaces it has data for:
+- ships / installable outfits  -> the build database (Ship Editor / Add Parts)
+- missions                     -> the Information Deck **Quest Guide**
+- systems / planets            -> galaxy map + planet pages
+- AI / UI / QoL tweaks (no extractable content) -> an informational card (from plugin.txt `about`),
+  so it's listed/acknowledged even though a builder can't "apply" it.
+So the AI/mission/UI plugins (most of Zuckung's list) aren't discarded — they belong in the
+Information Deck. `mission.helper` itself is a UI helper; the vanilla missions it indexes come from
+the base game, which we extract directly.
+
+### Quest Guide foundation (pipeline/parse_missions.py — PoC)
+Extracts `mission` definitions into compact records: id, name, description, start (`source`),
+destination, type (job/story/minor), prerequisite chain (mission flags from `to offer`), reward,
+content flags. Validated on vanilla: **2,265 missions** (748 job-board jobs, 1,517 story; 1,147
+chained). Story records yield clean quest chains (start planet -> destination + "requires X: done").
+Size: **941 KB full / 708 KB without descriptions** for all missions.
+=> Build the Quest Guide first (it's the home for the large mission/AI/UI plugin class and is valuable
+on its own). Delivery TBD: on-demand `missions.json` (keeps index.html lean) vs inline; scope TBD:
+all missions vs story-focused.
+
 ---
 
 ## v0.6.0 — Thorndeux update — 2026-06-14
