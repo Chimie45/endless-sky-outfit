@@ -305,10 +305,10 @@
         </div>
       </div>
       <div class="info-section">
-        <div class="eyebrow">Coming soon</div>
+        <div class="eyebrow">Missions</div>
         <div class="info-cards">
+          <button class="infocard" id="openQuest"><h3>Quest Guide</h3><p>Every mission &amp; campaign chain: where it starts and what unlocks it.</p></button>
           <div class="infocard soon"><h3>Starport Events</h3><p>Spaceport news &amp; events per planet.</p></div>
-          <div class="infocard soon"><h3>Quest Tracker</h3><p>Needs mission data to be parsed first.</p></div>
         </div>
       </div>
     </div>
@@ -359,6 +359,19 @@
       <div class="sp-body">
         <div class="sp-rail" id="yardRail"></div>
         <div class="shipgrid sp-grid" id="yardGrid"></div>
+      </div>
+    </div>
+
+    <div class="info-tool" id="infoQuest">
+      <div class="info-toolhead">
+        <button class="backbtn" data-info-back>← Information Deck</button>
+        <span class="sp-title">Quest Guide</span>
+        <input type="search" id="questSearch" placeholder="Find mission…" autocomplete="off">
+        <label class="quest-jobtoggle"><input type="checkbox" id="questJobs"><span>Jobs</span></label>
+      </div>
+      <div class="sp-body">
+        <div class="sp-rail" id="questRail"></div>
+        <div class="map-detail" id="questDetail"><div class="map-hint">Select a mission to see where it starts, what it requires, and what it unlocks.</div></div>
       </div>
     </div>
   </section>

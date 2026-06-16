@@ -1091,3 +1091,27 @@ body.has-newpatch #gearBtn::after{content:"";position:absolute;top:6px;right:6px
   .fl-savedlist{max-height:104px}
   header{flex-wrap:wrap}
 }
+
+/* ---- v0.7.0: Quest Guide (Information Deck) ---- */
+#viewInfoSec[data-info="quest"] #infoHome{display:none}
+#viewInfoSec[data-info="quest"] #infoQuest{display:flex}
+.quest-jobtoggle{flex:none;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);cursor:pointer;user-select:none}
+.quest-jobtoggle input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
+.quest-jobtoggle:hover{color:var(--bright)}
+#questRail .q-grp{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);font-weight:700;padding:9px 6px 3px;position:sticky;top:0;background:var(--panel);z-index:1}
+#questRail .q-grp:first-child{padding-top:2px}
+#questRail button .q-nm{color:var(--bright)}
+#questRail button .q-tag{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-left:6px}
+#questRail button.q-job .q-nm{color:var(--txt)}
+.q-meta{display:flex;flex-direction:column;gap:7px;margin:10px 0}
+.q-row{display:flex;gap:8px;font-size:12px;line-height:1.45}
+.q-row .q-k{flex:none;width:84px;color:var(--dim);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding-top:1px}
+.q-row .q-v{color:var(--txt);min-width:0}
+.q-desc{font-size:12.5px;color:var(--txt);line-height:1.6;margin-top:4px}
+.q-badge{display:inline-block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;border-radius:5px;padding:2px 7px;border:1px solid var(--line2)}
+.q-badge.story{color:var(--accent);border-color:var(--accent)}
+.q-badge.job{color:var(--accent2);border-color:var(--line2)}
+.q-badge.minor{color:var(--dim)}
+.q-chain .md-chip{cursor:default}
+.q-chain .md-link{cursor:pointer}
+.q-empty{color:var(--dim);font-size:12px;padding:14px 6px}

@@ -1380,6 +1380,7 @@ function setInfo(v){ state.info=v||""; const sec=el("viewInfoSec"); if(sec) sec.
   else if(state.info==="yard"){ renderYard(); const s=el("yardSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
   else if(state.info==="map"){ renderGalaxyMap(); }
   else if(state.info==="planets"){ renderPlanets(); const s=el("planetSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
+  else if(state.info==="quest"){ renderQuest(); const s=el("questSearch"); if(s) setTimeout(()=>{try{s.focus();}catch(e){}},30); }
   try{ localStorage.setItem("drydock-info",state.info); }catch(e){} }
 function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
 function openShipPicker(){ togglePanel("ship"); }
@@ -1498,6 +1499,7 @@ function init(){
   el("openShipyards").addEventListener("click",()=>setInfo("yard"));
   el("openMap").addEventListener("click",()=>setInfo("map"));
   el("openPlanets").addEventListener("click",()=>setInfo("planets"));
+  el("openQuest").addEventListener("click",()=>setInfo("quest"));
   el("viewInfoSec").addEventListener("click",e=>{ if(e.target.closest("[data-info-back]")) setInfo(""); });
   el("shopRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.shopPage+=pg.dataset.pg==="next"?1:-1;renderShop();return;}const b=e.target.closest("[data-station]");if(b){state.shopStation=b.dataset.station;renderShop();}});
   el("yardRail").addEventListener("click",e=>{const pg=e.target.closest("[data-pg]");if(pg){state.yardPage+=pg.dataset.pg==="next"?1:-1;renderYard();return;}const b=e.target.closest("[data-station]");if(b){state.yardStation=b.dataset.station;renderYard();}});
@@ -1514,7 +1516,7 @@ function init(){
     state.tier=+b.dataset.tier;
     document.querySelectorAll("#tierBtns button").forEach(x=>x.setAttribute("aria-pressed",x===b));
     renderPartsFac(); renderCatbar(); renderCatalog(); renderPickerFac(); renderPickerGrid();
-    if(state.info==="shop")renderShop(); if(state.info==="yard")renderYard(); if(state.info==="map")renderGalaxyMap(); if(state.info==="planets")renderPlanets();});
+    if(state.info==="shop")renderShop(); if(state.info==="yard")renderYard(); if(state.info==="map")renderGalaxyMap(); if(state.info==="planets")renderPlanets(); if(state.info==="quest"&&_missions)renderQuestRail();});
   el("search").addEventListener("input",e=>{state.q=e.target.value;state.catPage=0;renderCatalog();});
   el("partsFac").addEventListener("change",e=>{state.faction=e.target.value;state.catPage=0;renderCatalog();});
   el("catbar").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; state.catPage=0;
@@ -1650,6 +1652,72 @@ function _wirePlanets(){ if(_planetsWired) return; _planetsWired=true;
 
 function goPlanet(name){ state.planetSel=name; state.planetQ=""; const ms=el("planetSearch"); if(ms) ms.value=""; setInfo("planets");
   requestAnimationFrame(()=>{ const rb=document.querySelector('#planetRail button[data-planet="'+name.replace(/"/g,'&quot;')+'"]'); if(rb) rb.scrollIntoView({block:"center"}); }); }
+
+/* ---------- Quest Guide (missions, lazy-loaded) ---------- */
+let _missions=null, _missionsLoading=null, _questWired=false;
+function loadMissions(){
+  if(_missions) return Promise.resolve(_missions);
+  if(_missionsLoading) return _missionsLoading;
+  _missionsLoading = fetch("data/missions.json").then(r=>{ if(!r.ok) throw 0; return r.json(); }).then(d=>{
+    const byId=d.missions||{}, unlocks={};
+    const toId=s=>s.replace(/:\s*(?:done|offered|active|failed|declined)\b.*$/i,"").trim();
+    for(const id in byId){ const m=byId[id]; m._pre=[];
+      for(const f of (m.prereq||[])){ const t=toId(f); if(byId[t] && t!==id){ if(m._pre.indexOf(t)<0) m._pre.push(t); (unlocks[t]=unlocks[t]||[]).push(id); } } }
+    _missions={byId,unlocks}; return _missions;
+  });
+  return _missionsLoading;
+}
+function renderQuest(){ const rail=el("questRail");
+  if(rail && !_missions) rail.innerHTML='<div class="q-empty">Loading missions…</div>';
+  loadMissions().then(()=>{ if(state.info==="quest") renderQuestRail(); })
+    .catch(()=>{ if(rail) rail.innerHTML='<div class="q-empty">Couldn’t load mission data.</div>'; }); }
+function renderQuestRail(){
+  const rail=el("questRail"); if(!rail||!_missions) return;
+  const q=(state.questQ||"").toLowerCase(), showJobs=!!state.questJobs;
+  const vis=Object.values(_missions.byId).filter(m=> !m.invisible && (showJobs||!m.job)
+    && factionTier(m.faction)<=state.tier
+    && (!q || m.name.toLowerCase().includes(q) || (m.id||"").toLowerCase().includes(q)));
+  const groups={}; for(const m of vis){ (groups[m.faction]=groups[m.faction]||[]).push(m); }
+  const order=Object.keys(groups).sort((a,b)=> factionTier(a)-factionTier(b) || a.localeCompare(b));
+  let html="";
+  for(const f of order){ const arr=groups[f].sort((a,b)=> (a.job?1:0)-(b.job?1:0) || a.name.localeCompare(b.name));
+    html+='<div class="q-grp">'+esc(FACLABEL(f))+' <b style="color:var(--dim)">'+arr.length+'</b></div>';
+    html+=arr.map(m=>'<button data-q="'+esc(m.id)+'"'+(m.id===state.questSel?' aria-pressed="true"':'')+(m.job?' class="q-job"':'')+'><span class="q-nm">'+esc(m.name)+'</span>'+(m.job?'<span class="q-tag">job</span>':(m.minor?'<span class="q-tag">minor</span>':''))+'</button>').join("");
+  }
+  rail.innerHTML = vis.length? html : '<div class="q-empty">No missions match'+(state.tier<3?' at this tech tier — raise Tech to see more.':'.')+'</div>';
+  if(vis.length){ const cur=state.questSel && _missions.byId[state.questSel] && vis.some(m=>m.id===state.questSel); renderQuestDetail(cur?state.questSel:vis[0].id); }
+  else el("questDetail").innerHTML='<div class="map-hint">No missions match.</div>';
+  _wireQuest();
+}
+function renderQuestDetail(id){
+  const box=el("questDetail"); if(!box||!_missions) return; const m=_missions.byId[id]; if(!m) return;
+  state.questSel=id;
+  document.querySelectorAll('#questRail button').forEach(b=>{ if(b.dataset.q===id) b.setAttribute('aria-pressed','true'); else b.removeAttribute('aria-pressed'); });
+  const idx=planetIndex();
+  const ploc=name=> (name && idx.sysOf[name]!==undefined) ? '<button class="md-chip md-link" data-go-planet="'+esc(name)+'">'+esc(name)+'</button>' : esc(name||"—");
+  const link=mid=> '<button class="md-chip md-link" data-q="'+esc(mid)+'">'+esc(_missions.byId[mid].name)+'</button>';
+  const badge = m.job?'<span class="q-badge job">Job</span>':'<span class="q-badge story">Story</span>';
+  const minor = m.minor?' <span class="q-badge minor">Minor</span>':'';
+  const rows=[["Starts at", ploc(m.src)]];
+  if(m.dest) rows.push(["Destination", ploc(m.dest)]);
+  if(m.reward) rows.push(["Reward", FMT(m.reward)+" credits"]);
+  const inv=[m.cargo?"cargo":"", m.passengers?"passengers":"", m.npc?"escorts / NPC ships":""].filter(Boolean).join(", ");
+  if(inv) rows.push(["Involves", inv]);
+  const pre=(m._pre||[]).map(link);
+  const unl=(_missions.unlocks[id]||[]).filter(u=>!_missions.byId[u].invisible).map(link);
+  let h='<div class="md-head"><div class="md-nm">'+esc(m.name)+'</div><div style="margin-top:4px">'+badge+minor+' <span class="q-badge" style="color:var(--accent2)">'+esc(FACLABEL(m.faction))+'</span></div></div>';
+  h+='<div class="q-meta">'+rows.map(r=>'<div class="q-row"><span class="q-k">'+r[0]+'</span><span class="q-v">'+r[1]+'</span></div>').join("")+'</div>';
+  if(m.desc){ let dt=m.desc; if(m.dest) dt=dt.replace(/<destination>/g,m.dest).replace(/<planet>/g,m.dest); h+='<div class="q-desc">'+esc(dt)+'</div>'; }
+  if(pre.length) h+='<div class="md-sect q-chain"><div class="md-h">Requires first <b>'+pre.length+'</b></div><div class="md-list">'+pre.join("")+'</div></div>';
+  if(unl.length) h+='<div class="md-sect q-chain"><div class="md-h">Unlocks <b>'+unl.length+'</b></div><div class="md-list">'+unl.join("")+'</div></div>';
+  box.innerHTML=h;
+}
+function _wireQuest(){ if(_questWired) return; _questWired=true;
+  el("questRail").addEventListener("click",e=>{ const b=e.target.closest("[data-q]"); if(b) renderQuestDetail(b.dataset.q); });
+  el("questDetail").addEventListener("click",e=>{ const q=e.target.closest("[data-q]"); if(q){ renderQuestDetail(q.dataset.q); const rb=document.querySelector('#questRail button[data-q="'+esc(q.dataset.q).replace(/"/g,'&quot;')+'"]'); if(rb) rb.scrollIntoView({block:"center"}); return; } const gp=e.target.closest("[data-go-planet]"); if(gp) goPlanet(gp.dataset.goPlanet); });
+  el("questSearch").addEventListener("input",e=>{ state.questQ=e.target.value; renderQuestRail(); });
+  el("questJobs").addEventListener("change",e=>{ state.questJobs=e.target.checked; renderQuestRail(); });
+}
 function openShipInfo(name){ const sh=DATA.ships[name]; if(!sh) return; const base=sh.displayName||sh.name; let html="";
   _withBuild({ship:name, outfits:sh.defaultOutfits||{}}, ()=>{
     const s=computeStats(); const crew=requiredCrew(), bunks=eff("bunks"), mass=eff("mass"); const X=String.fromCharCode(215);
