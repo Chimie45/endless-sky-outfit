@@ -468,6 +468,7 @@ function outfitEligible(o){
   if(o.category==="Minerals"||o.category==="Unique"||o.category==="Licenses") return false; // not installable parts
   if(o.name==="Local Map") return false;                    // map item, not installable
   if(!o.thumbnail||o.thumbnail==="outfit/unknown") return false; // need real bundled art
+  if(o.source) return true;                                  // enabled plug-in content: always eligible
   if(!state.showUnreleased && !o.obtainable) return false;
   if(factionTier(o.faction)>state.tier) return false;
   return true;
@@ -530,7 +531,7 @@ function ocardHTML(o, browse){
       <div class="art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
       <div class="cardbtns">${browse?'':`<button class="cbtn addbtn" data-inc="${n}" title="Install">+</button>`}<button class="cbtn detailbtn" data-detail="${n}" title="Details" aria-label="Details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.3-4.3"/></svg></button></div>
       <div class="meta">
-        <b data-detail="${n}" title="${o.name}">${o.name}</b>
+        <b data-detail="${n}" title="${o.name}">${o.name}${srcBadge(o)}</b>
         <div class="chips">${statChips(o)}</div>
       </div>
     </div>`;
@@ -647,7 +648,7 @@ function olistHTML(o, browse){
   const n=o.name.replace(/"/g,'&quot;');
   return `<div class="lrow orow${browse?' browse':''}"${browse?'':' draggable="true"'} data-name="${n}">
       <div class="lrow-left">
-        <b class="lrow-nm" data-detail="${n}" title="${o.name}">${o.name}</b>
+        <b class="lrow-nm" data-detail="${n}" title="${o.name}">${o.name}${srcBadge(o)}</b>
         <div class="lrow-art">${artTile(o.thumbnail==="outfit/unknown"?null:o.thumbnail, mono2(o.name), CAT_COLOR[o.category]||'var(--dim)')}</div>
         <div class="lrow-sub"><span class="chip fac">${FACLABEL(o.faction)}</span><span class="chip">Price ${priceK(o.cost)}</span></div>
       </div>
@@ -660,7 +661,7 @@ function shiplistHTML(s, browse){
   const sel=!browse&&state.ship&&state.ship.name===s.name?' sel':'';
   return `<div class="lrow shiprow${sel}${browse?' browse':''}"${browse?'':' draggable="true"'} ${browse?'data-shipinfo':'data-ship'}="${id}" title="${nm}">
       <div class="lrow-left">
-        <b class="lrow-nm">${nm}</b>
+        <b class="lrow-nm">${nm}${srcBadge(s)}</b>
         <div class="lrow-art">${artTile(s.thumbnail||s.sprite, mono2(nm), "var(--accent)")}</div>
         <div class="lrow-sub"><span class="chip fac">${FACLABEL(s.faction)}</span><span class="chip">Price ${priceK((s.attributes&&s.attributes.cost)||0)}</span></div>
       </div>
@@ -1248,10 +1249,12 @@ const MODEL_RE=/^Model \d+/i;
 function shipsByFaction(){
   const byFac={};
   for(const s of Object.values(DATA.ships)){
-    if(!state.showUnreleased && !s.obtainable) continue;
     if(!s.thumbnail) continue;                                  // no photo -> hide from picker
-    if(factionTier(s.faction)>state.tier) continue;             // respect the tech tier
     if(MODEL_RE.test(s.displayName||s.name)||MODEL_RE.test(s.name)) continue;  // "Model 8/16/.." automata
+    if(!s.source){                                              // base game: gate by tier/obtainable
+      if(!state.showUnreleased && !s.obtainable) continue;
+      if(factionTier(s.faction)>state.tier) continue;
+    }
     (byFac[s.faction] ||= []).push(s);
   }
   return byFac;
@@ -1322,7 +1325,7 @@ function renderPickerGrid(){
 function shipcellHTML(s, browse){
   return `<button class="shipcell ${!browse&&state.ship&&state.ship.name===s.name?'sel':''}"${browse?'':' draggable="true"'} ${browse?'data-shipinfo':'data-ship'}="${s.name.replace(/"/g,'&quot;')}" title="${s.displayName||s.name}">
       <div class="sc-art">${artTile(s.thumbnail||s.sprite, mono2(s.displayName||s.name), "var(--accent)")}</div>
-      <div class="sc-nm">${s.displayName||s.name}</div>
+      <div class="sc-nm">${s.displayName||s.name}${srcBadge(s)}</div>
       <div class="sc-cat">${s.category}</div>
     </button>`;
 }
@@ -1385,7 +1388,7 @@ function setInfo(v){ state.info=v||""; const sec=el("viewInfoSec"); if(sec) sec.
 function togglePanel(name){ if(document.body.dataset.panel===name) closePanels(); else openPanel(name); }
 function openShipPicker(){ togglePanel("ship"); }
 function closeShipPicker(){ closePanels(); }
-function setView(v){ document.body.dataset.view=v; try{localStorage.setItem("drydock-view",v);}catch(e){} mountFleet(); if(v==="fleet") renderFleet(); if(v==="ship") requestAnimationFrame(()=>{ if(state.ship) fitShipName(); renderLoadout(); if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else if(state.dock==="fleet"){renderFleet();}else{renderCatbar();renderCatalog();} }); }
+function setView(v){ document.body.dataset.view=v; try{localStorage.setItem("drydock-view",v);}catch(e){} mountFleet(); if(v==="plugins") renderPlugins(); if(v==="fleet") renderFleet(); if(v==="ship") requestAnimationFrame(()=>{ if(state.ship) fitShipName(); renderLoadout(); if(state.dock==="ship"){renderPickerFac();renderPickerGrid();}else if(state.dock==="fleet"){renderFleet();}else{renderCatbar();renderCatalog();} }); }
 function mountFleet(){ const fp=el("fleetPanel"); if(!fp) return; const target=(document.body.dataset.view==="ship" && state.dock==="fleet") ? el("dockFleetPane") : el("viewFleetSec"); if(target && fp.parentElement!==target) target.appendChild(fp); }
 function setDock(d){ state.dock=d;
   ["parts","ship","fleet"].forEach(k=>{ const pane=el("dock"+k.charAt(0).toUpperCase()+k.slice(1)+"Pane"); if(pane) pane.classList.toggle("show",k===d); const tab=el("dock"+k.charAt(0).toUpperCase()+k.slice(1)+"Tab"); if(tab) tab.setAttribute("aria-pressed",k===d); });
@@ -1492,6 +1495,7 @@ function init(){
   el("viewShip").addEventListener("click",()=>setView("ship"));
   el("viewFleet").addEventListener("click",()=>setView("fleet"));
   el("viewInfo").addEventListener("click",()=>setView("info"));
+  el("viewPlugins").addEventListener("click",()=>setView("plugins"));
   el("dockPartsTab").addEventListener("click",()=>setDock("parts"));
   el("dockShipTab").addEventListener("click",()=>setDock("ship"));
   el("dockFleetTab").addEventListener("click",()=>setDock("fleet"));
@@ -1510,7 +1514,8 @@ function init(){
   el("catbarPager").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(b){state.catbarPage+=b.dataset.pg==="next"?1:-1;renderCatbar();}});
   el("pickerGridPager").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(b){state.pickPage+=b.dataset.pg==="next"?1:-1;renderPickerGrid();}});
   el("pickerFacPager").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(b){state.pickFacPage+=b.dataset.pg==="next"?1:-1;renderPickerFac();}});
-  { let sv=null; try{ sv=localStorage.getItem("drydock-view"); }catch(e){} setView(sv==="fleet"||sv==="info"?sv:"ship"); }
+  applyEnabledPlugins().then(()=>{ if(document.body.dataset.view==="ship"){ renderCatbar(); renderCatalog(); renderPickerFac(); renderPickerGrid(); } });
+  { let sv=null; try{ sv=localStorage.getItem("drydock-view"); }catch(e){} setView(["fleet","info","plugins"].includes(sv)?sv:"ship"); }
   { let sd=null; try{ sd=localStorage.getItem("drydock-dock"); }catch(e){} setDock(sd==="ship"||sd==="fleet"?sd:"parts"); }
   el("tierBtns").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
     state.tier=+b.dataset.tier;
@@ -1718,6 +1723,83 @@ function _wireQuest(){ if(_questWired) return; _questWired=true;
   el("questSearch").addEventListener("input",e=>{ state.questQ=e.target.value; renderQuestRail(); });
   el("questJobs").addEventListener("change",e=>{ state.questJobs=e.target.checked; renderQuestRail(); });
 }
+
+/* ---------- Plug-in Manager (curated bundled packs, live merge) ---------- */
+let _pluginIndex=null, _pluginIdxLoading=null, _pluginsWired=false;
+const _baseStash={ships:{},outfits:{},systems:{}};
+function loadPluginIndex(){
+  if(_pluginIndex) return Promise.resolve(_pluginIndex);
+  if(_pluginIdxLoading) return _pluginIdxLoading;
+  _pluginIdxLoading=fetch("data/plugin-index.json").then(r=>{ if(!r.ok) throw 0; return r.json(); }).then(d=>{ _pluginIndex=d.plugins||[]; return _pluginIndex; });
+  return _pluginIdxLoading;
+}
+function _enabledSet(){ if(!state.plugins){ let s=[]; try{ s=JSON.parse(localStorage.getItem("drydock-plugins")||"[]"); }catch(e){} state.plugins=new Set(s); } return state.plugins; }
+function _savePlugins(){ try{ localStorage.setItem("drydock-plugins", JSON.stringify([...state.plugins])); }catch(e){} }
+function _mergePack(pack){
+  for(const kind of ["ships","outfits","systems"]){
+    const recs=pack[kind]||{}, D=DATA[kind], S=_baseStash[kind];
+    for(const k in recs){ if((k in D) && !D[k].source && !(k in S)) S[k]=D[k]; D[k]=recs[k]; }
+  }
+}
+function _unmergeSource(pid){
+  for(const kind of ["ships","outfits","systems"]){
+    const D=DATA[kind], S=_baseStash[kind];
+    for(const k of Object.keys(D)){ if(D[k] && D[k].source===pid){ if(k in S){ D[k]=S[k]; delete S[k]; } else delete D[k]; } }
+  }
+}
+function _invalidatePlugins(){
+  _shopMap=null; _yardMap=null; _planetIdx=null;
+  const v=document.body.dataset.view;
+  if(v==="ship"){ renderCatbar(); renderPartsFac(); renderCatalog(); renderPickerFac(); renderPickerGrid(); if(state.ship) renderLoadout(); }
+  else if(v==="fleet"){ renderFleet(); }
+  else if(v==="info"){ if(state.info==="planets")renderPlanets(); else if(state.info==="shop")renderShop(); else if(state.info==="yard")renderYard(); else if(state.info==="map")renderGalaxyMap(); }
+}
+function enablePlugin(id){
+  return fetch("data/plugins/"+encodeURIComponent(id)+".json").then(r=>{ if(!r.ok) throw 0; return r.json(); }).then(pack=>{
+    _mergePack(pack); _enabledSet().add(id); _savePlugins(); _invalidatePlugins();
+  });
+}
+function disablePlugin(id){
+  _unmergeSource(id); _enabledSet().delete(id); _savePlugins();
+  for(const k of Object.keys(state.installed||{})) if(!DATA.outfits[k]) delete state.installed[k];
+  for(const fn in (state.fleets||{})) state.fleets[fn]=state.fleets[fn].filter(e=>DATA.ships[e.ship]);
+  if(state.ship && !DATA.ships[state.ship.name]){ const def=DATA.ships["Bactrian"]||Object.values(DATA.ships)[0]; if(def) setShip(def.name); }
+  _invalidatePlugins();
+}
+function applyEnabledPlugins(){
+  const set=_enabledSet(); if(!set.size) return Promise.resolve();
+  return Promise.all([...set].map(id=> fetch("data/plugins/"+encodeURIComponent(id)+".json").then(r=>r.ok?r.json():null).then(p=>{ if(p) _mergePack(p); }).catch(()=>{})))
+    .then(()=>{ _shopMap=null; _yardMap=null; _planetIdx=null; });
+}
+function renderPlugins(){
+  const wrap=el("pluginsList"); if(!wrap) return;
+  if(!_pluginIndex){ wrap.innerHTML='<div class="q-empty">Loading plug-ins…</div>';
+    loadPluginIndex().then(()=>{ if(document.body.dataset.view==="plugins") renderPlugins(); }).catch(()=>{ wrap.innerHTML='<div class="q-empty">Couldn’t load the plug-in list.</div>'; }); return; }
+  const set=_enabledSet(), q=(state.pluginQ||"").toLowerCase();
+  const match=p=>!q||p.name.toLowerCase().includes(q)||(p.about||"").toLowerCase().includes(q)||(p.authors||[]).join(" ").toLowerCase().includes(q);
+  const card=p=>{ const c=p.counts||{}, on=set.has(p.id), bits=[];
+    if(c.ships) bits.push(c.ships+" ship"+(c.ships!=1?"s":"")); if(c.buildable) bits.push(c.buildable+" outfit"+(c.buildable!=1?"s":"")); if(c.systems) bits.push(c.systems+" system"+(c.systems!=1?"s":""));
+    const toggle=p.type==="content"
+      ? '<button class="pl-toggle'+(on?' on':'')+'" data-plugin="'+esc(p.id)+'" role="switch" aria-checked="'+on+'" title="'+(on?'Disable':'Enable')+'"><span class="pl-knob"></span></button>'
+      : '<span class="pl-note">'+(p.type==="generator"?"too large to bundle":"no buildable parts")+'</span>';
+    return '<div class="plugin-card'+(on?' on':'')+'"><div class="pl-main"><div class="pl-nm">'+esc(p.name)+(p.authors&&p.authors.length?' <span class="pl-auth">'+esc(p.authors.join(", "))+'</span>':'')+'</div>'
+      +(p.about?'<div class="pl-about">'+esc(p.about)+'</div>':'')
+      +'<div class="pl-meta"><span class="pl-type pl-'+p.type+'">'+p.type+'</span>'+(bits.length?'<span class="pl-counts">'+bits.join(" · ")+'</span>':'')+'</div></div>'
+      +'<div class="pl-act">'+toggle+'</div></div>'; };
+  const all=_pluginIndex.filter(match), content=all.filter(p=>p.type==="content"), other=all.filter(p=>p.type!=="content");
+  let html="";
+  if(content.length) html+='<div class="eyebrow">Adds ships &amp; outfits ('+content.length+')</div>'+content.map(card).join("");
+  if(other.length) html+='<div class="eyebrow" style="margin-top:18px">Gameplay / large plug-ins ('+other.length+')</div><p class="plugins-intro" style="margin-top:4px">Missions, AI &amp; UI tweaks (these will surface in the Information Deck), or plug-ins too large to bundle yet — listed for reference.</p>'+other.map(card).join("");
+  wrap.innerHTML=html||'<div class="q-empty">No plug-ins match.</div>';
+  _wirePlugins();
+}
+function _wirePlugins(){ if(_pluginsWired) return; _pluginsWired=true;
+  el("pluginsList").addEventListener("click",e=>{ const b=e.target.closest("[data-plugin]"); if(!b||b.classList.contains("busy")) return;
+    const id=b.dataset.plugin, on=_enabledSet().has(id); b.classList.add("busy");
+    (on?Promise.resolve(disablePlugin(id)):enablePlugin(id)).then(()=>renderPlugins()).catch(()=>{ showToast("Couldn’t load that plug-in"); renderPlugins(); }); });
+  el("pluginSearch").addEventListener("input",e=>{ state.pluginQ=e.target.value; renderPlugins(); });
+}
+function srcBadge(rec){ return rec&&rec.source?' <span class="src-badge" title="Added by plug-in: '+esc(rec.source)+'">plug-in</span>':''; }
 function openShipInfo(name){ const sh=DATA.ships[name]; if(!sh) return; const base=sh.displayName||sh.name; let html="";
   _withBuild({ship:name, outfits:sh.defaultOutfits||{}}, ()=>{
     const s=computeStats(); const crew=requiredCrew(), bunks=eff("bunks"), mass=eff("mass"); const X=String.fromCharCode(215);

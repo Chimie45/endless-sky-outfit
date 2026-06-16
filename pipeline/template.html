@@ -12,6 +12,7 @@
     <button class="navtab" id="viewShip">Ship Editor</button>
     <button class="navtab" id="viewFleet">Fleet Editor</button>
     <button class="navtab" id="viewInfo">Information Deck</button>
+    <button class="navtab" id="viewPlugins">Plug-ins</button>
   </nav>
   <div class="spacer"></div>
   <div class="headtier">
@@ -373,6 +374,18 @@
         <div class="sp-rail" id="questRail"></div>
         <div class="map-detail" id="questDetail"><div class="map-hint">Select a mission to see where it starts, what it requires, and what it unlocks.</div></div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ PLUG-IN MANAGER ============ -->
+  <section class="view view-plugins" id="viewPluginsSec">
+    <div class="plugins-wrap">
+      <div class="plugins-head">
+        <div class="eyebrow">Plug-in Manager</div>
+        <input type="search" id="pluginSearch" placeholder="Find plug-in…" autocomplete="off">
+      </div>
+      <p class="plugins-intro">Enable community plug-ins to add their ships, outfits &amp; content to the builder — toggling is instant and saved in your browser. (Plug-in artwork isn't bundled yet, so new parts use placeholder icons for now.)</p>
+      <div class="plugins-list" id="pluginsList"></div>
     </div>
   </section>
 </main>
