@@ -16,10 +16,54 @@ Plugin type:
   generator  too large to bundle (ship.merging, boss.loot, ...)  -> listed, not bundled
   gameplay   no buildable content (AI/UI/mission tweaks)  -> listed as informational only
 """
-import json, os, re, sys, subprocess, tempfile
+import json, os, re, sys, subprocess, tempfile, shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PARSER = os.path.join(HERE, "parse_endless_sky.py")
+IMAGES = os.path.join(HERE, "..", "images")   # repo's bundled image tree (base art + images/plugins/)
+
+
+def base_has_image(path):
+    """True if the base game already bundles this image path (so a plug-in can reuse it)."""
+    p = os.path.join(IMAGES, path.replace("/", os.sep))
+    return any(os.path.isfile(p + e) for e in (".png", ".jpg", ".jpeg"))
+
+
+def find_plugin_image(plugin_dir, path):
+    """Locate a plug-in image file: exact .png, then @2x, then the first animation frame."""
+    base = os.path.join(plugin_dir, "images", path.replace("/", os.sep))
+    for c in (base + ".png", base + "@2x.png"):
+        if os.path.isfile(c):
+            return c
+    d, name = os.path.dirname(base), os.path.basename(base)
+    if os.path.isdir(d):
+        rx = re.compile(r"^" + re.escape(name) + r"(?:[-~+=@].*)?\.png$", re.I)
+        frames = sorted(f for f in os.listdir(d) if rx.match(f))
+        if frames:
+            return os.path.join(d, frames[0])
+    return None
+
+
+def bundle_images(rec, keys, pid, plugin_dir):
+    """Copy referenced plug-in art into images/plugins/<pid>/ and rewrite the record's path.
+    Reuses base art when the plug-in references a base path; leaves missing art as-is (placeholder)."""
+    n = 0
+    for k in keys:
+        p = rec.get(k)
+        if not p or p in ("outfit/unknown", "ship/unknown"):
+            continue
+        if base_has_image(p):
+            continue  # use the base game's image
+        src = find_plugin_image(plugin_dir, p)
+        if not src:
+            continue  # no art shipped -> placeholder icon
+        dst = os.path.join(IMAGES, "plugins", pid, p.replace("/", os.sep) + ".png")
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        if not os.path.isfile(dst):
+            shutil.copy2(src, dst)
+        rec[k] = "plugins/" + pid + "/" + p
+        n += 1
+    return n
 BASE_PATH = os.path.join(HERE, "..", "data", "endless-sky-data.json")
 TOKEN = re.compile(r'"([^"]*)"|`([^`]*)`|(\S+)')
 NON_BUILDABLE = {"Minerals", "Unique", "Licenses", "Special"}
@@ -101,10 +145,14 @@ def main():
             entry = {"id": pid, "name": meta["name"], "about": meta["about"],
                      "authors": meta["authors"], "type": ptype, "counts": counts, "hasPack": False}
             if ptype == "content":
+                nimg = 0
+                for s in ships.values(): nimg += bundle_images(s, ["thumbnail", "sprite"], pid, pdir)
+                for o in outfits.values(): nimg += bundle_images(o, ["thumbnail"], pid, pdir)
                 pack = {"id": pid, "ships": ships, "outfits": outfits, "systems": new_sys}
                 json.dump(pack, open(os.path.join(pack_dir, pid + ".json"), "w", encoding="utf-8"),
                           separators=(",", ":"), ensure_ascii=False)
                 entry["hasPack"] = True
+                entry["images"] = nimg
             index.append(entry)
             print(f"{pid[:32]:32} {ptype:9} {len(ships):5} {len(buildable):5} {conflicts:4}")
 

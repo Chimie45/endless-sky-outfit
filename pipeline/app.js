@@ -37,6 +37,9 @@ const CAT_COLOR = {
 };
 
 let state = { ship:null, installed:{}, tier:0, q:"", view:"schem", loadoutName:"empty", showUnreleased:false, pickerFac:"all", pickerQ:"", fleet:[], fleetSel:-1, series:"All", cat:"", openCat:"", faction:"", shopStation:"", shopQ:"", yardStation:"", yardQ:"", shopPage:0, yardPage:0, dock:"parts", catPage:0, catbarPage:0, pickPage:0, pickFacPage:0, loadPage:0, partsList:false, shipList:false, partsSort:"cat", shipSort:"cat", partsRev:false, shipRev:false, netCoolRef:"Small Heat Shunt", netEnergyRef:"Boulder Reactor" };
+// stash of base records overridden by an enabled plug-in, so disabling restores vanilla (declared
+// early: applyEnabledPlugins() runs at init, before the Plug-in Manager block further down)
+const _baseStash={ships:{},outfits:{},systems:{}};
 
 // ---- patch notes (newest first); each +0.0.1 bundles ~7-10 changes ----
 const PATCH_NOTES=[
@@ -1726,7 +1729,6 @@ function _wireQuest(){ if(_questWired) return; _questWired=true;
 
 /* ---------- Plug-in Manager (curated bundled packs, live merge) ---------- */
 let _pluginIndex=null, _pluginIdxLoading=null, _pluginsWired=false;
-const _baseStash={ships:{},outfits:{},systems:{}};
 function loadPluginIndex(){
   if(_pluginIndex) return Promise.resolve(_pluginIndex);
   if(_pluginIdxLoading) return _pluginIdxLoading;
